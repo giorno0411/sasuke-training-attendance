@@ -1,0 +1,55 @@
+function doPost(e) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const data = JSON.parse(e.postData.contents);
+    
+    // ヘッダー行がなければ作成
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        "送信日時", "氏名", "参加日", "参加時間", "交通手段", "同伴者", "備考"
+      ]);
+    }
+    
+    // データを末尾に追加
+    sheet.appendRow([
+      new Date(),
+      data.name || "",
+      data.date || "",
+      data.time || "",
+      data.transport || "",
+      data.companion || "なし",
+      data.note || ""
+    ]);
+    
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// 管理者用の一覧データ取得
+function doGet(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const rows = sheet.getDataRange().getValues();
+  if (rows.length <= 1) {
+    return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  const headers = rows[0];
+  const list = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    list.push({
+      timestamp: r[0],
+      name: r[1],
+      date: r[2] instanceof Date ? Utilities.formatDate(r[2], "JST", "yyyy-MM-dd") : r[2],
+      time: r[3],
+      transport: r[4],
+      companion: r[5],
+      note: r[6]
+    });
+  }
+  return ContentService.createTextOutput(JSON.stringify(list)).setMimeType(ContentService.MimeType.JSON);
+}
