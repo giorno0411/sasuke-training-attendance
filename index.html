@@ -923,7 +923,7 @@
 
 <script>
 // ★Google Apps ScriptのURL（ご自身のURLに差し替えてください）
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzxxxxxx/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
 
 // 管理者PIN設定
 const ADMIN_PIN = "7978815";
@@ -1795,13 +1795,32 @@ async function verifyAdminPin() {
   }
 }
 
+// 日付ラベルの整形（NaNが出ない頑丈な処理）
 function formatDateLabel(dateStr) {
   if (!dateStr) return "日程未指定";
-  const parts = dateStr.split('-').map(Number);
-  if (parts.length < 3) return dateStr;
-  const d = new Date(parts[0], parts[1] - 1, parts[2]);
-  const w = isNaN(d.getDay()) ? "" : `(${weekDays[d.getDay()]})`;
-  return `${parts[1]}月${parts[2]}日${w}`;
+  
+  // 1. "2026-10-15" や "2026/10/15" から数字を直接抽出
+  const match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (match) {
+    const y = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const d = parseInt(match[3], 10);
+    const dt = new Date(y, m - 1, d);
+    const w = isNaN(dt.getDay()) ? "" : `(${weekDays[dt.getDay()]})`;
+    return `${m}月${d}日${w}`;
+  }
+
+  // 2. 正規表現に一致しない場合は標準Dateでフォールバック
+  const fallbackDate = new Date(dateStr);
+  if (!isNaN(fallbackDate.getTime())) {
+    const m = fallbackDate.getMonth() + 1;
+    const d = fallbackDate.getDate();
+    const w = `(${weekDays[fallbackDate.getDay()]})`;
+    return `${m}月${d}日${w}`;
+  }
+
+  // 3. それでも解析できない場合はそのまま返す
+  return String(dateStr);
 }
 
 // 出欠集計データの取得（キャッシュ完全無効化）
