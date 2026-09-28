@@ -554,6 +554,42 @@
   }
   .carpool-title { font-weight: bold; color: #34d399; margin-bottom: 4px; }
 
+  /* 削除ボタン */
+  .btn-del-single {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn-del-single:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .admin-clear-all-wrap {
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+    text-align: center;
+  }
+  .btn-clear-all {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn-clear-all:active {
+    background: var(--accent);
+    color: #fff;
+  }
+
   /* 管理者用カードスタイル */
   .admin-edit-card {
     background: rgba(15, 23, 42, 0.85);
@@ -676,11 +712,9 @@
     </div>
   </div>
 
-  <!-- 2. 注意事項ページ（動的描画対応） -->
+  <!-- 2. 注意事項ページ -->
   <div id="view-column" class="hidden">
-    <div class="card" id="rules-display-container">
-      <!-- JSで注意事項セクションを動的描画 -->
-    </div>
+    <div class="card" id="rules-display-container"></div>
   </div>
 
   <!-- 3. セット稼働状況ページ（ステージ別） -->
@@ -691,13 +725,11 @@
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。</p>
       </div>
 
-      <div id="stage-groups-container">
-        <!-- JSでステージ別に自動生成 -->
-      </div>
+      <div id="stage-groups-container"></div>
     </div>
   </div>
 
-  <!-- 4. 管理者専用画面（出欠集計 ＆ セット稼働編集 ＆ 注意事項編集） -->
+  <!-- 4. 管理者専用画面 -->
   <div id="view-admin" class="hidden">
     <div class="card">
       
@@ -716,6 +748,11 @@
         </div>
         <div id="admin-data-container">
           <div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>
+        </div>
+
+        <!-- 回答の全件一括削除ボタン -->
+        <div class="admin-clear-all-wrap">
+          <button type="button" class="btn-clear-all" onclick="clearAllAttendance()">⚠️ 回答データを全件削除（リセット）</button>
         </div>
       </div>
 
@@ -811,7 +848,7 @@ let ruleSections = [
   },
   {
     title: "🚗 駐車場・アクセスルール",
-    content: "お車でお越しの方は、下記「駐車レイアウト.pdf」をご参照し、指定の駐車エリアへ奥から詰めて駐車をお願いいたします。\n渋滞等で到着が遅れる場合は、必ず事前にご連絡をお願いいたします。"
+    content: "お車でお越しの方は、下記「駐車レイアウト.png」をご参照し、指定の駐車エリアへ奥から詰めて駐車をお願いいたします。\n渋滞等で到着が遅れる場合は、必ず事前にご連絡をお願いいたします。"
   },
   {
     title: "👟 シューズ・服装について",
@@ -898,7 +935,6 @@ window.addEventListener('DOMContentLoaded', () => {
 function formatRuleItem(text, title) {
   let str = escapeHtml(text);
 
-  // 指定の装飾キーワード
   str = str.replace(
     /使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。/g,
     '<span class="urgent-highlight">使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。</span>'
@@ -912,12 +948,12 @@ function formatRuleItem(text, title) {
     '<span class="urgent-highlight">ぜひ積極的なお手伝いをお願いいたします！</span>'
   );
 
-  // 駐車レイアウトPDFボタンの自動挿入
-  if (title.includes("駐車場") && str.includes("駐車レイアウト.pdf")) {
+  // 駐車レイアウト画像ボタン（PNG / PDF両対応）
+  if (title.includes("駐車場") && (str.includes("駐車レイアウト.png") || str.includes("駐車レイアウト.pdf"))) {
     str += `
       <div style="margin: 10px 0 6px 0;">
-        <a href="parking-layout.pdf" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">
-          📄 駐車レイアウト.pdf を開く
+        <a href="parking-layout.png" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">
+          🗺️ 駐車レイアウト画像を開く
         </a>
       </div>
     `;
@@ -926,7 +962,7 @@ function formatRuleItem(text, title) {
   return str;
 }
 
-// ユーザー向け注意事項の動的描画
+// ユーザー向け注意事項の描画
 function renderRulesDisplay() {
   const container = document.getElementById('rules-display-container');
   if (!container) return;
@@ -967,7 +1003,6 @@ function renderAdminRulesEditor() {
   container.innerHTML = html;
 }
 
-// GASから注意事項を取得
 async function loadRemoteRules() {
   try {
     const res = await fetch(GAS_URL + "?type=rules&t=" + Date.now());
@@ -980,7 +1015,6 @@ async function loadRemoteRules() {
   } catch(e) {}
 }
 
-// 管理者による注意事項の保存
 async function saveRuleSettings(e) {
   e.preventDefault();
   const btn = document.getElementById('btn-save-rules');
@@ -1015,7 +1049,6 @@ async function saveRuleSettings(e) {
   }
 }
 
-// GASから最新のセット稼働状況を読み込み
 async function loadRemoteObstacles() {
   try {
     const res = await fetch(GAS_URL + "?type=obstacles&t=" + Date.now());
@@ -1040,7 +1073,7 @@ async function loadRemoteObstacles() {
   } catch(e) {}
 }
 
-// ユーザー向けセット稼働状況のレンダリング
+// ユーザー向けセット稼働状況のレンダリング（「⚠️理由:」表記・スペースなし）
 function renderStageGroups() {
   const container = document.getElementById('stage-groups-container');
   if (!container) return;
@@ -1079,7 +1112,7 @@ function renderStageGroups() {
           </div>
           ${hasNote ? `
             <div class="${noteClass}">
-              ⚠️ <b>状況:</b> ${escapeHtml(item.note)}
+              ⚠️理由:${escapeHtml(item.note)}
             </div>
           ` : ''}
         </div>
@@ -1095,7 +1128,6 @@ function renderStageGroups() {
   container.innerHTML = html;
 }
 
-// 管理者画面用のセット編集エディターの生成
 function renderAdminObstacleEditor() {
   const container = document.getElementById('admin-obstacle-edit-list');
   if (!container) return;
@@ -1120,7 +1152,7 @@ function renderAdminObstacleEditor() {
             </select>
           </div>
           <div id="wrap-${inputId}" class="${isHalted ? '' : 'hidden'}">
-            <input type="text" id="${inputId}" value="${escapeHtml(item.note || '')}" placeholder="休止・調整の理由（例: 床腐食のため、チェーン交換中等）" style="font-size:12px; padding:6px 10px;">
+            <input type="text" id="${inputId}" value="${escapeHtml(item.note || '')}" placeholder="理由を入力（例: 床腐食のため、チェーン交換中等）" style="font-size:12px; padding:6px 10px;">
           </div>
         </div>
       `;
@@ -1137,7 +1169,6 @@ function toggleAdminNoteInput(inputId, status) {
   }
 }
 
-// 管理者によるセット稼働状況の保存
 async function saveObstacleSettings(e) {
   e.preventDefault();
   const btn = document.getElementById('btn-save-obs');
@@ -1290,7 +1321,6 @@ function updateTriggerDisplay() {
   display.innerHTML = arr.map(d => `<span class="date-selected-pill">${formatDateLabel(d)}</span>`).join('');
 }
 
-// 日程ごとの詳細入力カードを動的生成
 function renderDaysConfigCards() {
   const container = document.getElementById('days-config-container');
   const arr = Array.from(selectedDates).sort();
@@ -1308,7 +1338,6 @@ function renderDaysConfigCards() {
           <span>📅 ${formatDateLabel(d)} の参加情報</span>
         </div>
 
-        <!-- 参加時間 -->
         <div class="form-group" style="margin-bottom:12px;">
           <label style="font-size:11px;">参加希望時間<span class="required">*</span></label>
           <select class="field-time-preset" onchange="toggleDayCustomTime('${d}', this.value)" required>
@@ -1324,7 +1353,6 @@ function renderDaysConfigCards() {
           </div>
         </div>
 
-        <!-- 交通機関 -->
         <div class="form-group" style="margin-bottom:0;">
           <label style="font-size:11px;">交通機関<span class="required">*</span></label>
           <div class="radio-pill-group">
@@ -1345,7 +1373,6 @@ function renderDaysConfigCards() {
             </label>
           </div>
 
-          <!-- 自車の場合（軽/普通/他） -->
           <div id="car-box-${d}" class="conditional-box hidden">
             <label style="font-size:11px; margin-bottom:4px;">車種（台数把握のため）<span class="required">*</span></label>
             <select class="field-car-type">
@@ -1355,7 +1382,6 @@ function renderDaysConfigCards() {
             </select>
           </div>
 
-          <!-- 乗り合いの場合（代表者名） -->
           <div id="share-box-${d}" class="conditional-box hidden">
             <label style="font-size:11px; margin-bottom:4px;">相乗り代表者（運転者）のお名前<span class="required">*</span></label>
             <input type="text" class="field-car-leader" placeholder="本名・スペースなしで入力（例: 内宮修造）">
@@ -1406,7 +1432,6 @@ function switchTab(tab) {
   document.getElementById('tab-btn-status').classList.toggle('active', tab === 'status');
 }
 
-// 送信処理（各日程ごとの設定をまとめて送信）
 async function submitAttendance(e) {
   e.preventDefault();
 
@@ -1638,7 +1663,10 @@ async function fetchAdminData() {
           <div class="admin-member-card">
             <div class="member-top-row">
               <span class="member-name">${escapeHtml(m.name)}</span>
-              <span class="badge-transport ${badgeCls}">${escapeHtml(m.transport)}${escapeHtml(carInfo)}</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="badge-transport ${badgeCls}">${escapeHtml(m.transport)}${escapeHtml(carInfo)}</span>
+                <button type="button" class="btn-del-single" onclick="deleteSingleAttendance('${escapeHtml(m.name)}', '${escapeHtml(m.date)}')">🗑️ 削除</button>
+              </div>
             </div>
             <div style="font-size:13px; color:#38bdf8;">⏰ ${escapeHtml(m.time || '時間指定なし')}</div>
             ${m.carLeader ? `<div style="font-size:12px; color:#34d399;">🤝 相乗り代表: ${escapeHtml(m.carLeader)}</div>` : ''}
@@ -1654,6 +1682,54 @@ async function fetchAdminData() {
     container.innerHTML = html;
   } catch (err) {
     container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:15px;">データの取得に失敗しました</div>';
+  }
+}
+
+// 1件削除
+async function deleteSingleAttendance(name, date) {
+  if (!confirm(`「${name}」さんの ${formatDateLabel(date)} の回答を削除しますか？`)) {
+    return;
+  }
+  try {
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "delete_single_attendance",
+        name: name,
+        date: date
+      })
+    });
+    alert("削除しました。");
+    fetchAdminData();
+  } catch(e) {
+    alert("削除に失敗しました。");
+  }
+}
+
+// 全件クリア
+async function clearAllAttendance() {
+  if (!confirm("【警告】本当にすべての出欠回答データを削除しますか？\n（この操作は元に戻せません）")) {
+    return;
+  }
+  if (!confirm("本当に実行しますか？スプレッドシートの出欠データがすべて消去されます。")) {
+    return;
+  }
+
+  try {
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "clear_all_attendance"
+      })
+    });
+    alert("すべての出欠回答データを消去しました。");
+    fetchAdminData();
+  } catch(e) {
+    alert("全件削除に失敗しました。");
   }
 }
 
