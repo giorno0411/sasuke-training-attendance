@@ -469,7 +469,7 @@
   /* 管理者画面 */
   .admin-subnav {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     margin-bottom: 14px;
   }
   .admin-sub-btn {
@@ -477,11 +477,12 @@
     background: rgba(15, 23, 42, 0.7);
     border: 1px solid var(--border);
     color: var(--text-sub);
-    padding: 7px;
-    font-size: 12px;
+    padding: 7px 4px;
+    font-size: 11px;
     font-weight: bold;
     border-radius: 6px;
     cursor: pointer;
+    text-align: center;
   }
   .admin-sub-btn.active {
     background: rgba(239, 68, 68, 0.2);
@@ -553,8 +554,8 @@
   }
   .carpool-title { font-weight: bold; color: #34d399; margin-bottom: 4px; }
 
-  /* 管理者用セット編集カード */
-  .admin-obs-card {
+  /* 管理者用カードスタイル */
+  .admin-edit-card {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -675,88 +676,10 @@
     </div>
   </div>
 
-  <!-- 2. 注意事項ページ（指定順） -->
+  <!-- 2. 注意事項ページ（動的描画対応） -->
   <div id="view-column" class="hidden">
-    <div class="card">
-      
-      <!-- 1. ⚠️ 安全・怪我の防止 -->
-      <div class="column-section">
-        <div class="column-title">⚠️ 安全・怪我の防止</div>
-        <div class="column-body">
-          <ul>
-            <li>練習前は関節や筋肉のストレッチ、ウォーミングアップを入念に行ってください。</li>
-            <li>トライ前は着地ポイントにマットがあるか、ズレや隙間がないかを必ず確認してください。また、マットを一時的に移動した場合は、<span class="urgent-highlight">使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。</span></li>
-            <li>パーク内での怪我や事故につきましては、原則として自己責任の上でご参加ください。万が一に備え、各自でスポーツ安全保険等への加入を推奨します。</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 2. 🚗 駐車場・アクセスルール -->
-      <div class="column-section">
-        <div class="column-title">🚗 駐車場・アクセスルール</div>
-        <div class="column-body">
-          <ul>
-            <li>お車でお越しの方は、下記「駐車レイアウト.pdf」をご参照し、指定の駐車エリアへ奥から詰めて駐車をお願いいたします。
-              <div style="margin: 10px 0 6px 0;">
-                <a href="parking-layout.pdf" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">
-                  📄 駐車レイアウト.pdf を開く
-                </a>
-              </div>
-            </li>
-            <li>渋滞等で到着が遅れる場合は、必ず事前にご連絡をお願いいたします。</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 3. 👟 シューズ・服装について -->
-      <div class="column-section">
-        <div class="column-title">👟 シューズ・服装について</div>
-        <div class="column-body">
-          <ul>
-            <li>パーク内は砂が多く、靴やウェア等が汚れやすい環境です。練習着とは別に、替えの靴・靴下・着替えをご持参いただくことを強く推奨します。</li>
-            <li>「そり立つ壁」の滑り止めシート等、一部のエリアでは靴底（ソール）が激しく摩耗する可能性がありますので、練習用シューズの着用をおすすめします。</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 4. 📦 備品について -->
-      <div class="column-section">
-        <div class="column-title">📦 備品について</div>
-        <div class="column-body">
-          <ul>
-            <li>チョークや松脂スプレー等の消耗品は、各自でご持参いただけると大変助かります。<span class="urgent-highlight">※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。</span></li>
-            <li>現地のプロテクターを使用する際は、必ず正しい手順にて装着してください。（例：膝プロテクターは靴を脱いでから着用する）</li>
-            <li>テーピングや衣類等の忘れ物が非常に多いため、合トレ終了の1時間ほど前から余裕を持って片付け始めることを推奨します。</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 5. 🧹 施設利用のマナー -->
-      <div class="column-section">
-        <div class="column-title">🧹 施設利用のマナー</div>
-        <div class="column-body">
-          <ul>
-            <li>出たゴミは、各自でお持ち帰りのご協力をお願いいたします。<br>
-            近隣住民の方へのご挨拶等、気持ちの良いコミュニケーションを心がけていただけますと幸いです。</li>
-          </ul>
-          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); line-height: 1.6;">
-            エリアのセット準備や片付けは、皆様のご協力によってスムーズに進みます。<br>
-            <span class="urgent-highlight" style="display: inline-block; margin-top: 4px;">ぜひ積極的なお手伝いをお願いいたします！</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 6. 📌 その他 -->
-      <div class="column-section">
-        <div class="column-title">📌 その他</div>
-        <div class="column-body">
-          <ul>
-            <li>合トレメンバー確定後、当日のスケジュール共有や事務連絡用に、グループラインを作成させていただきます。</li>
-            <li>出欠の代理回答は可能です。ただし、本フォームは関係者限定となりますので、招待されていない方へのリンク転送・共有はご遠慮ください。</li>
-          </ul>
-        </div>
-      </div>
-
+    <div class="card" id="rules-display-container">
+      <!-- JSで注意事項セクションを動的描画 -->
     </div>
   </div>
 
@@ -774,14 +697,15 @@
     </div>
   </div>
 
-  <!-- 4. 管理者専用画面（出欠集計 ＆ セット稼働編集） -->
+  <!-- 4. 管理者専用画面（出欠集計 ＆ セット稼働編集 ＆ 注意事項編集） -->
   <div id="view-admin" class="hidden">
     <div class="card">
       
       <!-- 管理者サブラビゲーション -->
       <div class="admin-subnav">
-        <button class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 出欠状況・車両集計</button>
-        <button class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット稼働設定</button>
+        <button class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 出欠状況</button>
+        <button class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット設定</button>
+        <button class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
       </div>
 
       <!-- サブタブ1: 出欠集計 -->
@@ -802,12 +726,28 @@
           <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="loadRemoteObstacles()">🔄 再読込</button>
         </div>
         <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
-          ステータスや停止時の理由・説明文を入力し、一番下の「変更を保存」を押してください。
+          ステータスや停止時の理由を入力し、一番下の「保存」を押してください。
         </p>
 
         <form onsubmit="saveObstacleSettings(event)">
           <div id="admin-obstacle-edit-list"></div>
           <button type="submit" class="btn-submit" id="btn-save-obs" style="margin-top:14px;">💾 セット稼働状況を保存する</button>
+        </form>
+      </div>
+
+      <!-- サブタブ3: 注意事項編集 -->
+      <div id="admin-subview-rules" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="font-size:15px; margin:0;">📜 注意事項の編集</h2>
+          <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="loadRemoteRules()">🔄 再読込</button>
+        </div>
+        <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
+          改行で複数箇条書きになります。変更後に一番下の「保存」を押してください。
+        </p>
+
+        <form onsubmit="saveRuleSettings(event)">
+          <div id="admin-rules-edit-list"></div>
+          <button type="submit" class="btn-submit" id="btn-save-rules" style="margin-top:14px;">💾 注意事項を保存する</button>
         </form>
       </div>
 
@@ -862,6 +802,34 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHm
 const ADMIN_PIN = "7978815";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
+
+// 注意事項データ（初期デフォルト値）
+let ruleSections = [
+  {
+    title: "⚠️ 安全・怪我の防止",
+    content: "練習前は関節や筋肉のストレッチ、ウォーミングアップを入念に行ってください。\nトライ前は着地ポイントにマットがあるか、ズレや隙間がないかを必ず確認してください。また、マットを一時的に移動した場合は、使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。\nパーク内での怪我や事故につきましては、原則として自己責任の上でご参加ください。万が一に備え、各自でスポーツ安全保険等への加入を推奨します。"
+  },
+  {
+    title: "🚗 駐車場・アクセスルール",
+    content: "お車でお越しの方は、下記「駐車レイアウト.pdf」をご参照し、指定の駐車エリアへ奥から詰めて駐車をお願いいたします。\n渋滞等で到着が遅れる場合は、必ず事前にご連絡をお願いいたします。"
+  },
+  {
+    title: "👟 シューズ・服装について",
+    content: "パーク内は砂が多く、靴やウェア等が汚れやすい環境です。練習着とは別に、替えの靴・靴下・着替えをご持参いただくことを強く推奨します。\n「そり立つ壁」の滑り止めシート等、一部のエリアでは靴底（ソール）が激しく摩耗する可能性がありますので、練習用シューズの着用をおすすめします。"
+  },
+  {
+    title: "📦 備品について",
+    content: "チョークや松脂スプレー等の消耗品は、各自でご持参いただけると大変助かります。※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。\n現地のプロテクターを使用する際は、必ず正しい手順にて装着してください。（例：膝プロテクターは靴を脱いでから着用する）\nテーピングや衣類等の忘れ物が非常に多いため、合トレ終了の1時間ほど前から余裕を持って片付け始めることを推奨します。"
+  },
+  {
+    title: "🧹 施設利用のマナー",
+    content: "出たゴミは、各自でお持ち帰りのご協力をお願いいたします。\n近隣住民の方へのご挨拶等、気持ちの良いコミュニケーションを心がけていただけますと幸いです。\nエリアのセット準備や片付けは、皆様のご協力によってスムーズに進みます。ぜひ積極的なお手伝いをお願いいたします！"
+  },
+  {
+    title: "📌 その他",
+    content: "合トレメンバー確定後、当日のスケジュール共有や事務連絡用に、グループラインを作成させていただきます。\n出欠の代理回答は可能です。ただし、本フォームは関係者限定となりますので、招待されていない方へのリンク転送・共有はご遠慮ください。"
+  }
+];
 
 // ステージ別セットデータ（初期デフォルト値）
 let stageData = [
@@ -920,9 +888,132 @@ window.addEventListener('DOMContentLoaded', () => {
   calYear = now.getFullYear();
   calMonth = now.getMonth();
   updateTriggerDisplay();
+  renderRulesDisplay();
   renderStageGroups();
   loadRemoteObstacles();
+  loadRemoteRules();
 });
+
+// 注意事項の装飾フォーマット関数
+function formatRuleItem(text, title) {
+  let str = escapeHtml(text);
+
+  // 指定の装飾キーワード
+  str = str.replace(
+    /使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。/g,
+    '<span class="urgent-highlight">使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。</span>'
+  );
+  str = str.replace(
+    /※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。/g,
+    '<span class="urgent-highlight">※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。</span>'
+  );
+  str = str.replace(
+    /ぜひ積極的なお手伝いをお願いいたします！/g,
+    '<span class="urgent-highlight">ぜひ積極的なお手伝いをお願いいたします！</span>'
+  );
+
+  // 駐車レイアウトPDFボタンの自動挿入
+  if (title.includes("駐車場") && str.includes("駐車レイアウト.pdf")) {
+    str += `
+      <div style="margin: 10px 0 6px 0;">
+        <a href="parking-layout.pdf" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">
+          📄 駐車レイアウト.pdf を開く
+        </a>
+      </div>
+    `;
+  }
+
+  return str;
+}
+
+// ユーザー向け注意事項の動的描画
+function renderRulesDisplay() {
+  const container = document.getElementById('rules-display-container');
+  if (!container) return;
+
+  let html = '';
+  ruleSections.forEach(section => {
+    const lines = section.content.split('\n').filter(l => l.trim() !== '');
+    html += `
+      <div class="column-section">
+        <div class="column-title">${escapeHtml(section.title)}</div>
+        <div class="column-body">
+          <ul>
+            ${lines.map(line => `<li>${formatRuleItem(line, section.title)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+// 管理者画面の注意事項エディター描画
+function renderAdminRulesEditor() {
+  const container = document.getElementById('admin-rules-edit-list');
+  if (!container) return;
+
+  let html = '';
+  ruleSections.forEach((sec, idx) => {
+    html += `
+      <div class="admin-edit-card">
+        <label style="font-size:12px; color:#93c5fd; margin-bottom:4px;">セクション見出し</label>
+        <input type="text" id="rule-title-${idx}" value="${escapeHtml(sec.title)}" style="margin-bottom:8px; font-weight:bold;">
+        <label style="font-size:11px; color:#cbd5e1; margin-bottom:4px;">本文（改行ごとに箇条書きになります）</label>
+        <textarea id="rule-content-${idx}" rows="4" style="font-size:12px; line-height:1.5;">${escapeHtml(sec.content)}</textarea>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+// GASから注意事項を取得
+async function loadRemoteRules() {
+  try {
+    const res = await fetch(GAS_URL + "?type=rules&t=" + Date.now());
+    const remoteRules = await res.json();
+    if (remoteRules && Array.isArray(remoteRules) && remoteRules.length > 0) {
+      ruleSections = remoteRules;
+      renderRulesDisplay();
+      renderAdminRulesEditor();
+    }
+  } catch(e) {}
+}
+
+// 管理者による注意事項の保存
+async function saveRuleSettings(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-save-rules');
+  btn.disabled = true;
+  btn.innerText = "保存中...";
+
+  ruleSections.forEach((sec, idx) => {
+    const titleEl = document.getElementById(`rule-title-${idx}`);
+    const contentEl = document.getElementById(`rule-content-${idx}`);
+    if (titleEl) sec.title = titleEl.value.trim();
+    if (contentEl) sec.content = contentEl.value.trim();
+  });
+
+  try {
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "update_rules",
+        rules: ruleSections
+      })
+    });
+
+    renderRulesDisplay();
+    alert("注意事項を更新・保存しました！");
+  } catch(err) {
+    alert("保存に失敗しました。電波環境を確認してください。");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "💾 注意事項を保存する";
+  }
+}
 
 // GASから最新のセット稼働状況を読み込み
 async function loadRemoteObstacles() {
@@ -946,9 +1037,7 @@ async function loadRemoteObstacles() {
       renderStageGroups();
       renderAdminObstacleEditor();
     }
-  } catch(e) {
-    console.log("リモート稼働状況の取得スキップ");
-  }
+  } catch(e) {}
 }
 
 // ユーザー向けセット稼働状況のレンダリング
@@ -1021,7 +1110,7 @@ function renderAdminObstacleEditor() {
       const isHalted = item.status !== 'active';
 
       html += `
-        <div class="admin-obs-card">
+        <div class="admin-edit-card">
           <div class="admin-obs-header">
             <span class="admin-obs-name">${escapeHtml(item.name)}</span>
             <select class="admin-obs-select" id="${selectId}" onchange="toggleAdminNoteInput('${inputId}', this.value)">
@@ -1088,12 +1177,16 @@ async function saveObstacleSettings(e) {
 function switchAdminSubTab(sub) {
   document.getElementById('admin-subview-attendance').classList.toggle('hidden', sub !== 'attendance');
   document.getElementById('admin-subview-obstacles').classList.toggle('hidden', sub !== 'obstacles');
+  document.getElementById('admin-subview-rules').classList.toggle('hidden', sub !== 'rules');
 
   document.getElementById('admin-sub-btn-att').classList.toggle('active', sub === 'attendance');
   document.getElementById('admin-sub-btn-obs').classList.toggle('active', sub === 'obstacles');
+  document.getElementById('admin-sub-btn-rules').classList.toggle('active', sub === 'rules');
 
   if (sub === 'obstacles') {
     renderAdminObstacleEditor();
+  } else if (sub === 'rules') {
+    renderAdminRulesEditor();
   }
 }
 
