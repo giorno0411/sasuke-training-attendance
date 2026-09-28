@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>内宮パーク 合トレ出欠確認</title>
+<title>内宮パーク 合トレ参加確認</title>
 <style>
   :root {
     --bg: #0b0f19;
@@ -37,31 +37,36 @@
   
   .container { width: 100%; max-width: 580px; }
 
+  /* スマホでも重ならないスマートヘッダー */
   header {
-    text-align: center;
-    padding: 16px 0 12px 0;
-    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 2px 14px 2px;
+    gap: 8px;
   }
   h1 { 
-    font-size: 21px; 
+    font-size: 19px; 
     margin: 0; 
     font-weight: 800; 
     letter-spacing: 0.5px;
     text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+    flex: 1;
+    line-height: 1.3;
   }
 
   .admin-trigger {
-    position: absolute;
-    top: 14px;
-    right: 0;
+    flex-shrink: 0;
     background: rgba(15, 23, 42, 0.7);
     border: 1px solid var(--border);
     color: var(--text-sub);
-    padding: 5px 10px;
+    padding: 6px 10px;
     font-size: 11px;
+    font-weight: 600;
     border-radius: 6px;
     cursor: pointer;
     backdrop-filter: blur(4px);
+    white-space: nowrap;
   }
 
   .tab-nav {
@@ -71,7 +76,7 @@
     backdrop-filter: blur(8px);
     padding: 4px;
     border-radius: 8px;
-    margin: 10px 0 16px 0;
+    margin: 4px 0 16px 0;
     border: 1px solid var(--border);
   }
   .tab-btn {
@@ -561,18 +566,28 @@
     font-weight: bold;
     border-left: 4px solid var(--accent);
     margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .admin-head-badges {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
   }
   .admin-card-stats {
     display: flex;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 6px 12px;
     font-size: 12px;
     margin-bottom: 8px;
     background: rgba(15, 23, 42, 0.5);
-    padding: 6px 10px;
+    padding: 7px 10px;
     border-radius: 6px;
     color: #94a3b8;
   }
   .car-stat-badge { color: #60a5fa; font-weight: bold; }
+  .people-stat-badge { color: #fca5a5; font-weight: bold; }
 
   .admin-member-card {
     background: rgba(15, 23, 42, 0.7);
@@ -720,20 +735,20 @@
 
 <div class="container">
   <header>
+    <h1>内宮パーク 合トレ参加確認</h1>
     <button class="admin-trigger" onclick="openLoginModal()">🔒 管理者</button>
-    <h1>内宮パーク 合トレ出欠確認</h1>
   </header>
 
   <div class="tab-nav">
-    <button class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">✍️ 出欠回答</button>
+    <button class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">✍️ 参加回答</button>
     <button class="tab-btn" id="tab-btn-column" onclick="switchTab('column')">📜 注意事項</button>
     <button class="tab-btn" id="tab-btn-status" onclick="switchTab('status')">⚙️ セット稼働状況</button>
   </div>
 
-  <!-- 1. 出欠送信フォーム -->
+  <!-- 1. 参加送信フォーム -->
   <div id="view-form">
     <div class="submit-success-box" id="success-msg">
-      ✓ 出欠情報を送信しました！回答ありがとうございます。
+      ✓ 参加情報を送信しました！回答ありがとうございます。
     </div>
 
     <!-- 認証済みメンバー表示バナー -->
@@ -797,7 +812,7 @@
           <textarea id="field-note" rows="2" placeholder="その他ご要望があればご記入ください。"></textarea>
         </div>
 
-        <button type="submit" class="btn-submit" id="btn-submit-form">出欠を送信する ↵</button>
+        <button type="submit" class="btn-submit" id="btn-submit-form">参加情報を送信する ↵</button>
       </form>
     </div>
   </div>
@@ -825,15 +840,15 @@
       
       <!-- 管理者サブラビゲーション -->
       <div class="admin-subnav">
-        <button class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 出欠状況</button>
+        <button class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 参加状況</button>
         <button class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット設定</button>
         <button class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
       </div>
 
-      <!-- サブタブ1: 出欠集計 -->
+      <!-- サブタブ1: 参加集計 -->
       <div id="admin-subview-attendance">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h2 style="font-size:15px; margin:0;">🔒 出欠状況・車両集計</h2>
+          <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
           <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="fetchAdminData()">🔄 最新化</button>
         </div>
         <div id="admin-data-container">
@@ -923,7 +938,7 @@
 
 <script>
 // ★Google Apps ScriptのURL（ご自身のURLに差し替えてください）
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzxxxxxx/exec";
 
 // 管理者PIN設定
 const ADMIN_PIN = "7978815";
@@ -954,7 +969,7 @@ let ruleSections = [
   },
   {
     title: "📌 その他",
-    content: "合トレメンバー確定後、当日のスケジュール共有や事務連絡用に、グループラインを作成させていただきます。\n出欠の代理回答は可能です。ただし、本フォームは関係者限定となりますので、招待されていない方へのリンク転送・共有はご遠慮ください。"
+    content: "合トレメンバー確定後、当日のスケジュール共有や事務連絡用に、グループラインを作成させていただきます。\n参加の代理回答は可能です。ただし、本フォームは関係者限定となりますので、招待されていない方へのリンク転送・共有はご遠慮ください。"
   }
 ];
 
@@ -1290,6 +1305,7 @@ async function loadRemoteObstacles() {
   } catch(e) {}
 }
 
+// ユーザー向けセット稼働状況のレンダリング（注意マークなし「理由：」）
 function renderStageGroups() {
   const container = document.getElementById('stage-groups-container');
   if (!container) return;
@@ -1328,7 +1344,7 @@ function renderStageGroups() {
           </div>
           ${hasNote ? `
             <div class="${noteClass}">
-              ⚠️理由：${escapeHtml(item.note)}
+              理由：${escapeHtml(item.note)}
             </div>
           ` : ''}
         </div>
@@ -1745,7 +1761,7 @@ async function submitAttendance(e) {
     alert("送信に失敗しました。電波環境を確認してください。");
   } finally {
     btn.disabled = false;
-    btn.innerText = "出欠を送信する ↵";
+    btn.innerText = "参加情報を送信する ↵";
   }
 }
 
@@ -1799,7 +1815,6 @@ async function verifyAdminPin() {
 function formatDateLabel(dateStr) {
   if (!dateStr) return "日程未指定";
   
-  // 1. "2026-10-15" や "2026/10/15" から数字を直接抽出
   const match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
   if (match) {
     const y = parseInt(match[1], 10);
@@ -1810,7 +1825,6 @@ function formatDateLabel(dateStr) {
     return `${m}月${d}日${w}`;
   }
 
-  // 2. 正規表現に一致しない場合は標準Dateでフォールバック
   const fallbackDate = new Date(dateStr);
   if (!isNaN(fallbackDate.getTime())) {
     const m = fallbackDate.getMonth() + 1;
@@ -1819,11 +1833,17 @@ function formatDateLabel(dateStr) {
     return `${m}月${d}日${w}`;
   }
 
-  // 3. それでも解析できない場合はそのまま返す
   return String(dateStr);
 }
 
-// 出欠集計データの取得（キャッシュ完全無効化）
+// 同伴者人数のパース用ヘルパー関数
+function parseCompanionCount(str) {
+  if (!str) return 0;
+  const match = String(str).match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
+// 参加集計データの取得（参加者合計、同伴者合計、総来場者数合計に対応）
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
@@ -1855,6 +1875,7 @@ async function fetchAdminData() {
       let carsStandard = 0;
       let carsLight = 0;
       let carsOther = 0;
+      let companionTotal = 0;
       const carpoolMap = {};
 
       members.forEach(m => {
@@ -1867,20 +1888,27 @@ async function fetchAdminData() {
           if (!carpoolMap[m.carLeader]) carpoolMap[m.carLeader] = [];
           carpoolMap[m.carLeader].push(m.name);
         }
+        companionTotal += parseCompanionCount(m.companionCount);
       });
 
+      const participantTotal = members.length;
+      const grandTotalPeople = participantTotal + companionTotal;
       const totalCars = carsStandard + carsLight + carsOther;
 
       html += `
         <div class="admin-date-group">
           <div class="admin-date-header">
             <span>📅 ${formatDateLabel(date)}</span>
-            <span class="admin-date-count" style="font-size:12px; background:var(--accent); color:#fff; padding:2px 8px; border-radius:12px;">${members.length}名</span>
+            <div class="admin-head-badges">
+              <span style="font-size:11px; background:var(--accent); color:#fff; padding:2px 7px; border-radius:10px;">参加: ${participantTotal}名</span>
+              ${companionTotal > 0 ? `<span style="font-size:11px; background:#475569; color:#f1f5f9; padding:2px 7px; border-radius:10px;">同伴: ${companionTotal}名</span>` : ''}
+              <span style="font-size:11px; background:#10b981; color:#fff; padding:2px 8px; border-radius:10px; font-weight:bold;">計: ${grandTotalPeople}名</span>
+            </div>
           </div>
 
           <div class="admin-card-stats">
-            <span>🚗 車両計: <span class="car-stat-badge">${totalCars}台</span></span>
-            <span>(普通: ${carsStandard}台 / 軽: ${carsLight}台${carsOther > 0 ? ` / 他: ${carsOther}台` : ''})</span>
+            <span>👥 <b>人数計: <span class="people-stat-badge">${grandTotalPeople}名</span></b> (参加者: ${participantTotal}名 / 同伴者: ${companionTotal}名)</span>
+            <span>🚗 <b>車両計: <span class="car-stat-badge">${totalCars}台</span></b> (普通: ${carsStandard}台 / 軽: ${carsLight}台${carsOther > 0 ? ` / 他: ${carsOther}台` : ''})</span>
           </div>
 
           ${Object.keys(carpoolMap).length > 0 ? `
@@ -1966,10 +1994,10 @@ async function deleteSingleAttendance(name, date, rowIndex) {
 
 // 全件クリア（GET通信）
 async function clearAllAttendance() {
-  if (!confirm("【警告】本当にすべての出欠回答データを削除しますか？\n（この操作は元に戻せません）")) {
+  if (!confirm("【警告】本当にすべての回答データを削除しますか？\n（この操作は元に戻せません）")) {
     return;
   }
-  if (!confirm("本当に実行しますか？スプレッドシートの出欠データがすべて消去されます。")) {
+  if (!confirm("本当に実行しますか？スプレッドシートの参加回答データがすべて消去されます。")) {
     return;
   }
 
@@ -1979,7 +2007,7 @@ async function clearAllAttendance() {
     const data = await res.json();
 
     if (data.status === "cleared") {
-      alert("すべての出欠回答データを消去しました。");
+      alert("すべての回答データを消去しました。");
       fetchAdminData();
     } else {
       alert("全件削除に失敗しました。");
