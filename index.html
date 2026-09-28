@@ -1,55 +1,477 @@
-function doPost(e) {
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SASUKE 合トレ出欠確認</title>
+<style>
+  :root {
+    --bg: #0b0f19;
+    --card-bg: #161f30;
+    --border: #2d3b55;
+    --text: #f8fafc;
+    --text-sub: #94a3b8;
+    --accent: #ef4444;
+    --accent-hover: #dc2626;
+    --success: #10b981;
+    --warning: #f59e0b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    -webkit-text-size-adjust: 100%;
+  }
+  .container { width: 100%; max-width: 580px; }
+
+  header {
+    text-align: center;
+    padding: 16px 0 10px 0;
+    position: relative;
+  }
+  .badge-title {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+  }
+  h1 { font-size: 20px; margin: 0; font-weight: 800; letter-spacing: 0.5px; }
+
+  .admin-trigger {
+    position: absolute;
+    top: 14px;
+    right: 0;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .tab-nav {
+    display: flex;
+    gap: 6px;
+    background: #0f172a;
+    padding: 4px;
+    border-radius: 8px;
+    margin: 12px 0 16px 0;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-sub);
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--card-bg);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+
+  .form-group { margin-bottom: 14px; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-sub);
+    margin-bottom: 5px;
+  }
+  .required { color: var(--accent); margin-left: 3px; }
+  
+  input[type="text"], input[type="date"], select, textarea {
+    width: 100%;
+    background: #0b0f19;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  
+  .radio-pill-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .radio-pill-label {
+    background: #0b0f19;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 8px;
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+  }
+  .radio-pill-label input { display: none; }
+  .radio-pill-label.checked {
+    background: #2b1720;
+    border-color: var(--accent);
+    color: #fca5a5;
+  }
+
+  .btn-submit {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    width: 100%;
+    padding: 13px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 6px;
+  }
+  .btn-submit:active { background: var(--accent-hover); }
+
+  .submit-success-box {
+    background: #064e3b;
+    border: 1px solid #10b981;
+    color: #a7f3d0;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 14px;
+    display: none;
+  }
+
+  .column-section { margin-bottom: 16px; }
+  .column-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #fda4af;
+    border-left: 3px solid var(--accent);
+    padding-left: 8px;
+    margin-bottom: 6px;
+  }
+  .column-body {
+    font-size: 13px;
+    color: #cbd5e1;
+    line-height: 1.6;
+    background: #0b0f19;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .column-body ul { margin: 0; padding-left: 18px; }
+  .column-body li { margin-bottom: 4px; }
+
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  .admin-table th, .admin-table td {
+    border: 1px solid var(--border);
+    padding: 8px 6px;
+    text-align: left;
+  }
+  .admin-table th { background: #0f172a; color: var(--text-sub); }
+  .admin-table tr:nth-child(even) { background: #0e1422; }
+  .badge-transport {
+    background: #1e293b;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <button class="admin-trigger" onclick="toggleAdminView()">🔒 管理者</button>
+    <span class="badge-title">OFFICIAL</span>
+    <h1>SASUKE 合トレ出欠管理</h1>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">✍️ 出欠回答</button>
+    <button class="tab-btn" id="tab-btn-column" onclick="switchTab('column')">📜 注意事項・コラム</button>
+  </div>
+
+  <!-- 出欠送信フォーム -->
+  <div id="view-form">
+    <div class="submit-success-box" id="success-msg">
+      ✓ 出欠情報を送信しました！回答ありがとうございます。
+    </div>
+
+    <div class="card">
+      <form id="attendance-form" onsubmit="submitAttendance(event)">
+        
+        <div class="form-group">
+          <label>参加者氏名（ニックネーム可）<span class="required">*</span></label>
+          <input type="text" id="field-name" placeholder="例: 山田太郎 / ヤマ" required>
+        </div>
+
+        <div class="form-group">
+          <label>参加日程<span class="required">*</span></label>
+          <input type="date" id="field-date" required>
+        </div>
+
+        <div class="form-group">
+          <label>練習参加予定時間<span class="required">*</span></label>
+          <input type="text" id="field-time" placeholder="例: 13:00〜18:00、終日、午後から など" required>
+        </div>
+
+        <div class="form-group">
+          <label>現地までの交通手段<span class="required">*</span></label>
+          <div class="radio-pill-group">
+            <label class="radio-pill-label" onclick="updateRadioStyle(this)">
+              <input type="radio" name="transport" value="自車" required> 🚗 自車
+            </label>
+            <label class="radio-pill-label" onclick="updateRadioStyle(this)">
+              <input type="radio" name="transport" value="乗り合い（同乗）"> 🤝 乗り合い
+            </label>
+            <label class="radio-pill-label" onclick="updateRadioStyle(this)">
+              <input type="radio" name="transport" value="現地までバス"> 🚌 バス
+            </label>
+            <label class="radio-pill-label" onclick="updateRadioStyle(this)">
+              <input type="radio" name="transport" value="タクシー"> 🚕 タクシー
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>お連れ様・同伴者（見学・補助など）</label>
+          <input type="text" id="field-companion" placeholder="例: 1名（佐藤）、なし">
+        </div>
+
+        <div class="form-group">
+          <label>備考・遅刻早退連絡など</label>
+          <textarea id="field-note" rows="2" placeholder="何かあればご記入ください"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-submit-form">出欠を送信する ↵</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 注意事項・コラムページ -->
+  <div id="view-column" class="hidden">
+    <div class="card">
+      <div class="column-section">
+        <div class="column-title">👟 シューズ・服装について</div>
+        <div class="column-body">
+          <ul>
+            <li>泥や小石を落とした<b>室内用／競技用シューズ</b>を必ずご持参ください（屋外の土足利用は禁止です）。</li>
+            <li>グリップ力を維持するため、ソールが摩耗しすぎていない靴をおすすめします。</li>
+            <li>引っかかりやすいアクセサリーや時計などは競技前に外してください。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="column-section">
+        <div class="column-title">⚠️ 安全・怪我の防止</div>
+        <div class="column-body">
+          <ul>
+            <li>エリア内でのウォーミングアップ・ストレッチを入念に行ってください。</li>
+            <li>マットの位置確認を怠らないよう、落下ポイントの安全を常に確認しましょう。</li>
+            <li>怪我については自己責任・各自のスポーツ安全保険等の適用となります。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="column-section">
+        <div class="column-title">🚗 駐車場・アクセスルール</div>
+        <div class="column-body">
+          <ul>
+            <li>自車でお越しの方は、指定の駐車エリアに奥から詰めて駐車をお願いします。</li>
+            <li>乗り合いやバス・タクシーでお越しの場合、集合・合流時間はグループチャット等で事前共有をお願いします。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="column-section">
+        <div class="column-title">🧹 ゴミと施設利用のマナー</div>
+        <div class="column-body">
+          <ul>
+            <li>出たゴミ（テーピング、ペットボトル等）は<b>各自必ずお持ち帰り</b>ください。</li>
+            <li>チョーク等の粉を使用する場合は、使用後の拭き取り・ブラッシングにご協力ください。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 管理者専用閲覧画面 -->
+  <div id="view-admin" class="hidden">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2 style="font-size:16px; margin:0;">🔒 管理者出欠集計</h2>
+        <button class="tab-btn" style="flex:none; padding:4px 8px; border:1px solid var(--border);" onclick="fetchAdminData()">🔄 最新化</button>
+      </div>
+      <div id="admin-data-container" style="overflow-x:auto;">
+        <div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ★Googleスプレッドシート（Apps Script）で発行したURLをここに貼り付けます
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzxxxxxx/exec";
+
+// 管理者PINコード
+const ADMIN_PIN = "1234";
+
+function switchTab(tab) {
+  document.getElementById('view-form').classList.toggle('hidden', tab !== 'form');
+  document.getElementById('view-column').classList.toggle('hidden', tab !== 'column');
+  document.getElementById('view-admin').classList.add('hidden');
+
+  document.getElementById('tab-btn-form').classList.toggle('active', tab === 'form');
+  document.getElementById('tab-btn-column').classList.toggle('active', tab === 'column');
+}
+
+function updateRadioStyle(selectedLabel) {
+  document.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
+  selectedLabel.classList.add('checked');
+}
+
+async function submitAttendance(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-submit-form');
+  btn.disabled = true;
+  btn.innerText = "送信中...";
+
+  const transportEl = document.querySelector('input[name="transport"]:checked');
+
+  const payload = {
+    name: document.getElementById('field-name').value.trim(),
+    date: document.getElementById('field-date').value,
+    time: document.getElementById('field-time').value.trim(),
+    transport: transportEl ? transportEl.value : "",
+    companion: document.getElementById('field-companion').value.trim() || "なし",
+    note: document.getElementById('field-note').value.trim()
+  };
+
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    const data = JSON.parse(e.postData.contents);
-    
-    // ヘッダー行がなければ作成
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "送信日時", "氏名", "参加日", "参加時間", "交通手段", "同伴者", "備考"
-      ]);
-    }
-    
-    // データを末尾に追加
-    sheet.appendRow([
-      new Date(),
-      data.name || "",
-      data.date || "",
-      data.time || "",
-      data.transport || "",
-      data.companion || "なし",
-      data.note || ""
-    ]);
-    
-    return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
-      .setMimeType(ContentService.MimeType.JSON);
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(payload)
+    });
+
+    document.getElementById('success-msg').style.display = 'block';
+    document.getElementById('attendance-form').reset();
+    document.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+    alert("送信に失敗しました。電波環境を確認してください。");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "出欠を送信する ↵";
   }
 }
 
-// 管理者用の一覧データ取得
-function doGet(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const rows = sheet.getDataRange().getValues();
-  if (rows.length <= 1) {
-    return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+function toggleAdminView() {
+  const pin = prompt("管理者暗証番号を入力してください:");
+  if (pin !== ADMIN_PIN) {
+    alert("パスワードが違います");
+    return;
   }
-  
-  const headers = rows[0];
-  const list = [];
-  for (let i = 1; i < rows.length; i++) {
-    const r = rows[i];
-    list.push({
-      timestamp: r[0],
-      name: r[1],
-      date: r[2] instanceof Date ? Utilities.formatDate(r[2], "JST", "yyyy-MM-dd") : r[2],
-      time: r[3],
-      transport: r[4],
-      companion: r[5],
-      note: r[6]
-    });
-  }
-  return ContentService.createTextOutput(JSON.stringify(list)).setMimeType(ContentService.MimeType.JSON);
+  document.getElementById('view-form').classList.add('hidden');
+  document.getElementById('view-column').classList.add('hidden');
+  document.getElementById('view-admin').classList.remove('hidden');
+  document.getElementById('tab-btn-form').classList.remove('active');
+  document.getElementById('tab-btn-column').classList.remove('active');
+  fetchAdminData();
 }
+
+async function fetchAdminData() {
+  const container = document.getElementById('admin-data-container');
+  container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
+
+  try {
+    const res = await fetch(GAS_URL + "?t=" + Date.now());
+    const list = await res.json();
+
+    if (!list || list.length === 0) {
+      container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">回答はまだありません</div>';
+      return;
+    }
+
+    let html = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>参加日</th>
+            <th>氏名</th>
+            <th>時間</th>
+            <th>交通手段</th>
+            <th>連れ</th>
+            <th>備考</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    list.reverse().forEach(item => {
+      html += `
+        <tr>
+          <td style="white-space:nowrap; font-weight:bold;">${escapeHtml(item.date)}</td>
+          <td style="white-space:nowrap;">${escapeHtml(item.name)}</td>
+          <td>${escapeHtml(item.time)}</td>
+          <td><span class="badge-transport">${escapeHtml(item.transport)}</span></td>
+          <td>${escapeHtml(item.companion)}</td>
+          <td style="font-size:11px; color:#cbd5e1;">${escapeHtml(item.note)}</td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:15px;">データの取得に失敗しました</div>';
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+</script>
+</body>
+</html>
