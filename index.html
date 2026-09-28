@@ -130,25 +130,25 @@
     background: rgba(11, 15, 25, 0.95);
   }
 
-  /* カレンダー展開トリガーバー */
-  .date-picker-trigger {
+  /* ★超コンパクトな日程選択バー★ */
+  .date-bar-input {
     background: rgba(11, 15, 25, 0.75);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 8px 12px;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 44px;
+    min-height: 42px;
     transition: border-color 0.2s;
   }
-  .date-picker-trigger:hover, .date-picker-trigger:active {
+  .date-bar-input:hover, .date-bar-input:active {
     border-color: var(--accent);
   }
-  .date-picker-placeholder {
+  .date-bar-text {
+    font-size: 13px;
     color: var(--text-sub);
-    font-size: 14px;
   }
   .date-pills-wrap {
     display: flex;
@@ -161,68 +161,68 @@
     color: #fca5a5;
     padding: 2px 7px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
   }
 
-  /* 小型カレンダーポップアップ */
-  .cal-popup-overlay {
+  /* ★中央ポップアップのミニカレンダー★ */
+  .mini-cal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999;
+    z-index: 9999;
     padding: 16px;
   }
-  .cal-popup-content {
+  .mini-cal-box {
     background: #151d2c;
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 14px;
-    width: 100%;
-    max-width: 320px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    width: 290px; /* 横幅を手のひらサイズに制限 */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
   }
-  .cal-header {
+  .mini-cal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
-  .cal-header-title {
+  .mini-cal-header-title {
     font-size: 14px;
     font-weight: bold;
     color: #f8fafc;
   }
-  .cal-nav-btn {
-    background: rgba(30, 41, 59, 0.8);
+  .mini-cal-nav-btn {
+    background: rgba(30, 41, 59, 0.9);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 3px 8px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
   }
-  .cal-weekdays {
+  .mini-cal-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: bold;
     color: var(--text-sub);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
-  .cal-weekdays .sun { color: #f87171; }
-  .cal-weekdays .sat { color: #60a5fa; }
-  .cal-grid {
+  .mini-cal-weekdays .sun { color: #f87171; }
+  .mini-cal-weekdays .sat { color: #60a5fa; }
+  .mini-cal-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 3px;
   }
-  .cal-day {
+  .mini-cal-day {
     aspect-ratio: 1;
     display: flex;
     align-items: center;
@@ -231,34 +231,33 @@
     border-radius: 6px;
     cursor: pointer;
     user-select: none;
-    background: rgba(30, 41, 59, 0.4);
+    background: rgba(30, 41, 59, 0.5);
     border: 1px solid transparent;
     transition: all 0.1s;
   }
-  .cal-day.disabled {
-    opacity: 0.2;
+  .mini-cal-day.disabled {
+    opacity: 0.18;
     cursor: not-allowed;
     background: transparent;
   }
-  .cal-day.today {
+  .mini-cal-day.today {
     border-color: #38bdf8;
   }
-  .cal-day.selected {
-    background: rgba(239, 68, 68, 0.35);
-    border-color: var(--accent);
-    color: #fff;
+  .mini-cal-day.selected {
+    background: rgba(239, 68, 68, 0.45) !important;
+    border-color: var(--accent) !important;
+    color: #fff !important;
     font-weight: bold;
-    box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
   }
-  .cal-footer {
+  .mini-cal-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 12px;
+    margin-top: 10px;
     padding-top: 8px;
     border-top: 1px solid var(--border);
   }
-  .cal-close-btn {
+  .mini-cal-done-btn {
     background: var(--accent);
     color: #fff;
     border: none;
@@ -269,7 +268,7 @@
     cursor: pointer;
   }
 
-  /* 交通機関グリッド */
+  /* 交通手段 */
   .radio-pill-group {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -397,10 +396,7 @@
     border-radius: 6px;
     color: #94a3b8;
   }
-  .car-stat-badge {
-    color: #60a5fa;
-    font-weight: bold;
-  }
+  .car-stat-badge { color: #60a5fa; font-weight: bold; }
 
   .admin-member-card {
     background: rgba(15, 23, 42, 0.7);
@@ -439,11 +435,7 @@
     margin: 6px 0;
     font-size: 12px;
   }
-  .carpool-title {
-    font-weight: bold;
-    color: #34d399;
-    margin-bottom: 4px;
-  }
+  .carpool-title { font-weight: bold; color: #34d399; margin-bottom: 4px; }
 
   /* 認証モーダル */
   .modal-overlay {
@@ -454,7 +446,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 10000;
     padding: 16px;
   }
   .modal-content {
@@ -498,12 +490,12 @@
           <input type="text" id="field-name" placeholder="例: 内宮修造" required>
         </div>
 
-        <!-- 参加日程（小型カレンダー展開式） -->
+        <!-- 参加日程：普段は1行のバーのみ！ -->
         <div class="form-group">
           <label>参加日程（タップして選択）<span class="required">*</span></label>
-          <div class="date-picker-trigger" onclick="openCalendarPopup()">
-            <div id="date-picker-display" class="date-picker-placeholder">📅 日程をカレンダーから選択...</div>
-            <span style="font-size:16px;">🗓️</span>
+          <div class="date-bar-input" onclick="openCalendarPopup()">
+            <div id="date-picker-display" class="date-bar-text">📅 日程をタップして選択...</div>
+            <span style="font-size:18px;">🗓️</span>
           </div>
         </div>
 
@@ -684,15 +676,15 @@
 
 </div>
 
-<!-- コンパクトカレンダー・ポップアップモーダル -->
-<div id="cal-popup-modal" class="cal-popup-overlay hidden" onclick="handleCalOverlayClick(event)">
-  <div class="cal-popup-content" onclick="event.stopPropagation()">
-    <div class="cal-header">
-      <button type="button" class="cal-nav-btn" onclick="prevMonth()">‹ 前月</button>
-      <div class="cal-header-title" id="cal-month-year"></div>
-      <button type="button" class="cal-nav-btn" onclick="nextMonth()">翌月 ›</button>
+<!-- ★タップしたときだけ画面中央に現れるミニカレンダー★ -->
+<div id="cal-popup-modal" class="mini-cal-overlay hidden" onclick="handleCalOverlayClick(event)">
+  <div class="mini-cal-box" onclick="event.stopPropagation()">
+    <div class="mini-cal-header">
+      <button type="button" class="mini-cal-nav-btn" onclick="prevMonth()">‹ 前月</button>
+      <div class="mini-cal-header-title" id="cal-month-year"></div>
+      <button type="button" class="mini-cal-nav-btn" onclick="nextMonth()">翌月 ›</button>
     </div>
-    <div class="cal-weekdays">
+    <div class="mini-cal-weekdays">
       <span class="sun">日</span>
       <span>月</span>
       <span>火</span>
@@ -701,10 +693,10 @@
       <span>金</span>
       <span class="sat">土</span>
     </div>
-    <div class="cal-grid" id="cal-days-grid"></div>
-    <div class="cal-footer">
+    <div class="mini-cal-grid" id="cal-days-grid"></div>
+    <div class="mini-cal-footer">
       <span id="cal-popup-count" style="font-size:11px; color:#94a3b8;">0日選択中</span>
-      <button type="button" class="cal-close-btn" onclick="closeCalendarPopup()">決定 / 閉じる</button>
+      <button type="button" class="mini-cal-done-btn" onclick="closeCalendarPopup()">決定</button>
     </div>
   </div>
 </div>
@@ -731,7 +723,6 @@ const ADMIN_PIN = "7978815";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 
-// カレンダー管理用状態
 let calYear, calMonth;
 const selectedDates = new Set();
 
@@ -743,7 +734,7 @@ window.addEventListener('DOMContentLoaded', () => {
   updateTriggerDisplay();
 });
 
-// ポップアップ開閉
+// ミニカレンダー開閉
 function openCalendarPopup() {
   renderCalendar();
   document.getElementById('cal-popup-modal').classList.remove('hidden');
@@ -785,13 +776,11 @@ function renderCalendar() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 前の空白セル
   for (let i = 0; i < firstDayIndex; i++) {
     const empty = document.createElement('div');
     grid.appendChild(empty);
   }
 
-  // 日付セル
   for (let d = 1; d <= daysInMonth; d++) {
     const cellDate = new Date(calYear, calMonth, d);
     cellDate.setHours(0, 0, 0, 0);
@@ -801,7 +790,7 @@ function renderCalendar() {
     const dateStr = `${calYear}-${mm}-${dd}`;
 
     const cell = document.createElement('div');
-    cell.className = 'cal-day';
+    cell.className = 'mini-cal-day';
     cell.innerText = d;
 
     if (cellDate < today) {
@@ -836,15 +825,14 @@ function updateTriggerDisplay() {
   const display = document.getElementById('date-picker-display');
   const arr = Array.from(selectedDates).sort();
   if (arr.length === 0) {
-    display.className = "date-picker-placeholder";
-    display.innerText = "📅 日程をカレンダーから選択...";
+    display.className = "date-bar-text";
+    display.innerText = "📅 日程をタップして選択...";
     return;
   }
   display.className = "date-pills-wrap";
   display.innerHTML = arr.map(d => `<span class="date-selected-pill">${formatDateLabel(d)}</span>`).join('');
 }
 
-// 0:00〜24:00のプルダウン生成
 function generateTimeDropdowns() {
   const startSel = document.getElementById('field-time-start');
   const endSel = document.getElementById('field-time-end');
@@ -885,7 +873,6 @@ function switchTab(tab) {
   document.getElementById('tab-btn-column').classList.toggle('active', tab === 'column');
 }
 
-// 送信処理
 async function submitAttendance(e) {
   e.preventDefault();
 
@@ -960,7 +947,6 @@ async function submitAttendance(e) {
   }
 }
 
-// 認証モーダル
 function openLoginModal() {
   document.getElementById('admin-modal').classList.remove('hidden');
   const input = document.getElementById('admin-pin-input');
