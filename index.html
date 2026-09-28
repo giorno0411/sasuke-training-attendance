@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SASUKE 合トレ出欠確認</title>
+<title>内宮パーク 合トレ出欠確認</title>
 <style>
   :root {
     --bg: #0b0f19;
@@ -39,22 +39,11 @@
 
   header {
     text-align: center;
-    padding: 16px 0 10px 0;
+    padding: 16px 0 12px 0;
     position: relative;
   }
-  .badge-title {
-    display: inline-block;
-    background: var(--accent);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    margin-bottom: 6px;
-  }
   h1 { 
-    font-size: 20px; 
+    font-size: 21px; 
     margin: 0; 
     font-weight: 800; 
     letter-spacing: 0.5px;
@@ -82,7 +71,7 @@
     backdrop-filter: blur(8px);
     padding: 4px;
     border-radius: 8px;
-    margin: 12px 0 16px 0;
+    margin: 10px 0 16px 0;
     border: 1px solid var(--border);
   }
   .tab-btn {
@@ -124,12 +113,12 @@
   }
   .required { color: var(--accent); margin-left: 3px; }
   
-  input[type="text"], input[type="date"], select, textarea {
+  input[type="text"], input[type="password"], select, textarea {
     width: 100%;
     background: rgba(11, 15, 25, 0.75);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 11px 12px;
+    padding: 10px 12px;
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
@@ -141,6 +130,33 @@
     background: rgba(11, 15, 25, 0.95);
   }
   
+  /* 日程複数選択ボタン（左詰め） */
+  .dates-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .date-chip {
+    background: rgba(11, 15, 25, 0.75);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .date-chip input { display: none; }
+  .date-chip.checked {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: var(--accent);
+    color: #fca5a5;
+    font-weight: bold;
+  }
+
+  /* 交通手段グリッド */
   .radio-pill-group {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -156,13 +172,36 @@
     cursor: pointer;
     user-select: none;
     font-weight: 600;
-    transition: all 0.2s;
   }
   .radio-pill-label input { display: none; }
   .radio-pill-label.checked {
     background: rgba(239, 68, 68, 0.2);
     border-color: var(--accent);
     color: #fca5a5;
+  }
+
+  /* 同伴者2カラム */
+  .companion-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 8px;
+  }
+
+  /* 時間選択 */
+  .time-custom-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .conditional-box {
+    margin-top: 8px;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
   }
 
   .btn-submit {
@@ -175,7 +214,6 @@
     font-size: 15px;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.2s;
     margin-top: 6px;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
   }
@@ -194,6 +232,7 @@
     display: none;
   }
 
+  /* コラム */
   .column-section { margin-bottom: 16px; }
   .column-title {
     font-size: 14px;
@@ -213,32 +252,37 @@
     border: 1px solid var(--border);
   }
   .column-body ul { margin: 0; padding-left: 18px; }
-  .column-body li { margin-bottom: 4px; }
+  .column-body li { margin-bottom: 6px; }
 
-  /* 管理者用：シンプルカード表示スタイル */
-  .admin-date-group {
-    margin-bottom: 20px;
-  }
+  /* 管理者画面 */
+  .admin-date-group { margin-bottom: 22px; }
   .admin-date-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(30, 41, 59, 0.9);
+    background: rgba(30, 41, 59, 0.95);
     padding: 8px 12px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: bold;
-    color: #f8fafc;
     border-left: 4px solid var(--accent);
     margin-bottom: 8px;
   }
-  .admin-date-count {
+  .admin-card-stats {
+    display: flex;
+    gap: 8px;
     font-size: 12px;
-    background: var(--accent);
-    color: #fff;
-    padding: 2px 8px;
-    border-radius: 12px;
+    margin-bottom: 8px;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: #94a3b8;
   }
+  .car-stat-badge {
+    color: #60a5fa;
+    font-weight: bold;
+  }
+
   .admin-member-card {
     background: rgba(15, 23, 42, 0.7);
     border: 1px solid var(--border);
@@ -254,11 +298,8 @@
     justify-content: space-between;
     align-items: center;
   }
-  .member-name {
-    font-size: 15px;
-    font-weight: bold;
-    color: #f8fafc;
-  }
+  .member-name { font-size: 15px; font-weight: bold; }
+  
   .badge-transport {
     font-size: 11px;
     padding: 3px 8px;
@@ -266,25 +307,46 @@
     font-weight: 600;
   }
   .transport-car { background: #1e3a8a; color: #93c5fd; }
+  .transport-share { background: #064e3b; color: #a7f3d0; }
   .transport-bus { background: #701a75; color: #f5d0fe; }
   .transport-taxi { background: #854d0e; color: #fef08a; }
-  .transport-share { background: #064e3b; color: #a7f3d0; }
-  .transport-default { background: #334155; color: #cbd5e1; }
+  .transport-other { background: #334155; color: #cbd5e1; }
 
-  .member-time-row {
-    font-size: 13px;
-    color: #38bdf8;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .member-sub-info {
+  /* 相乗りグループ */
+  .carpool-group {
+    background: rgba(6, 78, 59, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 6px 0;
     font-size: 12px;
-    color: var(--text-sub);
-    line-height: 1.4;
-    border-top: 1px dashed rgba(255,255,255,0.08);
-    padding-top: 4px;
-    margin-top: 2px;
+  }
+  .carpool-title {
+    font-weight: bold;
+    color: #34d399;
+    margin-bottom: 4px;
+  }
+
+  /* 認証モーダル */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 16px;
+  }
+  .modal-content {
+    background: #161f30;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 320px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   }
 
   .hidden { display: none !important; }
@@ -294,9 +356,8 @@
 
 <div class="container">
   <header>
-    <button class="admin-trigger" onclick="toggleAdminView()">🔒 管理者</button>
-    <span class="badge-title">OFFICIAL</span>
-    <h1>SASUKE 合トレ出欠管理</h1>
+    <button class="admin-trigger" onclick="openLoginModal()">🔒 管理者</button>
+    <h1>内宮パーク 合トレ出欠確認</h1>
   </header>
 
   <div class="tab-nav">
@@ -313,47 +374,94 @@
     <div class="card">
       <form id="attendance-form" onsubmit="submitAttendance(event)">
         
+        <!-- 氏名 -->
         <div class="form-group">
           <label>参加者氏名（ニックネーム可）<span class="required">*</span></label>
-          <input type="text" id="field-name" placeholder="例: 山田太郎 / ヤマ" required>
+          <input type="text" id="field-name" placeholder="例: 内宮修造" required>
         </div>
 
+        <!-- 参加日程（左詰め・複数選択対応） -->
         <div class="form-group">
-          <label>参加日程<span class="required">*</span></label>
-          <input type="date" id="field-date" required>
+          <label>参加日程（複数選択可）<span class="required">*</span></label>
+          <div class="dates-grid" id="dates-container"></div>
         </div>
 
+        <!-- 練習参加希望時間 -->
         <div class="form-group">
-          <label>練習参加予定時間<span class="required">*</span></label>
-          <input type="text" id="field-time" placeholder="例: 13:00〜18:00、終日、午後から など" required>
-        </div>
-
-        <div class="form-group">
-          <label>現地までの交通手段<span class="required">*</span></label>
-          <div class="radio-pill-group">
-            <label class="radio-pill-label" onclick="updateRadioStyle(this)">
-              <input type="radio" name="transport" value="自車" required> 🚗 自車
-            </label>
-            <label class="radio-pill-label" onclick="updateRadioStyle(this)">
-              <input type="radio" name="transport" value="乗り合い（同乗）"> 🤝 乗り合い
-            </label>
-            <label class="radio-pill-label" onclick="updateRadioStyle(this)">
-              <input type="radio" name="transport" value="現地までバス"> 🚌 バス
-            </label>
-            <label class="radio-pill-label" onclick="updateRadioStyle(this)">
-              <input type="radio" name="transport" value="タクシー"> 🚕 タクシー
-            </label>
+          <label>練習参加希望時間<span class="required">*</span></label>
+          <select id="field-time-preset" onchange="toggleCustomTime(this.value)" required>
+            <option value="終日">終日</option>
+            <option value="午前のみ">午前のみ</option>
+            <option value="午後のみ">午後のみ</option>
+            <option value="custom">時間を指定する (0:00〜24:00)</option>
+          </select>
+          
+          <div id="custom-time-row" class="time-custom-row hidden">
+            <select id="field-time-start"></select>
+            <span style="font-size:12px; color:var(--text-sub);">〜</span>
+            <select id="field-time-end"></select>
           </div>
         </div>
 
+        <!-- 交通機関 -->
         <div class="form-group">
-          <label>お連れ様・同伴者（見学・補助など）</label>
-          <input type="text" id="field-companion" placeholder="例: 1名（佐藤）、なし">
+          <label>現地までの交通機関<span class="required">*</span></label>
+          <div class="radio-pill-group">
+            <label class="radio-pill-label" onclick="selectTransport(this, '自車')">
+              <input type="radio" name="transport" value="自車" required> 🚗 自車
+            </label>
+            <label class="radio-pill-label" onclick="selectTransport(this, '乗り合い')">
+              <input type="radio" name="transport" value="乗り合い（同乗）"> 🤝 乗り合い
+            </label>
+            <label class="radio-pill-label" onclick="selectTransport(this, 'バス')">
+              <input type="radio" name="transport" value="現地までバス"> 🚌 バス
+            </label>
+            <label class="radio-pill-label" onclick="selectTransport(this, 'タクシー')">
+              <input type="radio" name="transport" value="タクシー"> 🚕 タクシー
+            </label>
+            <label class="radio-pill-label" style="grid-column: span 2;" onclick="selectTransport(this, 'その他')">
+              <input type="radio" name="transport" value="その他"> 🚲 その他
+            </label>
+          </div>
+
+          <!-- 自車の場合（軽/普通/他） -->
+          <div id="car-detail-box" class="conditional-box hidden">
+            <label style="font-size:11px; margin-bottom:4px;">車種（台数把握のため）<span class="required">*</span></label>
+            <select id="field-car-type">
+              <option value="普通車">普通車</option>
+              <option value="軽自動車">軽自動車</option>
+              <option value="その他">その他（バイク等）</option>
+            </select>
+          </div>
+
+          <!-- 乗り合いの場合（代表者名） -->
+          <div id="share-detail-box" class="conditional-box hidden">
+            <label style="font-size:11px; margin-bottom:4px;">相乗り代表者（運転者）のお名前<span class="required">*</span></label>
+            <input type="text" id="field-car-leader" placeholder="本名・スペースなしで入力（例: 内宮修造）">
+            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">※代表者の本名をスペースなしでご記入ください。</div>
+          </div>
         </div>
 
+        <!-- お連れ様・同伴者 -->
         <div class="form-group">
-          <label>備考・遅刻早退連絡など</label>
-          <textarea id="field-note" rows="2" placeholder="何かあればご記入ください"></textarea>
+          <label>お連れ様・同伴者（見学・補助など）</label>
+          <div class="companion-row">
+            <select id="field-companion-count">
+              <option value="0名">0名</option>
+              <option value="1名">1名</option>
+              <option value="2名">2名</option>
+              <option value="3名">3名</option>
+              <option value="4名">4名</option>
+              <option value="5名以上">5名以上</option>
+            </select>
+            <input type="text" id="field-companion-names" placeholder="人名または団体名（例: 家族、なし）">
+          </div>
+        </div>
+
+        <!-- 備考・その他ご要望 -->
+        <div class="form-group">
+          <label>備考・その他ご要望</label>
+          <textarea id="field-note" rows="2" placeholder="遅刻早退、その他ご要望があればご記入ください"></textarea>
         </div>
 
         <button type="submit" class="btn-submit" id="btn-submit-form">出欠を送信する ↵</button>
@@ -364,47 +472,72 @@
   <!-- 注意事項・コラムページ -->
   <div id="view-column" class="hidden">
     <div class="card">
+      
+      <!-- 👟 シューズ・服装について -->
       <div class="column-section">
         <div class="column-title">👟 シューズ・服装について</div>
         <div class="column-body">
           <ul>
-            <li>泥や小石を落とした<b>室内用／競技用シューズ</b>を必ずご持参ください（屋外の土足利用は禁止です）。</li>
-            <li>グリップ力を維持するため、ソールが摩耗しすぎていない靴をおすすめします。</li>
-            <li>引っかかりやすいアクセサリーや時計などは競技前に外してください。</li>
+            <li>パーク内は砂が多く、靴やウェアが汚れやすい環境です。練習着とは別に、替えの靴・靴下・着替えをご持参いただくことを強く推奨します。</li>
+            <li>「そり立つ壁」の滑り止めシートなど、一部のエリアでは靴底（ソール）が激しく摩耗する可能性があります。予めご承知おきいただき、練習用シューズの着用をおすすめします。</li>
           </ul>
         </div>
       </div>
 
+      <!-- ⚠️ 安全・怪我の防止 -->
       <div class="column-section">
         <div class="column-title">⚠️ 安全・怪我の防止</div>
         <div class="column-body">
           <ul>
-            <li>エリア内でのウォーミングアップ・ストレッチを入念に行ってください。</li>
-            <li>マットの位置確認を怠らないよう、落下ポイントの安全を常に確認しましょう。</li>
-            <li>怪我については自己責任・各自のスポーツ安全保険等の適用となります。</li>
+            <li>練習前は関節や筋肉のストレッチ、ウォーミングアップを入念に行ってください。</li>
+            <li>トライ前は着地ポイントにマットがあるか、ズレや隙間がないかを必ず確認してください。また、マットを一時的に移動した場合は、使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。</li>
+            <li>パーク内での怪我や事故につきましては、原則として自己責任の上でご参加ください。万が一に備え、各自でスポーツ安全保険等への加入を推奨いたします。</li>
           </ul>
         </div>
       </div>
 
+      <!-- 📦 備品について -->
+      <div class="column-section">
+        <div class="column-title">📦 備品について</div>
+        <div class="column-body">
+          <ul>
+            <li>チョークや松脂スプレーなどの消耗品は、各自でご持参いただけると大変助かります。（消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます）</li>
+            <li>現地のプロテクターを使用する際は、必ず正しい手順にて装着してください。（例：膝プロテクターは靴を脱いでから着用する）</li>
+            <li>テーピングや衣類などの忘れ物が非常に多いため、合トレ終了の1時間ほど前から余裕を持って片付け始めることを推奨します。</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 🚗 駐車場・アクセスルール -->
       <div class="column-section">
         <div class="column-title">🚗 駐車場・アクセスルール</div>
         <div class="column-body">
           <ul>
-            <li>自車でお越しの方は、指定の駐車エリアに奥から詰めて駐車をお願いします。</li>
-            <li>乗り合いやバス・タクシーでお越しの場合、集合・合流時間はグループチャット等で事前共有をお願いします。</li>
+            <li>お車でお越しの方は、下記「駐車レイアウト.pdf」をご参照し、指定の駐車エリアへ奥から詰めて駐車をお願いいたします。
+              <!-- PDF閲覧ボタン -->
+              <div style="margin: 10px 0 6px 0;">
+                <a href="parking-layout.pdf" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">
+                  📄 駐車レイアウト.pdf を開く
+                </a>
+              </div>
+            </li>
+            <li>渋滞などで到着が遅れる場合は、必ず事前にご連絡をお願いいたします。</li>
           </ul>
         </div>
       </div>
 
+      <!-- 🧹 施設利用のマナー -->
       <div class="column-section">
-        <div class="column-title">🧹 ゴミと施設利用のマナー</div>
+        <div class="column-title">🧹 施設利用のマナー</div>
         <div class="column-body">
           <ul>
-            <li>出たゴミ（テーピング、ペットボトル等）は<b>各自必ずお持ち帰り</b>ください。</li>
-            <li>チョーク等の粉を使用する場合は、使用後の拭き取り・ブラッシングにご協力ください。</li>
+            <li>出たゴミは、各自でお持ち帰りのご協力をお願いいたします。</li>
+            <li>近隣住民の方へのご挨拶など、気持ちの良いコミュニケーションを心がけていただけますと幸いです。</li>
+            <li>エリアのセット準備や片付けは、皆様のご協力によってスムーズに進みます。<span style="color: #ef4444; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">ぜひ積極的なお手伝いをお願いいたします！</span></li>
           </ul>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -412,7 +545,7 @@
   <div id="view-admin" class="hidden">
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h2 style="font-size:16px; margin:0;">🔒 出欠状況一覧</h2>
+        <h2 style="font-size:16px; margin:0;">🔒 出欠状況・車両集計</h2>
         <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="fetchAdminData()">🔄 最新化</button>
       </div>
       <div id="admin-data-container">
@@ -423,14 +556,90 @@
 
 </div>
 
+<!-- 管理者認証モーダル（英数字キーボード強制） -->
+<div id="admin-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <h3 style="margin-top:0; font-size:15px;">🔒 管理者ログイン</h3>
+    <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">英数字パスワードを入力してください。</p>
+    <input type="password" id="admin-pin-input" inputmode="text" autocomplete="off" placeholder="パスワードを入力" style="margin-bottom:12px;">
+    <div style="display:flex; gap:8px;">
+      <button class="tab-btn" style="border:1px solid var(--border);" onclick="closeLoginModal()">キャンセル</button>
+      <button class="btn-submit" style="margin:0; padding:8px;" onclick="verifyAdminPin()">ログイン</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ★お使いのGoogle Apps ScriptのURLが設定されているか確認してください
+// ★Google Apps ScriptのURL（ご自身のURLに差し替えてください）
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
 
-// 管理者PINコード
-const ADMIN_PIN = "1234";
+// パスワード設定（英数字）
+const ADMIN_PIN = "7978815";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
+
+window.addEventListener('DOMContentLoaded', () => {
+  generateDateButtons();
+  generateTimeDropdowns();
+});
+
+// 日程選択ボタンを生成（今日から2週間分を左詰め配置）
+function generateDateButtons() {
+  const container = document.getElementById('dates-container');
+  container.innerHTML = '';
+  const today = new Date();
+  
+  for (let i = 0; i < 14; i++) {
+    const d = new Date();
+    d.setDate(today.getDate() + i);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const dateVal = `${yyyy}-${mm}-${dd}`;
+    const dayLabel = `${d.getMonth() + 1}/${d.getDate()} (${weekDays[d.getDay()]})`;
+
+    const chip = document.createElement('label');
+    chip.className = 'date-chip';
+    chip.innerHTML = `<input type="checkbox" name="dates" value="${dateVal}"> ${dayLabel}`;
+    chip.onclick = function() {
+      const cb = this.querySelector('input');
+      this.classList.toggle('checked', cb.checked);
+    };
+    container.appendChild(chip);
+  }
+}
+
+// 0:00〜24:00のプルダウン生成
+function generateTimeDropdowns() {
+  const startSel = document.getElementById('field-time-start');
+  const endSel = document.getElementById('field-time-end');
+  startSel.innerHTML = '';
+  endSel.innerHTML = '';
+
+  for (let h = 0; h <= 24; h++) {
+    const t = `${h}:00`;
+    startSel.innerHTML += `<option value="${t}">${t}</option>`;
+    endSel.innerHTML += `<option value="${t}">${t}</option>`;
+  }
+  startSel.value = "9:00";
+  endSel.value = "17:00";
+}
+
+function toggleCustomTime(val) {
+  const customRow = document.getElementById('custom-time-row');
+  customRow.classList.toggle('hidden', val !== 'custom');
+}
+
+function selectTransport(labelEl, type) {
+  document.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
+  labelEl.classList.add('checked');
+
+  const carBox = document.getElementById('car-detail-box');
+  const shareBox = document.getElementById('share-detail-box');
+
+  carBox.classList.toggle('hidden', type !== '自車');
+  shareBox.classList.toggle('hidden', type !== '乗り合い');
+}
 
 function switchTab(tab) {
   document.getElementById('view-form').classList.toggle('hidden', tab !== 'form');
@@ -441,25 +650,52 @@ function switchTab(tab) {
   document.getElementById('tab-btn-column').classList.toggle('active', tab === 'column');
 }
 
-function updateRadioStyle(selectedLabel) {
-  document.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
-  selectedLabel.classList.add('checked');
-}
-
+// 送信処理
 async function submitAttendance(e) {
   e.preventDefault();
+
+  const checkedDates = Array.from(document.querySelectorAll('input[name="dates"]:checked')).map(el => el.value);
+  if (checkedDates.length === 0) {
+    alert("参加日程を1つ以上選択してください。");
+    return;
+  }
+
+  const transportEl = document.querySelector('input[name="transport"]:checked');
+  const transportVal = transportEl ? transportEl.value : "";
+
+  let carType = "";
+  if (transportVal === "自車") {
+    carType = document.getElementById('field-car-type').value;
+  }
+
+  let carLeader = "";
+  if (transportVal.includes("乗り合い")) {
+    carLeader = document.getElementById('field-car-leader').value.trim().replace(/\s+/g, '');
+    if (!carLeader) {
+      alert("相乗り代表者（運転者）のお名前をスペースなしでご記入ください。");
+      return;
+    }
+  }
+
+  const presetTime = document.getElementById('field-time-preset').value;
+  let finalTime = presetTime;
+  if (presetTime === 'custom') {
+    finalTime = `${document.getElementById('field-time-start').value}〜${document.getElementById('field-time-end').value}`;
+  }
+
   const btn = document.getElementById('btn-submit-form');
   btn.disabled = true;
   btn.innerText = "送信中...";
 
-  const transportEl = document.querySelector('input[name="transport"]:checked');
-
   const payload = {
     name: document.getElementById('field-name').value.trim(),
-    date: document.getElementById('field-date').value,
-    time: document.getElementById('field-time').value.trim(),
-    transport: transportEl ? transportEl.value : "",
-    companion: document.getElementById('field-companion').value.trim() || "なし",
+    dates: checkedDates,
+    time: finalTime,
+    transport: transportVal,
+    carType: carType,
+    carLeader: carLeader,
+    companionCount: document.getElementById('field-companion-count').value,
+    companionNames: document.getElementById('field-companion-names').value.trim() || "なし",
     note: document.getElementById('field-note').value.trim()
   };
 
@@ -473,7 +709,11 @@ async function submitAttendance(e) {
 
     document.getElementById('success-msg').style.display = 'block';
     document.getElementById('attendance-form').reset();
+    document.querySelectorAll('.date-chip').forEach(el => el.classList.remove('checked'));
     document.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
+    document.getElementById('car-detail-box').classList.add('hidden');
+    document.getElementById('share-detail-box').classList.add('hidden');
+    document.getElementById('custom-time-row').classList.add('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) {
     alert("送信に失敗しました。電波環境を確認してください。");
@@ -483,28 +723,50 @@ async function submitAttendance(e) {
   }
 }
 
-function toggleAdminView() {
-  const pin = prompt("管理者暗証番号を入力してください:");
-  if (pin !== ADMIN_PIN) {
-    alert("パスワードが違います");
-    return;
-  }
-  document.getElementById('view-form').classList.add('hidden');
-  document.getElementById('view-column').classList.add('hidden');
-  document.getElementById('view-admin').classList.remove('hidden');
-  document.getElementById('tab-btn-form').classList.remove('active');
-  document.getElementById('tab-btn-column').classList.remove('active');
-  fetchAdminData();
+// 認証モーダル
+function openLoginModal() {
+  document.getElementById('admin-modal').classList.remove('hidden');
+  const input = document.getElementById('admin-pin-input');
+  input.value = "";
+  setTimeout(() => input.focus(), 100);
+}
+function closeLoginModal() {
+  document.getElementById('admin-modal').classList.add('hidden');
 }
 
-function getTransportBadge(transport) {
-  const t = (transport || '').trim();
-  let cls = 'transport-default';
-  if (t.includes('自車')) cls = 'transport-car';
-  else if (t.includes('バス')) cls = 'transport-bus';
-  else if (t.includes('タクシー')) cls = 'transport-taxi';
-  else if (t.includes('乗り合い')) cls = 'transport-share';
-  return `<span class="badge-transport ${cls}">${escapeHtml(t || '未定')}</span>`;
+// 不正ログイン検知ログ送信
+async function logAdminAccess(status, attemptedPin) {
+  try {
+    fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "admin_login_log",
+        status: status,
+        attemptedPin: attemptedPin,
+        userAgent: navigator.userAgent
+      })
+    });
+  } catch(e) {}
+}
+
+async function verifyAdminPin() {
+  const pinInput = document.getElementById('admin-pin-input').value.trim();
+  if (pinInput === ADMIN_PIN) {
+    logAdminAccess("成功", "******");
+    closeLoginModal();
+    document.getElementById('view-form').classList.add('hidden');
+    document.getElementById('view-column').classList.add('hidden');
+    document.getElementById('view-admin').classList.remove('hidden');
+    document.getElementById('tab-btn-form').classList.remove('active');
+    document.getElementById('tab-btn-column').classList.remove('active');
+    fetchAdminData();
+  } else {
+    logAdminAccess("失敗(不正試行)", pinInput);
+    alert("パスワードが正しくありません。");
+    closeLoginModal();
+  }
 }
 
 function formatDateLabel(dateStr) {
@@ -529,7 +791,6 @@ async function fetchAdminData() {
       return;
     }
 
-    // 参加日ごとにグループ化
     const groups = {};
     list.forEach(item => {
       const d = item.date || "未指定";
@@ -537,39 +798,76 @@ async function fetchAdminData() {
       groups[d].push(item);
     });
 
-    // 日付順にソート
     const sortedDates = Object.keys(groups).sort();
-
     let html = '';
+
     sortedDates.forEach(date => {
       const members = groups[date];
+      
+      let carsStandard = 0;
+      let carsLight = 0;
+      let carsOther = 0;
+      const carpoolMap = {};
+
+      members.forEach(m => {
+        if (m.transport === "自車") {
+          if (m.carType === "普通車") carsStandard++;
+          else if (m.carType === "軽自動車") carsLight++;
+          else carsOther++;
+        }
+        if (m.carLeader) {
+          if (!carpoolMap[m.carLeader]) carpoolMap[m.carLeader] = [];
+          carpoolMap[m.carLeader].push(m.name);
+        }
+      });
+
+      const totalCars = carsStandard + carsLight + carsOther;
+
       html += `
         <div class="admin-date-group">
           <div class="admin-date-header">
             <span>📅 ${formatDateLabel(date)}</span>
-            <span class="admin-date-count">${members.length}名</span>
+            <span class="admin-date-count" style="font-size:12px; background:var(--accent); color:#fff; padding:2px 8px; border-radius:12px;">${members.length}名</span>
           </div>
+
+          <div class="admin-card-stats">
+            <span>🚗 車両計: <span class="car-stat-badge">${totalCars}台</span></span>
+            <span>(普通: ${carsStandard}台 / 軽: ${carsLight}台${carsOther > 0 ? ` / 他: ${carsOther}台` : ''})</span>
+          </div>
+
+          ${Object.keys(carpoolMap).length > 0 ? `
+            <div class="carpool-group">
+              <div class="carpool-title">🤝 相乗り車両・同乗者リスト</div>
+              ${Object.keys(carpoolMap).map(leader => `
+                <div style="margin-bottom:2px;">
+                  ・<b>${escapeHtml(leader)}号車</b> (${carpoolMap[leader].length}名同乗): ${escapeHtml(carpoolMap[leader].join(', '))}
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
       `;
 
       members.forEach(m => {
-        const hasCompanion = m.companion && m.companion !== 'なし' && m.companion.trim() !== '';
+        let badgeCls = 'transport-other';
+        if (m.transport === '自車') badgeCls = 'transport-car';
+        else if (m.transport.includes('乗り合い')) badgeCls = 'transport-share';
+        else if (m.transport.includes('バス')) badgeCls = 'transport-bus';
+        else if (m.transport.includes('タクシー')) badgeCls = 'transport-taxi';
+
+        const carInfo = m.transport === '自車' && m.carType ? ` (${m.carType})` : '';
+        const hasCompanion = m.companionCount && m.companionCount !== '0名';
         const hasNote = m.note && m.note.trim() !== '';
 
         html += `
           <div class="admin-member-card">
             <div class="member-top-row">
               <span class="member-name">${escapeHtml(m.name)}</span>
-              ${getTransportBadge(m.transport)}
+              <span class="badge-transport ${badgeCls}">${escapeHtml(m.transport)}${escapeHtml(carInfo)}</span>
             </div>
-            <div class="member-time-row">
-              <span>⏰ ${escapeHtml(m.time || '時間指定なし')}</span>
-            </div>
-            ${(hasCompanion || hasNote) ? `
-              <div class="member-sub-info">
-                ${hasCompanion ? `<div>👥 同伴: ${escapeHtml(m.companion)}</div>` : ''}
-                ${hasNote ? `<div>💬 備考: ${escapeHtml(m.note)}</div>` : ''}
-              </div>
-            ` : ''}
+            <div style="font-size:13px; color:#38bdf8;">⏰ ${escapeHtml(m.time || '時間指定なし')}</div>
+            ${m.carLeader ? `<div style="font-size:12px; color:#34d399;">🤝 相乗り代表: ${escapeHtml(m.carLeader)}</div>` : ''}
+            ${hasCompanion ? `<div style="font-size:12px; color:#cbd5e1;">👥 同伴: ${escapeHtml(m.companionCount)} (${escapeHtml(m.companionNames)})</div>` : ''}
+            ${hasNote ? `<div style="font-size:12px; color:#cbd5e1; border-top:1px dashed rgba(255,255,255,0.08); padding-top:4px; margin-top:2px;">💬 備考: ${escapeHtml(m.note)}</div>` : ''}
           </div>
         `;
       });
