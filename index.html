@@ -7,7 +7,7 @@
 <style>
   :root {
     --bg: #0b0f19;
-    --card-bg: rgba(22, 31, 48, 0.88); /* 写真がうっすら透ける半透明仕様 */
+    --card-bg: rgba(22, 31, 48, 0.88);
     --border: rgba(255, 255, 255, 0.12);
     --text: #f8fafc;
     --text-sub: #94a3b8;
@@ -18,15 +18,13 @@
   }
   * { box-sizing: border-box; }
   
-  /* ★背景画像の設定エリア★ */
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif;
     background-color: var(--bg);
-    /* ↓ アップロードした画像ファイル名（bg.jpg）を指定。暗めのオーバーレイを重ねて文字を読みやすくしています */
     background-image: linear-gradient(rgba(11, 15, 25, 0.82), rgba(11, 15, 25, 0.90)), url('bg.jpg');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed; /* スクロールしても背景を固定 */
+    background-attachment: fixed;
     background-repeat: no-repeat;
     color: var(--text);
     margin: 0;
@@ -39,7 +37,6 @@
   
   .container { width: 100%; max-width: 580px; }
 
-  /* ヘッダー */
   header {
     text-align: center;
     padding: 16px 0 10px 0;
@@ -78,7 +75,6 @@
     backdrop-filter: blur(4px);
   }
 
-  /* タブバー */
   .tab-nav {
     display: flex;
     gap: 6px;
@@ -107,7 +103,6 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
 
-  /* カード（すりガラス効果 + 半透明） */
   .card {
     background: var(--card-bg);
     backdrop-filter: blur(10px);
@@ -119,7 +114,6 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.45);
   }
 
-  /* フォーム要素 */
   .form-group { margin-bottom: 15px; }
   label {
     display: block;
@@ -200,7 +194,6 @@
     display: none;
   }
 
-  /* コラムスタイル */
   .column-section { margin-bottom: 16px; }
   .column-title {
     font-size: 14px;
@@ -222,26 +215,76 @@
   .column-body ul { margin: 0; padding-left: 18px; }
   .column-body li { margin-bottom: 4px; }
 
-  /* 管理者用ビュー */
-  .admin-table {
-    width: 100%;
-    border-collapse: collapse;
+  /* 管理者用：シンプルカード表示スタイル */
+  .admin-date-group {
+    margin-bottom: 20px;
+  }
+  .admin-date-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(30, 41, 59, 0.9);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #f8fafc;
+    border-left: 4px solid var(--accent);
+    margin-bottom: 8px;
+  }
+  .admin-date-count {
     font-size: 12px;
-    margin-top: 10px;
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 12px;
   }
-  .admin-table th, .admin-table td {
+  .admin-member-card {
+    background: rgba(15, 23, 42, 0.7);
     border: 1px solid var(--border);
-    padding: 8px 6px;
-    text-align: left;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
-  .admin-table th { background: rgba(15, 23, 42, 0.8); color: var(--text-sub); }
-  .admin-table tr:nth-child(even) { background: rgba(14, 20, 34, 0.6); }
+  .member-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .member-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #f8fafc;
+  }
   .badge-transport {
-    background: rgba(30, 41, 59, 0.8);
-    padding: 2px 5px;
-    border-radius: 4px;
     font-size: 11px;
-    white-space: nowrap;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .transport-car { background: #1e3a8a; color: #93c5fd; }
+  .transport-bus { background: #701a75; color: #f5d0fe; }
+  .transport-taxi { background: #854d0e; color: #fef08a; }
+  .transport-share { background: #064e3b; color: #a7f3d0; }
+  .transport-default { background: #334155; color: #cbd5e1; }
+
+  .member-time-row {
+    font-size: 13px;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .member-sub-info {
+    font-size: 12px;
+    color: var(--text-sub);
+    line-height: 1.4;
+    border-top: 1px dashed rgba(255,255,255,0.08);
+    padding-top: 4px;
+    margin-top: 2px;
   }
 
   .hidden { display: none !important; }
@@ -368,11 +411,11 @@
   <!-- 管理者専用閲覧画面 -->
   <div id="view-admin" class="hidden">
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h2 style="font-size:16px; margin:0;">🔒 管理者出欠集計</h2>
-        <button class="tab-btn" style="flex:none; padding:4px 8px; border:1px solid var(--border);" onclick="fetchAdminData()">🔄 最新化</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 style="font-size:16px; margin:0;">🔒 出欠状況一覧</h2>
+        <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="fetchAdminData()">🔄 最新化</button>
       </div>
-      <div id="admin-data-container" style="overflow-x:auto;">
+      <div id="admin-data-container">
         <div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>
       </div>
     </div>
@@ -381,11 +424,13 @@
 </div>
 
 <script>
-// ★Googleスプレッドシート（Apps Script）で発行したURLを貼り付けてください
+// ★お使いのGoogle Apps ScriptのURLが設定されているか確認してください
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
 
 // 管理者PINコード
 const ADMIN_PIN = "1234";
+
+const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 
 function switchTab(tab) {
   document.getElementById('view-form').classList.toggle('hidden', tab !== 'form');
@@ -452,6 +497,25 @@ function toggleAdminView() {
   fetchAdminData();
 }
 
+function getTransportBadge(transport) {
+  const t = (transport || '').trim();
+  let cls = 'transport-default';
+  if (t.includes('自車')) cls = 'transport-car';
+  else if (t.includes('バス')) cls = 'transport-bus';
+  else if (t.includes('タクシー')) cls = 'transport-taxi';
+  else if (t.includes('乗り合い')) cls = 'transport-share';
+  return `<span class="badge-transport ${cls}">${escapeHtml(t || '未定')}</span>`;
+}
+
+function formatDateLabel(dateStr) {
+  if (!dateStr) return "日程未指定";
+  const parts = dateStr.split('-').map(Number);
+  if (parts.length < 3) return dateStr;
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  const w = isNaN(d.getDay()) ? "" : `(${weekDays[d.getDay()]})`;
+  return `${parts[1]}月${parts[2]}日${w}`;
+}
+
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
@@ -465,35 +529,54 @@ async function fetchAdminData() {
       return;
     }
 
-    let html = `
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>参加日</th>
-            <th>氏名</th>
-            <th>時間</th>
-            <th>交通手段</th>
-            <th>連れ</th>
-            <th>備考</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-
-    list.reverse().forEach(item => {
-      html += `
-        <tr>
-          <td style="white-space:nowrap; font-weight:bold;">${escapeHtml(item.date)}</td>
-          <td style="white-space:nowrap;">${escapeHtml(item.name)}</td>
-          <td>${escapeHtml(item.time)}</td>
-          <td><span class="badge-transport">${escapeHtml(item.transport)}</span></td>
-          <td>${escapeHtml(item.companion)}</td>
-          <td style="font-size:11px; color:#cbd5e1;">${escapeHtml(item.note)}</td>
-        </tr>
-      `;
+    // 参加日ごとにグループ化
+    const groups = {};
+    list.forEach(item => {
+      const d = item.date || "未指定";
+      if (!groups[d]) groups[d] = [];
+      groups[d].push(item);
     });
 
-    html += `</tbody></table>`;
+    // 日付順にソート
+    const sortedDates = Object.keys(groups).sort();
+
+    let html = '';
+    sortedDates.forEach(date => {
+      const members = groups[date];
+      html += `
+        <div class="admin-date-group">
+          <div class="admin-date-header">
+            <span>📅 ${formatDateLabel(date)}</span>
+            <span class="admin-date-count">${members.length}名</span>
+          </div>
+      `;
+
+      members.forEach(m => {
+        const hasCompanion = m.companion && m.companion !== 'なし' && m.companion.trim() !== '';
+        const hasNote = m.note && m.note.trim() !== '';
+
+        html += `
+          <div class="admin-member-card">
+            <div class="member-top-row">
+              <span class="member-name">${escapeHtml(m.name)}</span>
+              ${getTransportBadge(m.transport)}
+            </div>
+            <div class="member-time-row">
+              <span>⏰ ${escapeHtml(m.time || '時間指定なし')}</span>
+            </div>
+            ${(hasCompanion || hasNote) ? `
+              <div class="member-sub-info">
+                ${hasCompanion ? `<div>👥 同伴: ${escapeHtml(m.companion)}</div>` : ''}
+                ${hasNote ? `<div>💬 備考: ${escapeHtml(m.note)}</div>` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+    });
+
     container.innerHTML = html;
   } catch (err) {
     container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:15px;">データの取得に失敗しました</div>';
