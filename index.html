@@ -379,7 +379,7 @@
     display: none;
   }
 
-  /* 注意事項 */
+  /* 注意事項（スリムな箇条書き・タイトル白色） */
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -398,9 +398,27 @@
     border-radius: 8px;
     border: 1px solid var(--border);
   }
-  .column-body ul { margin: 0; padding-left: 18px; }
-  .column-body li { margin-bottom: 8px; }
+  .column-body ul { 
+    margin: 0; 
+    padding-left: 0; 
+    list-style: none; /* 標準の大きな黒丸を解除 */
+  }
+  .column-body li { 
+    position: relative;
+    padding-left: 14px; 
+    margin-bottom: 8px; 
+  }
   .column-body li:last-child { margin-bottom: 0; }
+  .column-body li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 9px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--text-sub); /* 直径4pxのスリムなドット */
+  }
 
   .urgent-highlight {
     color: #ef4444;
@@ -802,14 +820,14 @@
         </form>
       </div>
 
-      <!-- サブタブ3: 注意事項編集 -->
+      <!-- サブタブ3: 注意事項編集（赤字強調・太字・下線の3種） -->
       <div id="admin-subview-rules" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">📜 注意事項の編集</h2>
           <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="loadRemoteRules()">🔄 再読込</button>
         </div>
         <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
-          改行で複数箇条書きになります。変更後に一番下の「保存」を押してください。
+          文字を選択して装飾ボタンを押せます。改行で箇条書きになります。
         </p>
 
         <form onsubmit="saveRuleSettings(event)">
@@ -979,6 +997,12 @@ function toggleProxyInput(checked) {
 function formatRuleItem(text, title) {
   let str = escapeHtml(text);
 
+  // HTMLタグを復元して装飾
+  str = str.replace(/&lt;span class=&quot;urgent-highlight&quot;&gt;(.*?)&lt;\/span&gt;/g, '<span class="urgent-highlight">$1</span>');
+  str = str.replace(/&lt;b&gt;(.*?)&lt;\/b&gt;/g, '<b>$1</b>');
+  str = str.replace(/&lt;u&gt;(.*?)&lt;\/u&gt;/g, '<u>$1</u>');
+
+  // 指定の装飾キーワード
   str = str.replace(
     /使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。/g,
     '<span class="urgent-highlight">使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。</span>'
@@ -1028,7 +1052,7 @@ function renderRulesDisplay() {
   container.innerHTML = html;
 }
 
-// 管理者画面の注意事項エディター描画
+// 管理者画面の注意事項エディター描画（赤字強調・太字・下線の3種）
 function renderAdminRulesEditor() {
   const container = document.getElementById('admin-rules-edit-list');
   if (!container) return;
@@ -1039,12 +1063,41 @@ function renderAdminRulesEditor() {
       <div class="admin-edit-card">
         <label style="font-size:12px; color:#93c5fd; margin-bottom:4px;">セクション見出し</label>
         <input type="text" id="rule-title-${idx}" value="${escapeHtml(sec.title)}" style="margin-bottom:8px; font-weight:bold;">
-        <label style="font-size:11px; color:#cbd5e1; margin-bottom:4px;">本文（改行ごとに箇条書きになります）</label>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <label style="font-size:11px; color:#cbd5e1; margin:0;">本文（選択して装飾ボタン）</label>
+          <div style="display:flex; gap:5px;">
+            <button type="button" class="tab-btn" style="padding:3px 8px; font-size:11px; color:#ef4444; border:1px solid rgba(239,68,68,0.4);" onclick="applyTextFormat(${idx}, 'red')">🔴 赤字強調</button>
+            <button type="button" class="tab-btn" style="padding:3px 8px; font-size:11px; font-weight:bold; border:1px solid var(--border);" onclick="applyTextFormat(${idx}, 'b')">B</button>
+            <button type="button" class="tab-btn" style="padding:3px 8px; font-size:11px; text-decoration:underline; border:1px solid var(--border);" onclick="applyTextFormat(${idx}, 'u')">U</button>
+          </div>
+        </div>
         <textarea id="rule-content-${idx}" rows="4" style="font-size:12px; line-height:1.5;">${escapeHtml(sec.content)}</textarea>
       </div>
     `;
   });
   container.innerHTML = html;
+}
+
+// テキストエリアの選択範囲をタグで囲む処理
+function applyTextFormat(idx, type) {
+  const ta = document.getElementById(`rule-content-${idx}`);
+  if (!ta) return;
+
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const sel = ta.value.substring(start, end);
+  if (!sel) {
+    alert("装飾したい文字を選択した状態でボタンを押してください。");
+    return;
+  }
+
+  let tagged = '';
+  if (type === 'red') tagged = `<span class="urgent-highlight">${sel}</span>`;
+  else if (type === 'b') tagged = `<b>${sel}</b>`;
+  else if (type === 'u') tagged = `<u>${sel}</u>`;
+
+  ta.setRangeText(tagged, start, end, 'select');
 }
 
 async function loadRemoteRules() {
@@ -1117,7 +1170,7 @@ async function loadRemoteObstacles() {
   } catch(e) {}
 }
 
-// ユーザー向けセット稼働状況のレンダリング（「⚠️理由:」表記）
+// ユーザー向けセット稼働状況のレンダリング（「⚠️理由：」全角コロン）
 function renderStageGroups() {
   const container = document.getElementById('stage-groups-container');
   if (!container) return;
@@ -1156,7 +1209,7 @@ function renderStageGroups() {
           </div>
           ${hasNote ? `
             <div class="${noteClass}">
-              ⚠️理由:${escapeHtml(item.note)}
+              ⚠️理由：${escapeHtml(item.note)}
             </div>
           ` : ''}
         </div>
