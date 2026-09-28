@@ -1604,6 +1604,7 @@ function renderDaysConfigCards() {
             </label>
           </div>
 
+          <!-- 自車の車種選択 -->
           <div id="car-box-${d}" class="conditional-box hidden">
             <label style="font-size:11px; margin-bottom:4px;">車種（台数把握のため）<span class="required">*</span></label>
             <select class="field-car-type">
@@ -1613,9 +1614,17 @@ function renderDaysConfigCards() {
             </select>
           </div>
 
+          <!-- 乗り合いの代表者名 ＆ 乗り合い車両の車種選択 -->
           <div id="share-box-${d}" class="conditional-box hidden">
             <label style="font-size:11px; margin-bottom:4px;">相乗り代表者（運転者）のお名前<span class="required">*</span></label>
-            <input type="text" class="field-car-leader" placeholder="本名・スペースなしで入力（例：内宮修造）">
+            <input type="text" class="field-car-leader" placeholder="本名・スペースなしで入力（例：内宮修造）" style="margin-bottom:8px;">
+            
+            <label style="font-size:11px; margin-bottom:4px;">相乗り車両の車種<span class="required">*</span></label>
+            <select class="field-carpool-type">
+              <option value="普通車">普通車</option>
+              <option value="軽自動車">軽自動車</option>
+              <option value="その他">その他（バイク等）</option>
+            </select>
           </div>
         </div>
 
@@ -1699,17 +1708,17 @@ async function submitAttendance(e) {
     const transportVal = transportRadio.value;
 
     let carType = "";
+    let carLeader = "";
+
     if (transportVal === "自車") {
       carType = card.querySelector('.field-car-type').value;
-    }
-
-    let carLeader = "";
-    if (transportVal.includes("乗り合い")) {
+    } else if (transportVal.includes("乗り合い")) {
       carLeader = card.querySelector('.field-car-leader').value.trim().replace(/\s+/g, '');
       if (!carLeader) {
         alert(`${formatDateLabel(d)} の相乗り代表者（運転者）のお名前をスペースなしでご記入ください。`);
         return;
       }
+      carType = card.querySelector('.field-carpool-type').value;
     }
 
     const presetTime = card.querySelector('.field-time-preset').value;
@@ -1843,7 +1852,7 @@ function parseCompanionCount(str) {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-// 参加集計データの取得（参加者合計、同伴者合計、総来場者数合計に対応）
+// 参加集計データの取得（自車・乗り合い車両の重複なし正確な台数カウント）
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
@@ -1872,28 +1881,57 @@ async function fetchAdminData() {
     sortedDates.forEach(date => {
       const members = groups[date];
       
+      let companionTotal = 0;
+      const carpoolMap = {};
+      const carpoolCarTypes = {}; // 代表者ごとの車種を保持
+
+      // 車両リスト（自車 ＋ 乗り合い車両を代表者単位でまとめる）
+      const countedCars = [];
+
+      members.forEach(m => {
+        companionTotal += parseCompanionCount(m.companionCount);
+
+        if (m.transport === "自車") {
+          countedCars.push({
+            type: m.carType || "普通車",
+            owner: m.name
+          });
+        }
+
+        if (m.transport.includes("乗り合い") && m.carLeader) {
+          if (!carpoolMap[m.carLeader]) {
+            carpoolMap[m.carLeader] = [];
+            carpoolCarTypes[m.carLeader] = m.carType || "普通車";
+          }
+          carpoolMap[m.carLeader].push(m.name);
+        }
+      });
+
+      // 乗り合い代表者の車両を1台としてカウント（複数人が乗っていても1台）
+      Object.keys(carpoolMap).forEach(leader => {
+        // 自車ですでに本人が登録していなければ追加
+        const alreadyCountedAsOwnCar = countedCars.some(c => c.owner === leader);
+        if (!alreadyCountedAsOwnCar) {
+          countedCars.push({
+            type: carpoolCarTypes[leader] || "普通車",
+            owner: leader
+          });
+        }
+      });
+
       let carsStandard = 0;
       let carsLight = 0;
       let carsOther = 0;
-      let companionTotal = 0;
-      const carpoolMap = {};
 
-      members.forEach(m => {
-        if (m.transport === "自車") {
-          if (m.carType === "普通車") carsStandard++;
-          else if (m.carType === "軽自動車") carsLight++;
-          else carsOther++;
-        }
-        if (m.carLeader) {
-          if (!carpoolMap[m.carLeader]) carpoolMap[m.carLeader] = [];
-          carpoolMap[m.carLeader].push(m.name);
-        }
-        companionTotal += parseCompanionCount(m.companionCount);
+      countedCars.forEach(c => {
+        if (c.type === "普通車") carsStandard++;
+        else if (c.type === "軽自動車") carsLight++;
+        else carsOther++;
       });
 
+      const totalCars = countedCars.length;
       const participantTotal = members.length;
       const grandTotalPeople = participantTotal + companionTotal;
-      const totalCars = carsStandard + carsLight + carsOther;
 
       html += `
         <div class="admin-date-group">
@@ -1915,8 +1953,8 @@ async function fetchAdminData() {
             <div class="carpool-group">
               <div class="carpool-title">🤝 相乗り車両・同乗者リスト</div>
               ${Object.keys(carpoolMap).map(leader => `
-                <div style="margin-bottom:2px;">
-                  ・<b>${escapeHtml(leader)}号車</b> (${carpoolMap[leader].length}名同乗): ${escapeHtml(carpoolMap[leader].join(', '))}
+                <div style="margin-bottom:3px;">
+                  ・<b>${escapeHtml(leader)}号車</b> [${escapeHtml(carpoolCarTypes[leader] || '普通車')}] (${carpoolMap[leader].length}名同乗): ${escapeHtml(carpoolMap[leader].join(', '))}
                 </div>
               `).join('')}
             </div>
@@ -1930,7 +1968,7 @@ async function fetchAdminData() {
         else if (m.transport.includes('バス')) badgeCls = 'transport-bus';
         else if (m.transport.includes('タクシー')) badgeCls = 'transport-taxi';
 
-        const carInfo = m.transport === '自車' && m.carType ? ` (${m.carType})` : '';
+        const carInfo = m.carType ? ` (${m.carType})` : '';
         const hasCompanion = m.companionCount && m.companionCount !== '0名';
         const hasNote = m.note && m.note.trim() !== '';
         const hasProxy = m.proxyName && m.proxyName.trim() !== '';
