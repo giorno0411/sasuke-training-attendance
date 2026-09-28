@@ -11,7 +11,7 @@
     --border: rgba(255, 255, 255, 0.12);
     --text: #f8fafc;
     --text-sub: #94a3b8;
-    --accent: #ef4444;       /* SASUKEレッド */
+    --accent: #ef4444;
     --accent-hover: #dc2626;
     --success: #10b981;
     --warning: #f59e0b;
@@ -1106,14 +1106,12 @@ function toggleProxyInput(checked) {
   group.classList.toggle('hidden', !checked);
 
   if (checked) {
-    // 代理回答ON: 代理入力者欄にログイン中の本人の名前を自動補完
     proxyInput.setAttribute('required', 'required');
     proxyInput.value = authUser;
     nameField.value = '';
     nameField.placeholder = "参加する方のお名前（例：山本太郎）";
     nameField.focus();
   } else {
-    // 代理回答OFF: 参加者氏名にログイン中の名前を復元
     proxyInput.removeAttribute('required');
     proxyInput.value = '';
     nameField.value = authUser;
@@ -1224,7 +1222,7 @@ function applyTextFormat(idx, type) {
 
 async function loadRemoteRules() {
   try {
-    const res = await fetch(GAS_URL + "?type=rules&t=" + Date.now());
+    const res = await fetch(GAS_URL + "?type=rules&t=" + Date.now(), { cache: "no-store" });
     const remoteRules = await res.json();
     if (remoteRules && Array.isArray(remoteRules) && remoteRules.length > 0) {
       ruleSections = remoteRules;
@@ -1270,7 +1268,7 @@ async function saveRuleSettings(e) {
 
 async function loadRemoteObstacles() {
   try {
-    const res = await fetch(GAS_URL + "?type=obstacles&t=" + Date.now());
+    const res = await fetch(GAS_URL + "?type=obstacles&t=" + Date.now(), { cache: "no-store" });
     const remoteList = await res.json();
     if (remoteList && Array.isArray(remoteList) && remoteList.length > 0) {
       const map = {};
@@ -1811,7 +1809,9 @@ async function fetchAdminData() {
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
 
   try {
-    const res = await fetch(GAS_URL + "?t=" + Date.now());
+    const res = await fetch(GAS_URL + "?type=attendance&t=" + new Date().getTime(), {
+      cache: "no-store"
+    });
     const list = await res.json();
 
     if (!list || list.length === 0) {
