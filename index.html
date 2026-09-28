@@ -130,7 +130,7 @@
     background: rgba(11, 15, 25, 0.95);
   }
 
-  /* ★超コンパクトな日程選択バー★ */
+  /* コンパクト日程選択バー */
   .date-bar-input {
     background: rgba(11, 15, 25, 0.75);
     border: 1px solid var(--border);
@@ -165,7 +165,7 @@
     font-weight: 600;
   }
 
-  /* ★中央ポップアップのミニカレンダー★ */
+  /* ミニカレンダーポップアップ */
   .mini-cal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -183,7 +183,7 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 14px;
-    width: 290px; /* 横幅を手のひらサイズに制限 */
+    width: 290px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.7);
   }
   .mini-cal-header {
@@ -240,9 +240,7 @@
     cursor: not-allowed;
     background: transparent;
   }
-  .mini-cal-day.today {
-    border-color: #38bdf8;
-  }
+  .mini-cal-day.today { border-color: #38bdf8; }
   .mini-cal-day.selected {
     background: rgba(239, 68, 68, 0.45) !important;
     border-color: var(--accent) !important;
@@ -268,7 +266,26 @@
     cursor: pointer;
   }
 
-  /* 交通手段 */
+  /* 日程ごとの詳細入力カード */
+  .day-config-card {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .day-config-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #fca5a5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+
   .radio-pill-group {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -278,8 +295,8 @@
     background: rgba(11, 15, 25, 0.75);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 10px 8px;
-    font-size: 13px;
+    padding: 9px 6px;
+    font-size: 12px;
     text-align: center;
     cursor: pointer;
     user-select: none;
@@ -292,26 +309,26 @@
     color: #fca5a5;
   }
 
-  .companion-row {
-    display: grid;
-    grid-template-columns: 100px 1fr;
-    gap: 8px;
-  }
-
   .time-custom-row {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 6px;
-    margin-top: 8px;
+    margin-top: 6px;
   }
 
   .conditional-box {
     margin-top: 8px;
     padding: 10px;
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(11, 15, 25, 0.6);
     border: 1px dashed var(--border);
     border-radius: 8px;
+  }
+
+  .companion-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 8px;
   }
 
   .btn-submit {
@@ -484,13 +501,13 @@
     <div class="card">
       <form id="attendance-form" onsubmit="submitAttendance(event)">
         
-        <!-- 氏名 -->
+        <!-- 氏名（ニックネーム可は削除） -->
         <div class="form-group">
-          <label>参加者氏名（ニックネーム可）<span class="required">*</span></label>
+          <label>参加者氏名<span class="required">*</span></label>
           <input type="text" id="field-name" placeholder="例: 内宮修造" required>
         </div>
 
-        <!-- 参加日程：普段は1行のバーのみ！ -->
+        <!-- 参加日程：コンパクトバー -->
         <div class="form-group">
           <label>参加日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" onclick="openCalendarPopup()">
@@ -499,60 +516,9 @@
           </div>
         </div>
 
-        <!-- 練習参加希望時間 -->
-        <div class="form-group">
-          <label>練習参加希望時間<span class="required">*</span></label>
-          <select id="field-time-preset" onchange="toggleCustomTime(this.value)" required>
-            <option value="終日">終日</option>
-            <option value="午前のみ">午前のみ</option>
-            <option value="午後のみ">午後のみ</option>
-            <option value="custom">時間を指定する (0:00〜24:00)</option>
-          </select>
-          
-          <div id="custom-time-row" class="time-custom-row hidden">
-            <select id="field-time-start"></select>
-            <span style="font-size:12px; color:var(--text-sub);">〜</span>
-            <select id="field-time-end"></select>
-          </div>
-        </div>
-
-        <!-- 交通機関 -->
-        <div class="form-group">
-          <label>現地までの交通機関<span class="required">*</span></label>
-          <div class="radio-pill-group">
-            <label class="radio-pill-label" onclick="selectTransport(this, '自車')">
-              <input type="radio" name="transport" value="自車" required> 🚗 自車
-            </label>
-            <label class="radio-pill-label" onclick="selectTransport(this, '乗り合い')">
-              <input type="radio" name="transport" value="乗り合い（同乗）"> 🤝 乗り合い
-            </label>
-            <label class="radio-pill-label" onclick="selectTransport(this, 'バス')">
-              <input type="radio" name="transport" value="現地までバス"> 🚌 バス
-            </label>
-            <label class="radio-pill-label" onclick="selectTransport(this, 'タクシー')">
-              <input type="radio" name="transport" value="タクシー"> 🚕 タクシー
-            </label>
-            <label class="radio-pill-label" style="grid-column: span 2;" onclick="selectTransport(this, 'その他')">
-              <input type="radio" name="transport" value="その他"> 🚲 その他
-            </label>
-          </div>
-
-          <!-- 自車の場合（軽/普通/他） -->
-          <div id="car-detail-box" class="conditional-box hidden">
-            <label style="font-size:11px; margin-bottom:4px;">車種（台数把握のため）<span class="required">*</span></label>
-            <select id="field-car-type">
-              <option value="普通車">普通車</option>
-              <option value="軽自動車">軽自動車</option>
-              <option value="その他">その他（バイク等）</option>
-            </select>
-          </div>
-
-          <!-- 乗り合いの場合（代表者名） -->
-          <div id="share-detail-box" class="conditional-box hidden">
-            <label style="font-size:11px; margin-bottom:4px;">相乗り代表者（運転者）のお名前<span class="required">*</span></label>
-            <input type="text" id="field-car-leader" placeholder="本名・スペースなしで入力（例: 内宮修造）">
-            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">※代表者の本名をスペースなしでご記入ください。</div>
-          </div>
+        <!-- 日程ごとの動的設定エリア -->
+        <div id="days-config-container">
+          <!-- カレンダーで選んだ日程ごとにカードが動的生成されます -->
         </div>
 
         <!-- お連れ様・同伴者 -->
@@ -676,7 +642,7 @@
 
 </div>
 
-<!-- ★タップしたときだけ画面中央に現れるミニカレンダー★ -->
+<!-- ミニカレンダーポップアップ -->
 <div id="cal-popup-modal" class="mini-cal-overlay hidden" onclick="handleCalOverlayClick(event)">
   <div class="mini-cal-box" onclick="event.stopPropagation()">
     <div class="mini-cal-header">
@@ -701,7 +667,7 @@
   </div>
 </div>
 
-<!-- 管理者認証モーダル（英数字キーボード強制） -->
+<!-- 管理者認証モーダル -->
 <div id="admin-modal" class="modal-overlay hidden">
   <div class="modal-content">
     <h3 style="margin-top:0; font-size:15px;">🔒 管理者ログイン</h3>
@@ -730,7 +696,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   calYear = now.getFullYear();
   calMonth = now.getMonth();
-  generateTimeDropdowns();
   updateTriggerDisplay();
 });
 
@@ -742,6 +707,7 @@ function openCalendarPopup() {
 function closeCalendarPopup() {
   document.getElementById('cal-popup-modal').classList.add('hidden');
   updateTriggerDisplay();
+  renderDaysConfigCards();
 }
 function handleCalOverlayClick(e) {
   closeCalendarPopup();
@@ -833,32 +799,106 @@ function updateTriggerDisplay() {
   display.innerHTML = arr.map(d => `<span class="date-selected-pill">${formatDateLabel(d)}</span>`).join('');
 }
 
-function generateTimeDropdowns() {
-  const startSel = document.getElementById('field-time-start');
-  const endSel = document.getElementById('field-time-end');
-  startSel.innerHTML = '';
-  endSel.innerHTML = '';
+// 日程ごとの詳細入力カードを動的生成
+function renderDaysConfigCards() {
+  const container = document.getElementById('days-config-container');
+  const arr = Array.from(selectedDates).sort();
 
-  for (let h = 0; h <= 24; h++) {
-    const t = `${h}:00`;
-    startSel.innerHTML += `<option value="${t}">${t}</option>`;
-    endSel.innerHTML += `<option value="${t}">${t}</option>`;
+  if (arr.length === 0) {
+    container.innerHTML = '';
+    return;
   }
-  startSel.value = "9:00";
-  endSel.value = "17:00";
+
+  let html = '';
+  arr.forEach((d, idx) => {
+    html += `
+      <div class="day-config-card" data-date="${d}">
+        <div class="day-config-title">
+          <span>📅 ${formatDateLabel(d)} の参加情報</span>
+        </div>
+
+        <!-- 参加時間 -->
+        <div class="form-group" style="margin-bottom:12px;">
+          <label style="font-size:11px;">参加希望時間<span class="required">*</span></label>
+          <select class="field-time-preset" onchange="toggleDayCustomTime('${d}', this.value)" required>
+            <option value="終日">終日</option>
+            <option value="午前のみ">午前のみ</option>
+            <option value="午後のみ">午後のみ</option>
+            <option value="custom">時間を指定する (0:00〜24:00)</option>
+          </select>
+          <div id="custom-time-row-${d}" class="time-custom-row hidden">
+            <select class="field-time-start">${getTimeOptions("9:00")}</select>
+            <span style="font-size:12px; color:var(--text-sub);">〜</span>
+            <select class="field-time-end">${getTimeOptions("17:00")}</select>
+          </div>
+        </div>
+
+        <!-- 交通機関 -->
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:11px;">交通機関<span class="required">*</span></label>
+          <div class="radio-pill-group">
+            <label class="radio-pill-label" onclick="selectDayTransport(this, '${d}', '自車')">
+              <input type="radio" name="transport-${d}" value="自車" required> 🚗 自車
+            </label>
+            <label class="radio-pill-label" onclick="selectDayTransport(this, '${d}', '乗り合い')">
+              <input type="radio" name="transport-${d}" value="乗り合い（同乗）"> 🤝 乗り合い
+            </label>
+            <label class="radio-pill-label" onclick="selectDayTransport(this, '${d}', 'バス')">
+              <input type="radio" name="transport-${d}" value="現地までバス"> 🚌 バス
+            </label>
+            <label class="radio-pill-label" onclick="selectDayTransport(this, '${d}', 'タクシー')">
+              <input type="radio" name="transport-${d}" value="タクシー"> 🚕 タクシー
+            </label>
+            <label class="radio-pill-label" style="grid-column: span 2;" onclick="selectDayTransport(this, '${d}', 'その他')">
+              <input type="radio" name="transport-${d}" value="その他"> 🚲 その他
+            </label>
+          </div>
+
+          <!-- 自車の場合（軽/普通/他） -->
+          <div id="car-box-${d}" class="conditional-box hidden">
+            <label style="font-size:11px; margin-bottom:4px;">車種（台数把握のため）<span class="required">*</span></label>
+            <select class="field-car-type">
+              <option value="普通車">普通車</option>
+              <option value="軽自動車">軽自動車</option>
+              <option value="その他">その他（バイク等）</option>
+            </select>
+          </div>
+
+          <!-- 乗り合いの場合（代表者名） -->
+          <div id="share-box-${d}" class="conditional-box hidden">
+            <label style="font-size:11px; margin-bottom:4px;">相乗り代表者（運転者）のお名前<span class="required">*</span></label>
+            <input type="text" class="field-car-leader" placeholder="本名・スペースなしで入力（例: 内宮修造）">
+          </div>
+        </div>
+
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
 }
 
-function toggleCustomTime(val) {
-  const customRow = document.getElementById('custom-time-row');
+function getTimeOptions(selectedVal) {
+  let opts = '';
+  for (let h = 0; h <= 24; h++) {
+    const t = `${h}:00`;
+    opts += `<option value="${t}" ${t === selectedVal ? 'selected' : ''}>${t}</option>`;
+  }
+  return opts;
+}
+
+function toggleDayCustomTime(date, val) {
+  const customRow = document.getElementById(`custom-time-row-${date}`);
   customRow.classList.toggle('hidden', val !== 'custom');
 }
 
-function selectTransport(labelEl, type) {
-  document.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
+function selectDayTransport(labelEl, date, type) {
+  const parent = labelEl.closest('.form-group');
+  parent.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
   labelEl.classList.add('checked');
 
-  const carBox = document.getElementById('car-detail-box');
-  const shareBox = document.getElementById('share-detail-box');
+  const carBox = document.getElementById(`car-box-${date}`);
+  const shareBox = document.getElementById(`share-box-${date}`);
 
   carBox.classList.toggle('hidden', type !== '自車');
   shareBox.classList.toggle('hidden', type !== '乗り合い');
@@ -873,37 +913,64 @@ function switchTab(tab) {
   document.getElementById('tab-btn-column').classList.toggle('active', tab === 'column');
 }
 
+// 送信処理（各日程ごとの設定をまとめて送信）
 async function submitAttendance(e) {
   e.preventDefault();
 
-  const checkedDates = Array.from(selectedDates).sort();
-  if (checkedDates.length === 0) {
+  const arr = Array.from(selectedDates).sort();
+  if (arr.length === 0) {
     alert("参加日程を1つ以上選択してください。");
     openCalendarPopup();
     return;
   }
 
-  const transportEl = document.querySelector('input[name="transport"]:checked');
-  const transportVal = transportEl ? transportEl.value : "";
+  const nameVal = document.getElementById('field-name').value.trim();
+  const companionCount = document.getElementById('field-companion-count').value;
+  const companionNames = document.getElementById('field-companion-names').value.trim() || "なし";
+  const note = document.getElementById('field-note').value.trim();
 
-  let carType = "";
-  if (transportVal === "自車") {
-    carType = document.getElementById('field-car-type').value;
-  }
+  // 日程ごとのデータを収集
+  const dayConfigs = [];
+  for (const d of arr) {
+    const card = document.querySelector(`.day-config-card[data-date="${d}"]`);
+    if (!card) continue;
 
-  let carLeader = "";
-  if (transportVal.includes("乗り合い")) {
-    carLeader = document.getElementById('field-car-leader').value.trim().replace(/\s+/g, '');
-    if (!carLeader) {
-      alert("相乗り代表者（運転者）のお名前をスペースなしでご記入ください。");
+    const transportRadio = card.querySelector(`input[name="transport-${d}"]:checked`);
+    if (!transportRadio) {
+      alert(`${formatDateLabel(d)} の交通機関を選択してください。`);
       return;
     }
-  }
+    const transportVal = transportRadio.value;
 
-  const presetTime = document.getElementById('field-time-preset').value;
-  let finalTime = presetTime;
-  if (presetTime === 'custom') {
-    finalTime = `${document.getElementById('field-time-start').value}〜${document.getElementById('field-time-end').value}`;
+    let carType = "";
+    if (transportVal === "自車") {
+      carType = card.querySelector('.field-car-type').value;
+    }
+
+    let carLeader = "";
+    if (transportVal.includes("乗り合い")) {
+      carLeader = card.querySelector('.field-car-leader').value.trim().replace(/\s+/g, '');
+      if (!carLeader) {
+        alert(`${formatDateLabel(d)} の相乗り代表者（運転者）のお名前をスペースなしでご記入ください。`);
+        return;
+      }
+    }
+
+    const presetTime = card.querySelector('.field-time-preset').value;
+    let finalTime = presetTime;
+    if (presetTime === 'custom') {
+      const s = card.querySelector('.field-time-start').value;
+      const end = card.querySelector('.field-time-end').value;
+      finalTime = `${s}〜${end}`;
+    }
+
+    dayConfigs.push({
+      date: d,
+      time: finalTime,
+      transport: transportVal,
+      carType: carType,
+      carLeader: carLeader
+    });
   }
 
   const btn = document.getElementById('btn-submit-form');
@@ -911,15 +978,11 @@ async function submitAttendance(e) {
   btn.innerText = "送信中...";
 
   const payload = {
-    name: document.getElementById('field-name').value.trim(),
-    dates: checkedDates,
-    time: finalTime,
-    transport: transportVal,
-    carType: carType,
-    carLeader: carLeader,
-    companionCount: document.getElementById('field-companion-count').value,
-    companionNames: document.getElementById('field-companion-names').value.trim() || "なし",
-    note: document.getElementById('field-note').value.trim()
+    name: nameVal,
+    days: dayConfigs,
+    companionCount: companionCount,
+    companionNames: companionNames,
+    note: note
   };
 
   try {
@@ -934,10 +997,7 @@ async function submitAttendance(e) {
     document.getElementById('attendance-form').reset();
     selectedDates.clear();
     updateTriggerDisplay();
-    document.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
-    document.getElementById('car-detail-box').classList.add('hidden');
-    document.getElementById('share-detail-box').classList.add('hidden');
-    document.getElementById('custom-time-row').classList.add('hidden');
+    renderDaysConfigCards();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) {
     alert("送信に失敗しました。電波環境を確認してください。");
