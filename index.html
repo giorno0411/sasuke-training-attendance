@@ -132,6 +132,29 @@
     background: rgba(11, 15, 25, 0.95);
   }
 
+  /* 認証済みユーザーバナー */
+  .auth-user-bar {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+  .auth-user-name {
+    font-weight: bold;
+    color: #34d399;
+  }
+  .auth-user-reauth {
+    color: #94a3b8;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 11px;
+  }
+
   /* 代理回答切り替えスイッチ */
   .proxy-toggle-wrap {
     display: flex;
@@ -401,7 +424,7 @@
   .column-body ul { 
     margin: 0; 
     padding-left: 0; 
-    list-style: none; /* 標準の大きな黒丸を解除 */
+    list-style: none;
   }
   .column-body li { 
     position: relative;
@@ -417,7 +440,7 @@
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background-color: var(--text-sub); /* 直径4pxのスリムなドット */
+    background-color: var(--text-sub);
   }
 
   .urgent-highlight {
@@ -659,8 +682,8 @@
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.75);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -674,13 +697,26 @@
     padding: 20px;
     width: 100%;
     max-width: 320px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
   }
 
   .hidden { display: none !important; }
 </style>
 </head>
 <body>
+
+<!-- 個別認証ゲートモーダル（未認証時に全画面ブロック） -->
+<div id="gate-modal" class="modal-overlay hidden">
+  <div class="modal-content" style="text-align:center;">
+    <div style="font-size:28px; margin-bottom:8px;">🔒</div>
+    <h3 style="margin:0 0 6px 0; font-size:16px;">関係者限定アクセス</h3>
+    <p style="font-size:12px; color:var(--text-sub); margin-bottom:14px; line-height:1.5;">
+      本フォームは招待メンバー専用です。<br>案内された「個別コード」を入力してください。
+    </p>
+    <input type="password" id="gate-code-input" inputmode="numeric" autocomplete="off" placeholder="個別コードを入力" style="margin-bottom:12px; text-align:center;">
+    <button type="button" class="btn-submit" id="btn-gate-verify" style="margin:0; padding:10px;" onclick="verifyGateCode()">認証して入場 ↵</button>
+  </div>
+</div>
 
 <div class="container">
   <header>
@@ -698,6 +734,12 @@
   <div id="view-form">
     <div class="submit-success-box" id="success-msg">
       ✓ 出欠情報を送信しました！回答ありがとうございます。
+    </div>
+
+    <!-- 認証済みメンバー表示バナー -->
+    <div class="auth-user-bar" id="auth-banner" style="display:none;">
+      <span>👤 ログイン中: <span class="auth-user-name" id="auth-display-name"></span></span>
+      <span class="auth-user-reauth" onclick="resetUserAuth()">コード再入力</span>
     </div>
 
     <div class="card">
@@ -883,7 +925,7 @@
 // ★Google Apps ScriptのURL（ご自身のURLに差し替えてください）
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
 
-// パスワード設定（英数字）
+// 管理者PIN設定
 const ADMIN_PIN = "7978815";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
@@ -969,6 +1011,7 @@ let calYear, calMonth;
 const selectedDates = new Set();
 
 window.addEventListener('DOMContentLoaded', () => {
+  checkGateAccess();
   const now = new Date();
   calYear = now.getFullYear();
   calMonth = now.getMonth();
@@ -979,17 +1022,102 @@ window.addEventListener('DOMContentLoaded', () => {
   loadRemoteRules();
 });
 
+// 個別コードによるアクセスチェック
+function checkGateAccess() {
+  const savedName = localStorage.getItem('uchimiya_auth_user');
+  if (savedName) {
+    applyAuthenticatedUser(savedName);
+    return;
+  }
+  document.getElementById('gate-modal').classList.remove('hidden');
+  setTimeout(() => {
+    const inp = document.getElementById('gate-code-input');
+    if (inp) inp.focus();
+  }, 150);
+}
+
+// GASと照合してコードを検証
+async function verifyGateCode() {
+  const inputEl = document.getElementById('gate-code-input');
+  const btn = document.getElementById('btn-gate-verify');
+  const code = inputEl.value.trim();
+
+  if (!code) {
+    alert("コードを入力してください。");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = "認証中...";
+
+  try {
+    const res = await fetch(`${GAS_URL}?type=verify_code&code=${encodeURIComponent(code)}&t=${Date.now()}`);
+    const data = await res.json();
+
+    if (data.valid && data.name) {
+      localStorage.setItem('uchimiya_auth_user', data.name);
+      localStorage.setItem('uchimiya_auth_code', code);
+      applyAuthenticatedUser(data.name);
+      document.getElementById('gate-modal').classList.add('hidden');
+    } else {
+      alert(data.message || "認証に失敗しました。正しいコードを入力してください。");
+    }
+  } catch(e) {
+    alert("通信エラーが発生しました。電波の良い場所でお試しください。");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "認証して入場 ↵";
+  }
+}
+
+// 認証成功時のユーザー設定
+function applyAuthenticatedUser(name) {
+  const nameField = document.getElementById('field-name');
+  const proxyCheckbox = document.getElementById('field-is-proxy');
+
+  if (!proxyCheckbox.checked) {
+    nameField.value = name;
+  }
+
+  const banner = document.getElementById('auth-banner');
+  const displayEl = document.getElementById('auth-display-name');
+  if (banner && displayEl) {
+    displayEl.innerText = name;
+    banner.style.display = 'flex';
+  }
+}
+
+// コードの再入力（別端末・別メンバーへの切り替え）
+function resetUserAuth() {
+  if (confirm("認証情報をリセットして、別のコードを入力しますか？")) {
+    localStorage.removeItem('uchimiya_auth_user');
+    localStorage.removeItem('uchimiya_auth_code');
+    location.reload();
+  }
+}
+
 // 代理回答入力枠の切り替え
 function toggleProxyInput(checked) {
   const group = document.getElementById('proxy-name-group');
-  const input = document.getElementById('field-proxy-name');
+  const proxyInput = document.getElementById('field-proxy-name');
+  const nameField = document.getElementById('field-name');
+  const authUser = localStorage.getItem('uchimiya_auth_user') || "";
+
   group.classList.toggle('hidden', !checked);
+
   if (checked) {
-    input.setAttribute('required', 'required');
-    input.focus();
+    // 代理回答ON: 代理入力者欄にログイン中の本人の名前を自動補完
+    proxyInput.setAttribute('required', 'required');
+    proxyInput.value = authUser;
+    nameField.value = '';
+    nameField.placeholder = "参加する方のお名前（例：山本太郎）";
+    nameField.focus();
   } else {
-    input.removeAttribute('required');
-    input.value = '';
+    // 代理回答OFF: 参加者氏名にログイン中の名前を復元
+    proxyInput.removeAttribute('required');
+    proxyInput.value = '';
+    nameField.value = authUser;
+    nameField.placeholder = "例：内宮修造";
   }
 }
 
@@ -997,12 +1125,10 @@ function toggleProxyInput(checked) {
 function formatRuleItem(text, title) {
   let str = escapeHtml(text);
 
-  // HTMLタグを復元して装飾
   str = str.replace(/&lt;span class=&quot;urgent-highlight&quot;&gt;(.*?)&lt;\/span&gt;/g, '<span class="urgent-highlight">$1</span>');
   str = str.replace(/&lt;b&gt;(.*?)&lt;\/b&gt;/g, '<b>$1</b>');
   str = str.replace(/&lt;u&gt;(.*?)&lt;\/u&gt;/g, '<u>$1</u>');
 
-  // 指定の装飾キーワード
   str = str.replace(
     /使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。/g,
     '<span class="urgent-highlight">使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。</span>'
@@ -1016,7 +1142,6 @@ function formatRuleItem(text, title) {
     '<span class="urgent-highlight">ぜひ積極的なお手伝いをお願いいたします！</span>'
   );
 
-  // 駐車レイアウト画像ボタン（「🗺️ 駐車レイアウト」）
   if (title.includes("駐車場") && str.includes("駐車レイアウト")) {
     str += `
       <div style="margin: 10px 0 6px 0;">
@@ -1030,7 +1155,6 @@ function formatRuleItem(text, title) {
   return str;
 }
 
-// ユーザー向け注意事項の描画
 function renderRulesDisplay() {
   const container = document.getElementById('rules-display-container');
   if (!container) return;
@@ -1052,7 +1176,6 @@ function renderRulesDisplay() {
   container.innerHTML = html;
 }
 
-// 管理者画面の注意事項エディター描画（赤字強調・太字・下線の3種）
 function renderAdminRulesEditor() {
   const container = document.getElementById('admin-rules-edit-list');
   if (!container) return;
@@ -1079,7 +1202,6 @@ function renderAdminRulesEditor() {
   container.innerHTML = html;
 }
 
-// テキストエリアの選択範囲をタグで囲む処理
 function applyTextFormat(idx, type) {
   const ta = document.getElementById(`rule-content-${idx}`);
   if (!ta) return;
@@ -1170,7 +1292,6 @@ async function loadRemoteObstacles() {
   } catch(e) {}
 }
 
-// ユーザー向けセット稼働状況のレンダリング（「⚠️理由：」全角コロン）
 function renderStageGroups() {
   const container = document.getElementById('stage-groups-container');
   if (!container) return;
@@ -1318,7 +1439,6 @@ function switchAdminSubTab(sub) {
   }
 }
 
-// ミニカレンダー開閉
 function openCalendarPopup() {
   renderCalendar();
   document.getElementById('cal-popup-modal').classList.remove('hidden');
@@ -1796,7 +1916,6 @@ async function fetchAdminData() {
   }
 }
 
-// 1件削除
 async function deleteSingleAttendance(name, date) {
   if (!confirm(`「${name}」さんの ${formatDateLabel(date)} の回答を削除しますか？`)) {
     return;
@@ -1819,7 +1938,6 @@ async function deleteSingleAttendance(name, date) {
   }
 }
 
-// 全件クリア
 async function clearAllAttendance() {
   if (!confirm("【警告】本当にすべての出欠回答データを削除しますか？\n（この操作は元に戻せません）")) {
     return;
