@@ -752,6 +752,7 @@
         <div class="column-body">
           <ul>
             <li>合トレメンバー確定後、当日のスケジュール共有や事務連絡用に、グループラインを作成させていただきます。</li>
+            <li>出欠の代理回答は可能です。ただし、本フォームは関係者限定となりますので、招待されていない方へのリンク転送・共有はご遠慮ください。</li>
           </ul>
         </div>
       </div>
@@ -920,7 +921,7 @@ window.addEventListener('DOMContentLoaded', () => {
   calMonth = now.getMonth();
   updateTriggerDisplay();
   renderStageGroups();
-  loadRemoteObstacles(); // 起動時に最新の稼働状況をGASから自動読み込み
+  loadRemoteObstacles();
 });
 
 // GASから最新のセット稼働状況を読み込み
@@ -989,7 +990,7 @@ function renderStageGroups() {
           </div>
           ${hasNote ? `
             <div class="${noteClass}">
-              ⚠️ <b>状況説明:</b> ${escapeHtml(item.note)}
+              ⚠️ <b>状況:</b> ${escapeHtml(item.note)}
             </div>
           ` : ''}
         </div>
