@@ -923,7 +923,7 @@
 
 <script>
 // ★Google Apps ScriptのURL（ご自身のURLに差し替えてください）
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzxxxxxx/exec";
 
 // 管理者PIN設定
 const ADMIN_PIN = "7978815";
@@ -1917,35 +1917,35 @@ async function fetchAdminData() {
   }
 }
 
-// 1件削除（rowIndex付きで送信し、1秒待機してから最新化）
+// 1件削除（GET通信で直接行番号を消去）
 async function deleteSingleAttendance(name, date, rowIndex) {
   if (!confirm(`「${name}」さんの ${formatDateLabel(date)} の回答を削除しますか？`)) {
     return;
   }
+  
+  if (!rowIndex || rowIndex <= 1) {
+    alert("対象の行番号が取得できませんでした。最新化してから再度お試しください。");
+    return;
+  }
+
   try {
-    await fetch(GAS_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({
-        action: "delete_single_attendance",
-        name: name,
-        date: date,
-        rowIndex: rowIndex
-      })
-    });
-    
-    // スプレッドシート側の行削除完了を待ってから再描画
-    setTimeout(() => {
-      alert("削除しました。");
+    const url = `${GAS_URL}?type=delete_single&rowIndex=${rowIndex}&t=${Date.now()}`;
+    const res = await fetch(url, { cache: "no-store" });
+    const data = await res.json();
+
+    if (data.status === "deleted") {
+      alert("削除が完了しました！");
       fetchAdminData();
-    }, 1200);
+    } else {
+      alert("削除に失敗しました。行が存在しない可能性があります。");
+      fetchAdminData();
+    }
   } catch(e) {
-    alert("削除に失敗しました。");
+    alert("通信エラーが発生しました。");
   }
 }
 
-// 全件クリア
+// 全件クリア（GET通信）
 async function clearAllAttendance() {
   if (!confirm("【警告】本当にすべての出欠回答データを削除しますか？\n（この操作は元に戻せません）")) {
     return;
@@ -1955,19 +1955,16 @@ async function clearAllAttendance() {
   }
 
   try {
-    await fetch(GAS_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({
-        action: "clear_all_attendance"
-      })
-    });
-    
-    setTimeout(() => {
+    const url = `${GAS_URL}?type=clear_all&t=${Date.now()}`;
+    const res = await fetch(url, { cache: "no-store" });
+    const data = await res.json();
+
+    if (data.status === "cleared") {
       alert("すべての出欠回答データを消去しました。");
       fetchAdminData();
-    }, 1200);
+    } else {
+      alert("全件削除に失敗しました。");
+    }
   } catch(e) {
     alert("全件削除に失敗しました。");
   }
