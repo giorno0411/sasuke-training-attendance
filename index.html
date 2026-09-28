@@ -382,6 +382,7 @@
   .column-body li { margin-bottom: 8px; }
   .column-body li:last-child { margin-bottom: 0; }
 
+  /* 強調用クラス（赤字・太字・下線） */
   .urgent-highlight {
     color: #ef4444;
     font-weight: 800;
@@ -501,7 +502,7 @@
     <div class="card">
       <form id="attendance-form" onsubmit="submitAttendance(event)">
         
-        <!-- 氏名（ニックネーム可は削除） -->
+        <!-- 参加者氏名 -->
         <div class="form-group">
           <label>参加者氏名<span class="required">*</span></label>
           <input type="text" id="field-name" placeholder="例: 内宮修造" required>
@@ -517,9 +518,7 @@
         </div>
 
         <!-- 日程ごとの動的設定エリア -->
-        <div id="days-config-container">
-          <!-- カレンダーで選んだ日程ごとにカードが動的生成されます -->
-        </div>
+        <div id="days-config-container"></div>
 
         <!-- お連れ様・同伴者 -->
         <div class="form-group">
@@ -533,14 +532,14 @@
               <option value="4名">4名</option>
               <option value="5名以上">5名以上</option>
             </select>
-            <input type="text" id="field-companion-names" placeholder="人名または団体名（例: 家族、なし）">
+            <input type="text" id="field-companion-names" placeholder="人名または団体名（例: 家族、トレーナー）">
           </div>
         </div>
 
         <!-- 備考・その他ご要望 -->
         <div class="form-group">
           <label>備考・その他ご要望</label>
-          <textarea id="field-note" rows="2" placeholder="遅刻早退、その他ご要望があればご記入ください"></textarea>
+          <textarea id="field-note" rows="2" placeholder="その他ご要望があればご記入ください。"></textarea>
         </div>
 
         <button type="submit" class="btn-submit" id="btn-submit-form">出欠を送信する ↵</button>
@@ -552,6 +551,7 @@
   <div id="view-column" class="hidden">
     <div class="card">
       
+      <!-- 👟 シューズ・服装について -->
       <div class="column-section">
         <div class="column-title">👟 シューズ・服装について</div>
         <div class="column-body">
@@ -562,6 +562,7 @@
         </div>
       </div>
 
+      <!-- ⚠️ 安全・怪我の防止 -->
       <div class="column-section">
         <div class="column-title">⚠️ 安全・怪我の防止</div>
         <div class="column-body">
@@ -573,17 +574,19 @@
         </div>
       </div>
 
+      <!-- 📦 備品について -->
       <div class="column-section">
         <div class="column-title">📦 備品について</div>
         <div class="column-body">
           <ul>
-            <li>チョークや松脂スプレーなどの消耗品は、各自でご持参いただけると大変助かります。（消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます）</li>
+            <li>チョークや松脂スプレーなどの消耗品は、各自でご持参いただけると大変助かります。<span class="urgent-highlight">※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。</span></li>
             <li>現地のプロテクターを使用する際は、必ず正しい手順にて装着してください。（例：膝プロテクターは靴を脱いでから着用する）</li>
             <li>テーピングや衣類などの忘れ物が非常に多いため、合トレ終了の1時間ほど前から余裕を持って片付け始めることを推奨します。</li>
           </ul>
         </div>
       </div>
 
+      <!-- 🚗 駐車場・アクセスルール -->
       <div class="column-section">
         <div class="column-title">🚗 駐車場・アクセスルール</div>
         <div class="column-body">
@@ -600,6 +603,7 @@
         </div>
       </div>
 
+      <!-- 🧹 施設利用のマナー -->
       <div class="column-section">
         <div class="column-title">🧹 施設利用のマナー</div>
         <div class="column-body">
@@ -614,12 +618,12 @@
         </div>
       </div>
 
+      <!-- 📌 その他 -->
       <div class="column-section">
         <div class="column-title">📌 その他</div>
         <div class="column-body">
           <ul>
-            <li>合トレメンバー確定後、グループラインを作成させていただきます。<br>
-            当日のスケジュールや事務的な連絡はそちらにて共有させていただきますので、よろしくお願いいたします。</li>
+            <li>合トレメンバー確定後、当日のスケジュール共有や事務連絡用に、グループラインを作成させていただきます。</li>
           </ul>
         </div>
       </div>
@@ -929,7 +933,6 @@ async function submitAttendance(e) {
   const companionNames = document.getElementById('field-companion-names').value.trim() || "なし";
   const note = document.getElementById('field-note').value.trim();
 
-  // 日程ごとのデータを収集
   const dayConfigs = [];
   for (const d of arr) {
     const card = document.querySelector(`.day-config-card[data-date="${d}"]`);
