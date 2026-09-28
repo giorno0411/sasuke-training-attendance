@@ -364,7 +364,7 @@
   .column-title {
     font-size: 14px;
     font-weight: bold;
-    color: #ffffff; /* 白色に変更 */
+    color: #ffffff;
     border-left: 3px solid var(--accent);
     padding-left: 8px;
     margin-bottom: 8px;
@@ -532,7 +532,7 @@
               <option value="4名">4名</option>
               <option value="5名以上">5名以上</option>
             </select>
-            <input type="text" id="field-companion-names" placeholder="人名または団体名（例: 家族、トレーナー）">
+            <input type="text" id="field-companion-names" placeholder="例: 家族、トレーナー">
           </div>
         </div>
 
@@ -547,22 +547,11 @@
     </div>
   </div>
 
-  <!-- 注意事項ページ -->
+  <!-- 注意事項ページ（指定順） -->
   <div id="view-column" class="hidden">
     <div class="card">
       
-      <!-- 👟 シューズ・服装について -->
-      <div class="column-section">
-        <div class="column-title">👟 シューズ・服装について</div>
-        <div class="column-body">
-          <ul>
-            <li>パーク内は砂が多く、靴やウェア等が汚れやすい環境です。練習着とは別に、替えの靴・靴下・着替えをご持参いただくことを強く推奨します。</li>
-            <li>「そり立つ壁」の滑り止めシート等、一部のエリアでは靴底（ソール）が激しく摩耗する可能性がありますので、練習用シューズの着用をおすすめします。</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- ⚠️ 安全・怪我の防止 -->
+      <!-- 1. ⚠️ 安全・怪我の防止 -->
       <div class="column-section">
         <div class="column-title">⚠️ 安全・怪我の防止</div>
         <div class="column-body">
@@ -574,19 +563,7 @@
         </div>
       </div>
 
-      <!-- 📦 備品について -->
-      <div class="column-section">
-        <div class="column-title">📦 備品について</div>
-        <div class="column-body">
-          <ul>
-            <li>チョークや松脂スプレー等の消耗品は、各自でご持参いただけると大変助かります。<span class="urgent-highlight">※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。</span></li>
-            <li>現地のプロテクターを使用する際は、必ず正しい手順にて装着してください。（例：膝プロテクターは靴を脱いでから着用する）</li>
-            <li>テーピングや衣類等の忘れ物が非常に多いため、合トレ終了の1時間ほど前から余裕を持って片付け始めることを推奨します。</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 🚗 駐車場・アクセスルール -->
+      <!-- 2. 🚗 駐車場・アクセスルール -->
       <div class="column-section">
         <div class="column-title">🚗 駐車場・アクセスルール</div>
         <div class="column-body">
@@ -603,7 +580,30 @@
         </div>
       </div>
 
-      <!-- 🧹 施設利用のマナー -->
+      <!-- 3. 👟 シューズ・服装について -->
+      <div class="column-section">
+        <div class="column-title">👟 シューズ・服装について</div>
+        <div class="column-body">
+          <ul>
+            <li>パーク内は砂が多く、靴やウェア等が汚れやすい環境です。練習着とは別に、替えの靴・靴下・着替えをご持参いただくことを強く推奨します。</li>
+            <li>「そり立つ壁」の滑り止めシート等、一部のエリアでは靴底（ソール）が激しく摩耗する可能性がありますので、練習用シューズの着用をおすすめします。</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 4. 📦 備品について -->
+      <div class="column-section">
+        <div class="column-title">📦 備品について</div>
+        <div class="column-body">
+          <ul>
+            <li>チョークや松脂スプレー等の消耗品は、各自でご持参いただけると大変助かります。<span class="urgent-highlight">※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。</span></li>
+            <li>現地のプロテクターを使用する際は、必ず正しい手順にて装着してください。（例：膝プロテクターは靴を脱いでから着用する）</li>
+            <li>テーピングや衣類等の忘れ物が非常に多いため、合トレ終了の1時間ほど前から余裕を持って片付け始めることを推奨します。</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 5. 🧹 施設利用のマナー -->
       <div class="column-section">
         <div class="column-title">🧹 施設利用のマナー</div>
         <div class="column-body">
@@ -618,7 +618,7 @@
         </div>
       </div>
 
-      <!-- 📌 その他 -->
+      <!-- 6. 📌 その他 -->
       <div class="column-section">
         <div class="column-title">📌 その他</div>
         <div class="column-body">
@@ -1116,7 +1116,7 @@ async function fetchAdminData() {
           </div>
 
           <div class="admin-card-stats">
-            <span>🚗 車両計: <span class="car-stat-badge">${totalCars}台</span></span>
+            <span>🚗 車料計: <span class="car-stat-badge">${totalCars}台</span></span>
             <span>(普通: ${carsStandard}台 / 軽: ${carsLight}台${carsOther > 0 ? ` / 他: ${carsOther}台` : ''})</span>
           </div>
 
