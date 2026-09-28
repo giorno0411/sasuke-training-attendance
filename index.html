@@ -392,9 +392,7 @@
   }
 
   /* セット稼働状況カードスタイル */
-  .stage-section {
-    margin-bottom: 18px;
-  }
+  .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
     font-weight: 800;
@@ -455,7 +453,6 @@
     color: #f87171;
     border: 1px solid rgba(239, 68, 68, 0.3);
   }
-  /* 稼働停止時の理由・説明文エリア */
   .obstacle-note-box {
     font-size: 11px;
     line-height: 1.45;
@@ -470,6 +467,28 @@
   }
 
   /* 管理者画面 */
+  .admin-subnav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .admin-sub-btn {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+    padding: 7px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .admin-sub-btn.active {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: var(--accent);
+    color: #fca5a5;
+  }
+
   .admin-date-group { margin-bottom: 22px; }
   .admin-date-header {
     display: flex;
@@ -533,6 +552,35 @@
     font-size: 12px;
   }
   .carpool-title { font-weight: bold; color: #34d399; margin-bottom: 4px; }
+
+  /* 管理者用セット編集カード */
+  .admin-obs-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .admin-obs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .admin-obs-name {
+    font-size: 13px;
+    font-weight: bold;
+    color: #f8fafc;
+  }
+  .admin-obs-select {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    background: #0f172a;
+    border: 1px solid var(--border);
+    color: #fff;
+    width: auto;
+  }
 
   /* 認証モーダル */
   .modal-overlay {
@@ -725,16 +773,43 @@
     </div>
   </div>
 
-  <!-- 管理者専用閲覧画面 -->
+  <!-- 4. 管理者専用画面（出欠集計 ＆ セット稼働編集） -->
   <div id="view-admin" class="hidden">
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h2 style="font-size:16px; margin:0;">🔒 出欠状況・車両集計</h2>
-        <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="fetchAdminData()">🔄 最新化</button>
+      
+      <!-- 管理者サブラビゲーション -->
+      <div class="admin-subnav">
+        <button class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 出欠状況・車両集計</button>
+        <button class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット稼働設定</button>
       </div>
-      <div id="admin-data-container">
-        <div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>
+
+      <!-- サブタブ1: 出欠集計 -->
+      <div id="admin-subview-attendance">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="font-size:15px; margin:0;">🔒 出欠状況・車両集計</h2>
+          <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="fetchAdminData()">🔄 最新化</button>
+        </div>
+        <div id="admin-data-container">
+          <div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>
+        </div>
       </div>
+
+      <!-- サブタブ2: セット稼働設定 -->
+      <div id="admin-subview-obstacles" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="font-size:15px; margin:0;">⚙️ セット稼働状況の編集</h2>
+          <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="loadRemoteObstacles()">🔄 再読込</button>
+        </div>
+        <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
+          ステータスや停止時の理由・説明文を入力し、一番下の「変更を保存」を押してください。
+        </p>
+
+        <form onsubmit="saveObstacleSettings(event)">
+          <div id="admin-obstacle-edit-list"></div>
+          <button type="submit" class="btn-submit" id="btn-save-obs" style="margin-top:14px;">💾 セット稼働状況を保存する</button>
+        </form>
+      </div>
+
     </div>
   </div>
 
@@ -787,53 +862,51 @@ const ADMIN_PIN = "7978815";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 
-// ステージ別セットデータ
-// status: 'active'=稼働中 / 'tuning'=調整中 / 'pause'=休止中
-// note: 稼働していない場合の説明文（例: "床部分の腐食を確認したため"）
-const stageData = [
+// ステージ別セットデータ（初期デフォルト値）
+let stageData = [
   {
     stage: "1st STAGE",
     items: [
-      { name: "新プリズムシーソー", status: "active", statusText: "稼働中", note: "" },
-      { name: "ローリングヒル上り", status: "active", statusText: "稼働中", note: "" },
-      { name: "ローリングヒル下り", status: "active", statusText: "稼働中", note: "" },
-      { name: "フィッシュボーンリバース", status: "active", statusText: "稼働中", note: "" },
-      { name: "ドラゴングライダー", status: "active", statusText: "稼働中", note: "" },
-      { name: "タックル", status: "active", statusText: "稼働中", note: "" },
-      { name: "そり立つ壁", status: "active", statusText: "稼働中", note: "" }
+      { name: "新プリズムシーソー", status: "active", note: "" },
+      { name: "ローリングヒル上り", status: "active", note: "" },
+      { name: "ローリングヒル下り", status: "active", note: "" },
+      { name: "フィッシュボーンリバース", status: "active", note: "" },
+      { name: "ドラゴングライダー", status: "active", note: "" },
+      { name: "タックル", status: "active", note: "" },
+      { name: "そり立つ壁", status: "active", note: "" }
     ]
   },
   {
     stage: "2nd STAGE",
     items: [
-      { name: "2nd用サーモンラダー", status: "active", statusText: "稼働中", note: "" },
-      { name: "スパイダーラン～ドロップ", status: "active", statusText: "稼働中", note: "" },
-      { name: "ウォールリフティング", status: "active", statusText: "稼働中", note: "" }
+      { name: "2nd用サーモンラダー", status: "active", note: "" },
+      { name: "スパイダーラン～ドロップ", status: "active", note: "" },
+      { name: "ウォールリフティング", status: "active", note: "" }
     ]
   },
   {
     stage: "3rd STAGE",
     items: [
-      { name: "フライングバー", status: "active", statusText: "稼働中", note: "" },
-      { name: "サイドワインダー（回転）", status: "active", statusText: "稼働中", note: "" },
-      { name: "サイドワインダー（落下）", status: "active", statusText: "稼働中", note: "" },
-      { name: "スイングエッジ", status: "active", statusText: "稼働中", note: "" },
-      { name: "クリフディメンション", status: "active", statusText: "稼働中", note: "" },
-      { name: "バーティカルリミット.BURST", status: "active", statusText: "稼働中", note: "" },
-      { name: "パイプスライダー", status: "active", statusText: "稼働中", note: "" }
+      { name: "フライングバー", status: "active", note: "" },
+      { name: "サイドワインダー（回転）", status: "active", note: "" },
+      { name: "サイドワインダー（落下）", status: "active", note: "" },
+      { name: "スイングエッジ", status: "active", note: "" },
+      { name: "クリフディメンション", status: "active", note: "" },
+      { name: "バーティカルリミット.BURST", status: "active", note: "" },
+      { name: "パイプスライダー", status: "active", note: "" }
     ]
   },
   {
     stage: "FINAL STAGE",
     items: [
-      { name: "final用サーモンラダー", status: "active", statusText: "稼働中", note: "" }
+      { name: "final用サーモンラダー", status: "active", note: "" }
     ]
   },
   {
     stage: "その他",
     items: [
-      { name: "休憩場", status: "active", statusText: "利用可能", note: "" },
-      { name: "アップ用器具（旧クリフ、ブランコ）", status: "active", statusText: "利用可能", note: "" }
+      { name: "休憩場", status: "active", note: "" },
+      { name: "アップ用器具（旧クリフ、ブランコ）", status: "active", note: "" }
     ]
   }
 ];
@@ -847,9 +920,37 @@ window.addEventListener('DOMContentLoaded', () => {
   calMonth = now.getMonth();
   updateTriggerDisplay();
   renderStageGroups();
+  loadRemoteObstacles(); // 起動時に最新の稼働状況をGASから自動読み込み
 });
 
-// ステージ別の稼働状況レンダリング（説明文表示対応）
+// GASから最新のセット稼働状況を読み込み
+async function loadRemoteObstacles() {
+  try {
+    const res = await fetch(GAS_URL + "?type=obstacles&t=" + Date.now());
+    const remoteList = await res.json();
+    if (remoteList && Array.isArray(remoteList) && remoteList.length > 0) {
+      const map = {};
+      remoteList.forEach(r => {
+        map[r.name] = { status: r.status, note: r.note || "" };
+      });
+
+      stageData.forEach(g => {
+        g.items.forEach(it => {
+          if (map[it.name]) {
+            it.status = map[it.name].status;
+            it.note = map[it.name].note;
+          }
+        });
+      });
+      renderStageGroups();
+      renderAdminObstacleEditor();
+    }
+  } catch(e) {
+    console.log("リモート稼働状況の取得スキップ");
+  }
+}
+
+// ユーザー向けセット稼働状況のレンダリング
 function renderStageGroups() {
   const container = document.getElementById('stage-groups-container');
   if (!container) return;
@@ -865,15 +966,18 @@ function renderStageGroups() {
     group.items.forEach(item => {
       let badgeClass = 'status-active';
       let icon = '🟢';
+      let statusText = '稼働中';
+
       if (item.status === 'tuning') {
         badgeClass = 'status-tuning';
         icon = '🟡';
+        statusText = '調整中';
       } else if (item.status === 'pause') {
         badgeClass = 'status-pause';
         icon = '🔴';
+        statusText = '休止中';
       }
 
-      // 稼働していない場合の説明文
       const hasNote = (item.status !== 'active') && item.note && item.note.trim() !== '';
       const noteClass = item.status === 'pause' ? 'obstacle-note-box pause' : 'obstacle-note-box';
 
@@ -881,7 +985,7 @@ function renderStageGroups() {
         <div class="obstacle-card">
           <div class="obstacle-top-row">
             <div class="obstacle-name">${escapeHtml(item.name)}</div>
-            <div class="status-badge ${badgeClass}">${icon} ${item.statusText}</div>
+            <div class="status-badge ${badgeClass}">${icon} ${statusText}</div>
           </div>
           ${hasNote ? `
             <div class="${noteClass}">
@@ -899,6 +1003,97 @@ function renderStageGroups() {
   });
 
   container.innerHTML = html;
+}
+
+// 管理者画面用のセット編集エディターの生成
+function renderAdminObstacleEditor() {
+  const container = document.getElementById('admin-obstacle-edit-list');
+  if (!container) return;
+
+  let html = '';
+  stageData.forEach((group, gIdx) => {
+    html += `<div style="font-weight:bold; font-size:13px; color:#93c5fd; margin:12px 0 6px 0; border-left:3px solid #3b82f6; padding-left:6px;">${escapeHtml(group.stage)}</div>`;
+
+    group.items.forEach((item, iIdx) => {
+      const inputId = `obs-note-${gIdx}-${iIdx}`;
+      const selectId = `obs-stat-${gIdx}-${iIdx}`;
+      const isHalted = item.status !== 'active';
+
+      html += `
+        <div class="admin-obs-card">
+          <div class="admin-obs-header">
+            <span class="admin-obs-name">${escapeHtml(item.name)}</span>
+            <select class="admin-obs-select" id="${selectId}" onchange="toggleAdminNoteInput('${inputId}', this.value)">
+              <option value="active" ${item.status === 'active' ? 'selected' : ''}>🟢 稼働中</option>
+              <option value="tuning" ${item.status === 'tuning' ? 'selected' : ''}>🟡 調整中</option>
+              <option value="pause" ${item.status === 'pause' ? 'selected' : ''}>🔴 休止中</option>
+            </select>
+          </div>
+          <div id="wrap-${inputId}" class="${isHalted ? '' : 'hidden'}">
+            <input type="text" id="${inputId}" value="${escapeHtml(item.note || '')}" placeholder="休止・調整の理由（例: 床腐食のため、チェーン交換中等）" style="font-size:12px; padding:6px 10px;">
+          </div>
+        </div>
+      `;
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleAdminNoteInput(inputId, status) {
+  const wrap = document.getElementById(`wrap-${inputId}`);
+  if (wrap) {
+    wrap.classList.toggle('hidden', status === 'active');
+  }
+}
+
+// 管理者によるセット稼働状況の保存
+async function saveObstacleSettings(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-save-obs');
+  btn.disabled = true;
+  btn.innerText = "保存中...";
+
+  stageData.forEach((group, gIdx) => {
+    group.items.forEach((item, iIdx) => {
+      const selectEl = document.getElementById(`obs-stat-${gIdx}-${iIdx}`);
+      const noteEl = document.getElementById(`obs-note-${gIdx}-${iIdx}`);
+      if (selectEl) item.status = selectEl.value;
+      if (noteEl) item.note = noteEl.value.trim();
+    });
+  });
+
+  try {
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "update_obstacles",
+        stages: stageData
+      })
+    });
+
+    renderStageGroups();
+    alert("セット稼働状況を更新・保存しました！");
+  } catch(err) {
+    alert("保存に失敗しました。電波環境を確認してください。");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "💾 セット稼働状況を保存する";
+  }
+}
+
+function switchAdminSubTab(sub) {
+  document.getElementById('admin-subview-attendance').classList.toggle('hidden', sub !== 'attendance');
+  document.getElementById('admin-subview-obstacles').classList.toggle('hidden', sub !== 'obstacles');
+
+  document.getElementById('admin-sub-btn-att').classList.toggle('active', sub === 'attendance');
+  document.getElementById('admin-sub-btn-obs').classList.toggle('active', sub === 'obstacles');
+
+  if (sub === 'obstacles') {
+    renderAdminObstacleEditor();
+  }
 }
 
 // ミニカレンダー開閉
