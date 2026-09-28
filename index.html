@@ -132,6 +132,24 @@
     background: rgba(11, 15, 25, 0.95);
   }
 
+  /* 代理回答切り替えスイッチ */
+  .proxy-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-sub);
+    cursor: pointer;
+    user-select: none;
+  }
+  .proxy-toggle-wrap input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--accent);
+  }
+
   /* コンパクト日程選択バー */
   .date-bar-input {
     background: rgba(11, 15, 25, 0.75);
@@ -670,14 +688,26 @@
         <!-- 参加者氏名 -->
         <div class="form-group">
           <label>参加者氏名<span class="required">*</span></label>
-          <input type="text" id="field-name" placeholder="例: 内宮修造" required>
+          <input type="text" id="field-name" placeholder="例：内宮修造" required>
+
+          <!-- 代理回答トグル -->
+          <label class="proxy-toggle-wrap">
+            <input type="checkbox" id="field-is-proxy" onchange="toggleProxyInput(this.checked)">
+            <span>代理で回答する（本人以外が入力する場合）</span>
+          </label>
         </div>
 
-        <!-- 参加日程：コンパクトバー -->
+        <!-- 代理回答者氏名入力枠（チェック時のみ展開） -->
+        <div class="form-group hidden" id="proxy-name-group">
+          <label>代理回答者氏名<span class="required">*</span></label>
+          <input type="text" id="field-proxy-name" placeholder="代理で入力されている方のお名前">
+        </div>
+
+        <!-- 参加希望日程：コンパクトバー -->
         <div class="form-group">
-          <label>参加日程（タップして選択）<span class="required">*</span></label>
+          <label>参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" onclick="openCalendarPopup()">
-            <div id="date-picker-display" class="date-bar-text">📅 日程をタップして選択...</div>
+            <div id="date-picker-display" class="date-bar-text">📅 参加希望日程をタップして選択...</div>
             <span style="font-size:18px;">🗓️</span>
           </div>
         </div>
@@ -697,7 +727,7 @@
               <option value="4名">4名</option>
               <option value="5名以上">5名以上</option>
             </select>
-            <input type="text" id="field-companion-names" placeholder="例: 家族、トレーナー">
+            <input type="text" id="field-companion-names" placeholder="例：家族、トレーナー">
           </div>
         </div>
 
@@ -848,7 +878,7 @@ let ruleSections = [
   },
   {
     title: "🚗 駐車場・アクセスルール",
-    content: "お車でお越しの方は、下記「駐車レイアウト.png」をご参照し、指定の駐車エリアへ奥から詰めて駐車をお願いいたします。\n渋滞等で到着が遅れる場合は、必ず事前にご連絡をお願いいたします。"
+    content: "お車でお越しの方は、下記「駐車レイアウト」をご参照し、指定の駐車エリアへ奥から詰めて駐車をお願いいたします。\n渋滞等で到着が遅れる場合は、必ず事前にご連絡をお願いいたします。"
   },
   {
     title: "👟 シューズ・服装について",
@@ -931,6 +961,20 @@ window.addEventListener('DOMContentLoaded', () => {
   loadRemoteRules();
 });
 
+// 代理回答入力枠の切り替え
+function toggleProxyInput(checked) {
+  const group = document.getElementById('proxy-name-group');
+  const input = document.getElementById('field-proxy-name');
+  group.classList.toggle('hidden', !checked);
+  if (checked) {
+    input.setAttribute('required', 'required');
+    input.focus();
+  } else {
+    input.removeAttribute('required');
+    input.value = '';
+  }
+}
+
 // 注意事項の装飾フォーマット関数
 function formatRuleItem(text, title) {
   let str = escapeHtml(text);
@@ -948,12 +992,12 @@ function formatRuleItem(text, title) {
     '<span class="urgent-highlight">ぜひ積極的なお手伝いをお願いいたします！</span>'
   );
 
-  // 駐車レイアウト画像ボタン（PNG / PDF両対応）
-  if (title.includes("駐車場") && (str.includes("駐車レイアウト.png") || str.includes("駐車レイアウト.pdf"))) {
+  // 駐車レイアウト画像ボタン（「🗺️ 駐車レイアウト」）
+  if (title.includes("駐車場") && str.includes("駐車レイアウト")) {
     str += `
       <div style="margin: 10px 0 6px 0;">
         <a href="parking-layout.png" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">
-          🗺️ 駐車レイアウト画像を開く
+          🗺️ 駐車レイアウト
         </a>
       </div>
     `;
@@ -1073,7 +1117,7 @@ async function loadRemoteObstacles() {
   } catch(e) {}
 }
 
-// ユーザー向けセット稼働状況のレンダリング（「⚠️理由:」表記・スペースなし）
+// ユーザー向けセット稼働状況のレンダリング（「⚠️理由:」表記）
 function renderStageGroups() {
   const container = document.getElementById('stage-groups-container');
   if (!container) return;
@@ -1152,7 +1196,7 @@ function renderAdminObstacleEditor() {
             </select>
           </div>
           <div id="wrap-${inputId}" class="${isHalted ? '' : 'hidden'}">
-            <input type="text" id="${inputId}" value="${escapeHtml(item.note || '')}" placeholder="理由を入力（例: 床腐食のため、チェーン交換中等）" style="font-size:12px; padding:6px 10px;">
+            <input type="text" id="${inputId}" value="${escapeHtml(item.note || '')}" placeholder="理由を入力（例：床腐食のため、チェーン交換中等）" style="font-size:12px; padding:6px 10px;">
           </div>
         </div>
       `;
@@ -1314,7 +1358,7 @@ function updateTriggerDisplay() {
   const arr = Array.from(selectedDates).sort();
   if (arr.length === 0) {
     display.className = "date-bar-text";
-    display.innerText = "📅 日程をタップして選択...";
+    display.innerText = "📅 参加希望日程をタップして選択...";
     return;
   }
   display.className = "date-pills-wrap";
@@ -1335,7 +1379,7 @@ function renderDaysConfigCards() {
     html += `
       <div class="day-config-card" data-date="${d}">
         <div class="day-config-title">
-          <span>📅 ${formatDateLabel(d)} の参加情報</span>
+          <span>📅 ${formatDateLabel(d)} の参加希望情報</span>
         </div>
 
         <div class="form-group" style="margin-bottom:12px;">
@@ -1384,7 +1428,7 @@ function renderDaysConfigCards() {
 
           <div id="share-box-${d}" class="conditional-box hidden">
             <label style="font-size:11px; margin-bottom:4px;">相乗り代表者（運転者）のお名前<span class="required">*</span></label>
-            <input type="text" class="field-car-leader" placeholder="本名・スペースなしで入力（例: 内宮修造）">
+            <input type="text" class="field-car-leader" placeholder="本名・スペースなしで入力（例：内宮修造）">
           </div>
         </div>
 
@@ -1437,12 +1481,20 @@ async function submitAttendance(e) {
 
   const arr = Array.from(selectedDates).sort();
   if (arr.length === 0) {
-    alert("参加日程を1つ以上選択してください。");
+    alert("参加希望日程を1つ以上選択してください。");
     openCalendarPopup();
     return;
   }
 
   const nameVal = document.getElementById('field-name').value.trim();
+  const isProxy = document.getElementById('field-is-proxy').checked;
+  const proxyNameVal = isProxy ? document.getElementById('field-proxy-name').value.trim() : "";
+
+  if (isProxy && !proxyNameVal) {
+    alert("代理回答者氏名を入力してください。");
+    return;
+  }
+
   const companionCount = document.getElementById('field-companion-count').value;
   const companionNames = document.getElementById('field-companion-names').value.trim() || "なし";
   const note = document.getElementById('field-note').value.trim();
@@ -1496,6 +1548,7 @@ async function submitAttendance(e) {
 
   const payload = {
     name: nameVal,
+    proxyName: proxyNameVal,
     days: dayConfigs,
     companionCount: companionCount,
     companionNames: companionNames,
@@ -1512,6 +1565,7 @@ async function submitAttendance(e) {
 
     document.getElementById('success-msg').style.display = 'block';
     document.getElementById('attendance-form').reset();
+    toggleProxyInput(false);
     selectedDates.clear();
     updateTriggerDisplay();
     renderDaysConfigCards();
@@ -1658,11 +1712,15 @@ async function fetchAdminData() {
         const carInfo = m.transport === '自車' && m.carType ? ` (${m.carType})` : '';
         const hasCompanion = m.companionCount && m.companionCount !== '0名';
         const hasNote = m.note && m.note.trim() !== '';
+        const hasProxy = m.proxyName && m.proxyName.trim() !== '';
 
         html += `
           <div class="admin-member-card">
             <div class="member-top-row">
-              <span class="member-name">${escapeHtml(m.name)}</span>
+              <div>
+                <span class="member-name">${escapeHtml(m.name)}</span>
+                ${hasProxy ? `<span style="font-size:11px; color:#fca5a5; margin-left:6px;">(代理: ${escapeHtml(m.proxyName)})</span>` : ''}
+              </div>
               <div style="display:flex; align-items:center; gap:6px;">
                 <span class="badge-transport ${badgeCls}">${escapeHtml(m.transport)}${escapeHtml(carInfo)}</span>
                 <button type="button" class="btn-del-single" onclick="deleteSingleAttendance('${escapeHtml(m.name)}', '${escapeHtml(m.date)}')">🗑️ 削除</button>
