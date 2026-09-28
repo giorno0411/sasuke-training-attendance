@@ -66,7 +66,7 @@
 
   .tab-nav {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     background: rgba(15, 23, 42, 0.75);
     backdrop-filter: blur(8px);
     padding: 4px;
@@ -79,12 +79,14 @@
     background: transparent;
     border: none;
     color: var(--text-sub);
-    padding: 8px;
+    padding: 8px 4px;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
+    text-align: center;
+    white-space: nowrap;
   }
   .tab-btn.active {
     background: rgba(30, 41, 59, 0.9);
@@ -382,12 +384,89 @@
   .column-body li { margin-bottom: 8px; }
   .column-body li:last-child { margin-bottom: 0; }
 
-  /* 強調用クラス（赤字・太字・下線） */
   .urgent-highlight {
     color: #ef4444;
     font-weight: 800;
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+
+  /* セット稼働状況カードスタイル */
+  .stage-section {
+    margin-bottom: 18px;
+  }
+  .stage-header {
+    font-size: 13px;
+    font-weight: 800;
+    color: #93c5fd;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding-left: 4px;
+    border-left: 3px solid #3b82f6;
+  }
+  .obstacle-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .obstacle-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .obstacle-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .obstacle-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f8fafc;
+  }
+  .status-badge {
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .status-active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  .status-tuning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  .status-pause {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  /* 稼働停止時の理由・説明文エリア */
+  .obstacle-note-box {
+    font-size: 11px;
+    line-height: 1.45;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.25);
+    border-left: 3px solid #f59e0b;
+    color: #e2e8f0;
+  }
+  .obstacle-note-box.pause {
+    border-left-color: #ef4444;
   }
 
   /* 管理者画面 */
@@ -491,9 +570,10 @@
   <div class="tab-nav">
     <button class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">✍️ 出欠回答</button>
     <button class="tab-btn" id="tab-btn-column" onclick="switchTab('column')">📜 注意事項</button>
+    <button class="tab-btn" id="tab-btn-status" onclick="switchTab('status')">⚙️ セット稼働状況</button>
   </div>
 
-  <!-- 出欠送信フォーム -->
+  <!-- 1. 出欠送信フォーム -->
   <div id="view-form">
     <div class="submit-success-box" id="success-msg">
       ✓ 出欠情報を送信しました！回答ありがとうございます。
@@ -547,7 +627,7 @@
     </div>
   </div>
 
-  <!-- 注意事項ページ（指定順） -->
+  <!-- 2. 注意事項ページ（指定順） -->
   <div id="view-column" class="hidden">
     <div class="card">
       
@@ -631,6 +711,20 @@
     </div>
   </div>
 
+  <!-- 3. セット稼働状況ページ（ステージ別） -->
+  <div id="view-status" class="hidden">
+    <div class="card">
+      <div style="margin-bottom: 14px;">
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
+        <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。</p>
+      </div>
+
+      <div id="stage-groups-container">
+        <!-- JSでステージ別に自動生成 -->
+      </div>
+    </div>
+  </div>
+
   <!-- 管理者専用閲覧画面 -->
   <div id="view-admin" class="hidden">
     <div class="card">
@@ -693,6 +787,57 @@ const ADMIN_PIN = "7978815";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 
+// ステージ別セットデータ
+// status: 'active'=稼働中 / 'tuning'=調整中 / 'pause'=休止中
+// note: 稼働していない場合の説明文（例: "床部分の腐食を確認したため"）
+const stageData = [
+  {
+    stage: "1st STAGE",
+    items: [
+      { name: "新プリズムシーソー", status: "active", statusText: "稼働中", note: "" },
+      { name: "ローリングヒル上り", status: "active", statusText: "稼働中", note: "" },
+      { name: "ローリングヒル下り", status: "active", statusText: "稼働中", note: "" },
+      { name: "フィッシュボーンリバース", status: "active", statusText: "稼働中", note: "" },
+      { name: "ドラゴングライダー", status: "active", statusText: "稼働中", note: "" },
+      { name: "タックル", status: "active", statusText: "稼働中", note: "" },
+      { name: "そり立つ壁", status: "active", statusText: "稼働中", note: "" }
+    ]
+  },
+  {
+    stage: "2nd STAGE",
+    items: [
+      { name: "2nd用サーモンラダー", status: "active", statusText: "稼働中", note: "" },
+      { name: "スパイダーラン～ドロップ", status: "active", statusText: "稼働中", note: "" },
+      { name: "ウォールリフティング", status: "active", statusText: "稼働中", note: "" }
+    ]
+  },
+  {
+    stage: "3rd STAGE",
+    items: [
+      { name: "フライングバー", status: "active", statusText: "稼働中", note: "" },
+      { name: "サイドワインダー（回転）", status: "active", statusText: "稼働中", note: "" },
+      { name: "サイドワインダー（落下）", status: "active", statusText: "稼働中", note: "" },
+      { name: "スイングエッジ", status: "active", statusText: "稼働中", note: "" },
+      { name: "クリフディメンション", status: "active", statusText: "稼働中", note: "" },
+      { name: "バーティカルリミット.BURST", status: "active", statusText: "稼働中", note: "" },
+      { name: "パイプスライダー", status: "active", statusText: "稼働中", note: "" }
+    ]
+  },
+  {
+    stage: "FINAL STAGE",
+    items: [
+      { name: "final用サーモンラダー", status: "active", statusText: "稼働中", note: "" }
+    ]
+  },
+  {
+    stage: "その他",
+    items: [
+      { name: "休憩場", status: "active", statusText: "利用可能", note: "" },
+      { name: "アップ用器具（旧クリフ、ブランコ）", status: "active", statusText: "利用可能", note: "" }
+    ]
+  }
+];
+
 let calYear, calMonth;
 const selectedDates = new Set();
 
@@ -701,7 +846,60 @@ window.addEventListener('DOMContentLoaded', () => {
   calYear = now.getFullYear();
   calMonth = now.getMonth();
   updateTriggerDisplay();
+  renderStageGroups();
 });
+
+// ステージ別の稼働状況レンダリング（説明文表示対応）
+function renderStageGroups() {
+  const container = document.getElementById('stage-groups-container');
+  if (!container) return;
+
+  let html = '';
+  stageData.forEach(group => {
+    html += `
+      <div class="stage-section">
+        <div class="stage-header">${escapeHtml(group.stage)}</div>
+        <div class="obstacle-grid">
+    `;
+
+    group.items.forEach(item => {
+      let badgeClass = 'status-active';
+      let icon = '🟢';
+      if (item.status === 'tuning') {
+        badgeClass = 'status-tuning';
+        icon = '🟡';
+      } else if (item.status === 'pause') {
+        badgeClass = 'status-pause';
+        icon = '🔴';
+      }
+
+      // 稼働していない場合の説明文
+      const hasNote = (item.status !== 'active') && item.note && item.note.trim() !== '';
+      const noteClass = item.status === 'pause' ? 'obstacle-note-box pause' : 'obstacle-note-box';
+
+      html += `
+        <div class="obstacle-card">
+          <div class="obstacle-top-row">
+            <div class="obstacle-name">${escapeHtml(item.name)}</div>
+            <div class="status-badge ${badgeClass}">${icon} ${item.statusText}</div>
+          </div>
+          ${hasNote ? `
+            <div class="${noteClass}">
+              ⚠️ <b>状況説明:</b> ${escapeHtml(item.note)}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
 
 // ミニカレンダー開閉
 function openCalendarPopup() {
@@ -911,10 +1109,12 @@ function selectDayTransport(labelEl, date, type) {
 function switchTab(tab) {
   document.getElementById('view-form').classList.toggle('hidden', tab !== 'form');
   document.getElementById('view-column').classList.toggle('hidden', tab !== 'column');
+  document.getElementById('view-status').classList.toggle('hidden', tab !== 'status');
   document.getElementById('view-admin').classList.add('hidden');
 
   document.getElementById('tab-btn-form').classList.toggle('active', tab === 'form');
   document.getElementById('tab-btn-column').classList.toggle('active', tab === 'column');
+  document.getElementById('tab-btn-status').classList.toggle('active', tab === 'status');
 }
 
 // 送信処理（各日程ごとの設定をまとめて送信）
@@ -1043,9 +1243,11 @@ async function verifyAdminPin() {
     closeLoginModal();
     document.getElementById('view-form').classList.add('hidden');
     document.getElementById('view-column').classList.add('hidden');
+    document.getElementById('view-status').classList.add('hidden');
     document.getElementById('view-admin').classList.remove('hidden');
     document.getElementById('tab-btn-form').classList.remove('active');
     document.getElementById('tab-btn-column').classList.remove('active');
+    document.getElementById('tab-btn-status').classList.remove('active');
     fetchAdminData();
   } else {
     logAdminAccess("失敗(不正試行)", pinInput);
@@ -1116,7 +1318,7 @@ async function fetchAdminData() {
           </div>
 
           <div class="admin-card-stats">
-            <span>🚗 車料計: <span class="car-stat-badge">${totalCars}台</span></span>
+            <span>🚗 車両計: <span class="car-stat-badge">${totalCars}台</span></span>
             <span>(普通: ${carsStandard}台 / 軽: ${carsLight}台${carsOther > 0 ? ` / 他: ${carsOther}台` : ''})</span>
           </div>
 
