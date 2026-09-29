@@ -37,7 +37,6 @@
   
   .container { width: 100%; max-width: 580px; }
 
-  /* スマホでも重ならないヘッダー */
   header {
     display: flex;
     justify-content: space-between;
@@ -137,7 +136,6 @@
     background: rgba(11, 15, 25, 0.95);
   }
 
-  /* 認証済みユーザーバナー */
   .auth-user-bar {
     background: rgba(16, 185, 129, 0.15);
     border: 1px solid rgba(16, 185, 129, 0.35);
@@ -160,25 +158,39 @@
     font-size: 11px;
   }
 
-  /* 代理回答トグル */
-  .proxy-toggle-wrap {
+  /* 他プレイヤー追加用スタイル */
+  .player-input-row {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--text-sub);
-    cursor: pointer;
-    user-select: none;
+    gap: 6px;
+    margin-bottom: 6px;
   }
-  .proxy-toggle-wrap input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+  .btn-remove-player {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    border-radius: 6px;
+    padding: 0 12px;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
-    accent-color: var(--accent);
+  }
+  .btn-add-player {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px dashed var(--accent);
+    color: #fca5a5;
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
   }
 
-  /* 日程選択バー */
   .date-bar-input {
     background: rgba(11, 15, 25, 0.75);
     border: 1px solid var(--border);
@@ -213,7 +225,6 @@
     font-weight: 600;
   }
 
-  /* ミニカレンダーモーダル */
   .mini-cal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -406,7 +417,6 @@
     display: none;
   }
 
-  /* 注意事項 */
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -454,7 +464,6 @@
     text-underline-offset: 3px;
   }
 
-  /* セット稼働状況 */
   .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
@@ -529,7 +538,6 @@
     border-left-color: #ef4444;
   }
 
-  /* 管理者画面 */
   .admin-subnav {
     display: flex;
     gap: 4px;
@@ -668,6 +676,7 @@
     border-radius: 8px;
     padding: 10px 12px;
     margin-bottom: 10px;
+    position: relative;
   }
   .admin-obs-header {
     display: flex;
@@ -754,21 +763,22 @@
     <div class="card">
       <form id="attendance-form" onsubmit="submitAttendance(event)">
         
+        <!-- 代表プレイヤー氏名 -->
         <div class="form-group">
-          <label>参加者氏名<span class="required">*</span></label>
+          <label>参加者（プレイヤー）氏名<span class="required">*</span></label>
           <input type="text" id="field-name" placeholder="例：内宮修造" required>
-
-          <label class="proxy-toggle-wrap">
-            <input type="checkbox" id="field-is-proxy" onchange="toggleProxyInput(this.checked)">
-            <span>代理で回答する（本人以外が入力する場合）</span>
-          </label>
         </div>
 
-        <div class="form-group hidden" id="proxy-name-group">
-          <label>代理回答者氏名<span class="required">*</span></label>
-          <input type="text" id="field-proxy-name" placeholder="代理で入力されている方のお名前">
+        <!-- 他参加者（プレイヤー）動的追加 -->
+        <div class="form-group">
+          <label>他参加者（プレイヤー）</label>
+          <div id="other-players-container"></div>
+          <button type="button" class="btn-add-player" onclick="addOtherPlayerInput()">
+            <span>＋ 他の参加者を追加する</span>
+          </button>
         </div>
 
+        <!-- 日程選択 -->
         <div class="form-group">
           <label>参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" onclick="openCalendarPopup()">
@@ -779,8 +789,9 @@
 
         <div id="days-config-container"></div>
 
+        <!-- お連れ様・同伴者（見学等） -->
         <div class="form-group">
-          <label>お連れ様・同伴者（見学・補助等）</label>
+          <label>お連れ様・同伴者（見学・補助等の非プレイヤー）</label>
           <div class="companion-row">
             <select id="field-companion-count">
               <option value="0名">0名</option>
@@ -794,6 +805,7 @@
           </div>
         </div>
 
+        <!-- 備考 -->
         <div class="form-group">
           <label>備考・その他ご要望</label>
           <textarea id="field-note" rows="2" placeholder="その他ご要望があればご記入ください。"></textarea>
@@ -816,7 +828,6 @@
         <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。</p>
       </div>
-
       <div id="stage-groups-container"></div>
     </div>
   </div>
@@ -830,6 +841,7 @@
         <button class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
       </div>
 
+      <!-- サブタブ1: 参加集計 -->
       <div id="admin-subview-attendance">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
@@ -844,6 +856,7 @@
         </div>
       </div>
 
+      <!-- サブタブ2: セット稼働設定 -->
       <div id="admin-subview-obstacles" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">⚙️ セット稼働状況の編集</h2>
@@ -859,6 +872,7 @@
         </form>
       </div>
 
+      <!-- サブタブ3: 注意事項編集（項目追加対応） -->
       <div id="admin-subview-rules" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">📜 注意事項の編集</h2>
@@ -870,7 +884,12 @@
 
         <form onsubmit="saveRuleSettings(event)">
           <div id="admin-rules-edit-list"></div>
-          <button type="submit" class="btn-submit" id="btn-save-rules" style="margin-top:14px;">💾 注意事項を保存する</button>
+          
+          <button type="button" class="btn-add-player" style="margin: 10px 0 16px 0; padding:10px;" onclick="addNewRuleSection()">
+            <span>＋ 新しい注意事項項目を追加する</span>
+          </button>
+
+          <button type="submit" class="btn-submit" id="btn-save-rules">💾 注意事項を保存する</button>
         </form>
       </div>
     </div>
@@ -907,7 +926,7 @@
 <div id="admin-modal" class="modal-overlay hidden">
   <div class="modal-content">
     <h3 style="margin-top:0; font-size:15px;">🔒 管理者ログイン</h3>
-    <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">英数字パスワードを入力してください。</p>
+    <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">管理者パスワードを入力してください。</p>
     <input type="password" id="admin-pin-input" inputmode="text" autocomplete="off" placeholder="パスワードを入力" style="margin-bottom:12px;">
     <div style="display:flex; gap:8px;">
       <button class="tab-btn" style="border:1px solid var(--border);" onclick="closeLoginModal()">キャンセル</button>
@@ -918,7 +937,10 @@
 
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
-const ADMIN_PIN = "7978815";
+
+// ★管理者パスワードを「okpl」に変更
+const ADMIN_PIN = "okpl";
+
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 
 let ruleSections = [
@@ -944,7 +966,7 @@ let ruleSections = [
   },
   {
     title: "📌 その他",
-    content: "合トレメンバー確定後、当日のスケジュール共有や事務連絡用に、グループラインを作成させていただきます。\n参加の代理回答は可能です。ただし、本フォームは関係者限定となりますので、招待されていない方へのリンク転送・共有はご遠慮ください。"
+    content: "合トレメンバー確定後、当日のスケジュール共有や事務連絡用に、グループラインを作成させていただきます。\n本フォームは関係者限定となりますので、招待されていない方へのリンク転送・共有はご遠慮ください。"
   }
 ];
 
@@ -998,6 +1020,7 @@ let stageData = [
 
 let calYear, calMonth;
 const selectedDates = new Set();
+let registeredRecords = []; // 重複回答判定用キャッシュ
 
 window.addEventListener('DOMContentLoaded', () => {
   checkGateAccess();
@@ -1009,6 +1032,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderStageGroups();
   loadRemoteObstacles();
   loadRemoteRules();
+  fetchRegisteredAttendance();
 });
 
 function checkGateAccess() {
@@ -1059,11 +1083,7 @@ async function verifyGateCode() {
 
 function applyAuthenticatedUser(name) {
   const nameField = document.getElementById('field-name');
-  const proxyCheckbox = document.getElementById('field-is-proxy');
-
-  if (!proxyCheckbox.checked) {
-    nameField.value = name;
-  }
+  if (nameField) nameField.value = name;
 
   const banner = document.getElementById('auth-banner');
   const displayEl = document.getElementById('auth-display-name');
@@ -1081,26 +1101,27 @@ function resetUserAuth() {
   }
 }
 
-function toggleProxyInput(checked) {
-  const group = document.getElementById('proxy-name-group');
-  const proxyInput = document.getElementById('field-proxy-name');
-  const nameField = document.getElementById('field-name');
-  const authUser = localStorage.getItem('uchimiya_auth_user') || "";
+// 他プレイヤーの動的追加
+function addOtherPlayerInput(val = '') {
+  const container = document.getElementById('other-players-container');
+  const row = document.createElement('div');
+  row.className = 'player-input-row';
+  row.innerHTML = `
+    <input type="text" class="field-other-player-name" placeholder="他参加者のお名前" value="${escapeHtml(val)}">
+    <button type="button" class="btn-remove-player" onclick="this.parentElement.remove()" title="削除">✕</button>
+  `;
+  container.appendChild(row);
+}
 
-  group.classList.toggle('hidden', !checked);
-
-  if (checked) {
-    proxyInput.setAttribute('required', 'required');
-    proxyInput.value = authUser;
-    nameField.value = '';
-    nameField.placeholder = "参加する方のお名前（例：山本太郎）";
-    nameField.focus();
-  } else {
-    proxyInput.removeAttribute('required');
-    proxyInput.value = '';
-    nameField.value = authUser;
-    nameField.placeholder = "例：内宮修造";
-  }
+// 重複回答チェック用の既存データ取得
+async function fetchRegisteredAttendance() {
+  try {
+    const res = await fetch(GAS_URL + "?type=attendance&t=" + Date.now(), { cache: "no-store" });
+    const list = await res.json();
+    if (Array.isArray(list)) {
+      registeredRecords = list;
+    }
+  } catch(e) {}
 }
 
 function formatRuleItem(text, title) {
@@ -1157,6 +1178,7 @@ function renderRulesDisplay() {
   container.innerHTML = html;
 }
 
+// 管理者注意事項エディタ（項目の動的追加・削除に対応）
 function renderAdminRulesEditor() {
   const container = document.getElementById('admin-rules-edit-list');
   if (!container) return;
@@ -1164,8 +1186,11 @@ function renderAdminRulesEditor() {
   let html = '';
   ruleSections.forEach((sec, idx) => {
     html += `
-      <div class="admin-edit-card">
-        <label style="font-size:12px; color:#93c5fd; margin-bottom:4px;">セクション見出し</label>
+      <div class="admin-edit-card" id="rule-card-${idx}">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <label style="font-size:12px; color:#93c5fd; margin:0;">項目見出し #${idx + 1}</label>
+          <button type="button" class="btn-del-single" onclick="removeRuleSection(${idx})">🗑️ 項目削除</button>
+        </div>
         <input type="text" id="rule-title-${idx}" value="${escapeHtml(sec.title)}" style="margin-bottom:8px; font-weight:bold;">
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
@@ -1181,6 +1206,32 @@ function renderAdminRulesEditor() {
     `;
   });
   container.innerHTML = html;
+}
+
+function addNewRuleSection() {
+  syncCurrentRuleInputs();
+  ruleSections.push({
+    title: "新しい項目",
+    content: "注意事項の内容をここに入力してください。"
+  });
+  renderAdminRulesEditor();
+}
+
+function removeRuleSection(idx) {
+  if (confirm("この注意事項項目を削除しますか？")) {
+    syncCurrentRuleInputs();
+    ruleSections.splice(idx, 1);
+    renderAdminRulesEditor();
+  }
+}
+
+function syncCurrentRuleInputs() {
+  ruleSections.forEach((sec, idx) => {
+    const titleEl = document.getElementById(`rule-title-${idx}`);
+    const contentEl = document.getElementById(`rule-content-${idx}`);
+    if (titleEl) sec.title = titleEl.value;
+    if (contentEl) sec.content = contentEl.value;
+  });
 }
 
 function applyTextFormat(idx, type) {
@@ -1221,12 +1272,7 @@ async function saveRuleSettings(e) {
   btn.disabled = true;
   btn.innerText = "保存中...";
 
-  ruleSections.forEach((sec, idx) => {
-    const titleEl = document.getElementById(`rule-title-${idx}`);
-    const contentEl = document.getElementById(`rule-content-${idx}`);
-    if (titleEl) sec.title = titleEl.value.trim();
-    if (contentEl) sec.content = contentEl.value.trim();
-  });
+  syncCurrentRuleInputs();
 
   try {
     await fetch(GAS_URL, {
@@ -1637,6 +1683,7 @@ function switchTab(tab) {
   document.getElementById('tab-btn-status').classList.toggle('active', tab === 'status');
 }
 
+// 参加送信処理（他プレイヤーの展開 ＆ 同一日程重複チェック）
 async function submitAttendance(e) {
   e.preventDefault();
 
@@ -1647,13 +1694,34 @@ async function submitAttendance(e) {
     return;
   }
 
-  const nameVal = document.getElementById('field-name').value.trim();
-  const isProxy = document.getElementById('field-is-proxy').checked;
-  const proxyNameVal = isProxy ? document.getElementById('field-proxy-name').value.trim() : "";
-
-  if (isProxy && !proxyNameVal) {
-    alert("代理回答者氏名を入力してください。");
+  const primaryName = document.getElementById('field-name').value.trim();
+  if (!primaryName) {
+    alert("参加者（プレイヤー）氏名を入力してください。");
     return;
+  }
+
+  // 他プレイヤーのリスト取得
+  const otherInputs = document.querySelectorAll('.field-other-player-name');
+  const allPlayers = [primaryName];
+  otherInputs.forEach(inp => {
+    const val = inp.value.trim();
+    if (val && !allPlayers.includes(val)) allPlayers.push(val);
+  });
+
+  // 重複回答チェック（最新回答を取得して照合）
+  await fetchRegisteredAttendance();
+  for (const pName of allPlayers) {
+    for (const d of arr) {
+      const isAlready = registeredRecords.some(r => {
+        const rName = String(r.name || '').trim();
+        const rDate = normalizeDateKey(r.date);
+        return rName === pName && rDate === normalizeDateKey(d);
+      });
+      if (isAlready) {
+        alert(`【重複回答エラー】\n「${pName}」さんは既に ${formatDateLabel(d)} の回答を送信済みです。\n同じ日程に二重で回答することはできません。`);
+        return;
+      }
+    }
   }
 
   const companionCount = document.getElementById('field-companion-count').value;
@@ -1707,30 +1775,41 @@ async function submitAttendance(e) {
   btn.disabled = true;
   btn.innerText = "送信中...";
 
-  const payload = {
-    name: nameVal,
-    proxyName: proxyNameVal,
-    days: dayConfigs,
-    companionCount: companionCount,
-    companionNames: companionNames,
-    note: note
-  };
+  // プレイヤー全員分を送信（複数人いる場合はまとめて登録）
+  const submitPromises = allPlayers.map(playerName => {
+    const payload = {
+      name: playerName,
+      proxyName: "", // 代理回答廃止のため空文字
+      days: dayConfigs,
+      companionCount: playerName === primaryName ? companionCount : "0名", // 同伴者は代表者にのみ紐付け
+      companionNames: playerName === primaryName ? companionNames : "なし",
+      note: playerName === primaryName ? note : `（${primaryName} 様と同時申込）`
+    };
 
-  try {
-    await fetch(GAS_URL, {
+    return fetch(GAS_URL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(payload)
     });
+  });
+
+  try {
+    await Promise.all(submitPromises);
 
     document.getElementById('success-msg').style.display = 'block';
     document.getElementById('attendance-form').reset();
-    toggleProxyInput(false);
+    document.getElementById('other-players-container').innerHTML = ''; // 他参加者入力枠クリア
+    
+    // ログイン中の名前を再適用
+    const authUser = localStorage.getItem('uchimiya_auth_user');
+    if (authUser) applyAuthenticatedUser(authUser);
+
     selectedDates.clear();
     updateTriggerDisplay();
     renderDaysConfigCards();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    fetchRegisteredAttendance();
   } catch (err) {
     alert("送信に失敗しました。電波環境を確認してください。");
   } finally {
@@ -1785,7 +1864,6 @@ async function verifyAdminPin() {
   }
 }
 
-// タイムゾーンによるズレを完全に排除した日付ラベル生成関数
 function formatDateLabel(dateStr) {
   if (!dateStr) return "日程未指定";
   
@@ -1848,6 +1926,8 @@ async function fetchAdminData() {
       container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">回答はまだありません</div>';
       return;
     }
+
+    registeredRecords = list;
 
     const groups = {};
     list.forEach(item => {
@@ -1941,14 +2021,12 @@ async function fetchAdminData() {
         const carInfo = m.carType ? ` (${m.carType})` : '';
         const hasCompanion = m.companionCount && m.companionCount !== '0名';
         const hasNote = m.note && m.note.trim() !== '';
-        const hasProxy = m.proxyName && m.proxyName.trim() !== '';
 
         html += `
           <div class="admin-member-card">
             <div class="member-top-row">
               <div>
                 <span class="member-name">${escapeHtml(m.name)}</span>
-                ${hasProxy ? `<span style="font-size:11px; color:#fca5a5; margin-left:6px;">(代理: ${escapeHtml(m.proxyName)})</span>` : ''}
               </div>
               <div style="display:flex; align-items:center; gap:6px;">
                 <span class="badge-transport ${badgeCls}">${escapeHtml(m.transport)}${escapeHtml(carInfo)}</span>
