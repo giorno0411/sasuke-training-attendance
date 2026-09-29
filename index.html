@@ -41,6 +41,7 @@
     justify-content: center;
     min-height: 100vh;
     -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
   }
   
   .container { width: 100%; max-width: 580px; position: relative; z-index: 1; }
@@ -130,6 +131,7 @@
   
   input[type="text"], input[type="password"], input[type="date"], select, textarea {
     width: 100%;
+    max-width: 100%;
     background: rgba(11, 15, 25, 0.75);
     border: 1px solid var(--border);
     color: var(--text);
@@ -138,6 +140,7 @@
     font-size: 14px;
     font-family: inherit;
     outline: none;
+    box-sizing: border-box;
   }
   input:focus, select:focus, textarea:focus { 
     border-color: var(--accent); 
@@ -249,15 +252,21 @@
     align-items: center;
     min-height: 42px;
     cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
   }
   .date-bar-text {
     font-size: 13px;
     color: var(--text-sub);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .date-pills-wrap {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
+    max-width: 90%;
   }
   .date-selected-pill {
     background: rgba(239, 68, 68, 0.25);
@@ -267,6 +276,7 @@
     border-radius: 4px;
     font-size: 11px;
     font-weight: 600;
+    white-space: nowrap;
   }
 
   .modal-overlay {
@@ -279,37 +289,42 @@
     justify-content: center;
     align-items: center;
     z-index: 100000;
-    padding: 16px;
+    padding: 12px;
+    box-sizing: border-box;
   }
 
   .modal-content {
     background: #161f30;
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px;
+    padding: 16px;
     width: 100%;
-    max-width: 350px;
+    max-width: 330px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
     max-height: 90vh;
     overflow-y: auto;
+    box-sizing: border-box;
   }
 
+  /* ミニカレンダーが横に突き抜けないよう修正 */
   .mini-cal-box {
     background: #151d2c;
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 14px;
-    width: 290px;
+    padding: 12px;
+    width: 100%;
+    max-width: 290px;
+    box-sizing: border-box;
     box-shadow: 0 10px 30px rgba(0,0,0,0.7);
   }
   .mini-cal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .mini-cal-header-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
     color: #f8fafc;
   }
@@ -374,9 +389,9 @@
     background: var(--accent);
     color: #fff;
     border: none;
-    padding: 6px 14px;
+    padding: 5px 12px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
     cursor: pointer;
   }
@@ -444,9 +459,9 @@
     color: #fff;
     border: none;
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: bold;
     margin-top: 6px;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
@@ -454,7 +469,6 @@
   }
   .btn-submit:active { background: var(--accent-hover); }
 
-  /* 送信成功メッセージ */
   .submit-success-box {
     background: rgba(6, 78, 59, 0.85);
     backdrop-filter: blur(8px);
@@ -481,7 +495,6 @@
     line-height: 1.6;
   }
 
-  /* 砂時計プログレスモーダル */
   .progress-modal-box {
     background: #161f30;
     border: 1px solid var(--border);
@@ -564,7 +577,6 @@
     text-underline-offset: 3px;
   }
 
-  /* セット稼働状況 */
   .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
@@ -685,7 +697,6 @@
     color: #fca5a5;
   }
 
-  /* 管理者日程グループと中止時グレーアウト */
   .admin-date-group {
     margin-bottom: 22px;
     transition: opacity 0.2s, filter 0.2s;
@@ -724,11 +735,12 @@
     gap: 6px;
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
-    padding: 2px 8px;
+    padding: 2px 7px;
     border-radius: 6px;
     font-size: 11px;
     height: 24px;
     line-height: 1;
+    box-sizing: border-box;
   }
   .status-toggle-label {
     display: inline-flex;
@@ -738,6 +750,7 @@
     font-weight: bold;
     margin: 0;
     line-height: 1;
+    user-select: none;
   }
   .status-toggle-label input {
     margin: 0;
@@ -823,7 +836,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 1 1 170px;
+    flex: 1 1 160px;
   }
   .member-name { font-size: 14px; font-weight: bold; }
   
@@ -908,7 +921,29 @@
     cursor: pointer;
   }
 
-  /* セット編集カード */
+  /* コンパクト化した手動追加フォームスタイル */
+  .compact-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .compact-field-group {
+    display: flex;
+    flex-direction: column;
+  }
+  .compact-field-group label {
+    font-size: 10.5px;
+    margin-bottom: 3px;
+    color: #cbd5e1;
+  }
+  .compact-field-group input, 
+  .compact-field-group select {
+    padding: 6px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
   .admin-edit-card {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
@@ -1029,7 +1064,7 @@
   <div class="tab-nav">
     <button type="button" class="tab-btn active" id="tab-btn-form">✍️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column">📜 注意事項</button>
-    <button type="button" class="tab-btn" id="tab-btn-status">⚙️️ セット稼働状況</button>
+    <button type="button" class="tab-btn" id="tab-btn-status">⚙️ セット稼働状況</button>
   </div>
 
   <!-- 1. 参加送信フォーム -->
@@ -1121,7 +1156,7 @@
       <div class="admin-subnav">
         <button type="button" class="admin-sub-btn active" id="admin-sub-btn-att">👥 参加状況</button>
         <button type="button" class="admin-sub-btn" id="admin-sub-btn-rules">📜 注意事項編集</button>
-        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs">⚙️️ セット稼働状況編集</button>
+        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs">⚙️ セット稼働状況編集</button>
       </div>
 
       <div id="admin-subview-attendance">
@@ -1138,7 +1173,7 @@
         </div>
 
         <div class="admin-clear-all-wrap">
-          <button type="button" class="btn-clear-all" id="btn-clear-all-data">⚠️️ 回答データを全件削除（リセット）</button>
+          <button type="button" class="btn-clear-all" id="btn-clear-all-data">⚠️ 回答データを全件削除（リセット）</button>
         </div>
       </div>
 
@@ -1238,63 +1273,85 @@
   </div>
 </div>
 
-<!-- 管理者手動代理追加モーダル（日付カレンダーピッカー付き） -->
+<!-- 管理者手動代理追加モーダル（超スリム・コンパクトUI） -->
 <div id="admin-add-modal" class="modal-overlay">
-  <div class="modal-content">
-    <h3 style="margin-top:0; font-size:15px; color:#fca5a5;">＋ 手動代理追加（LINE・口頭受付）</h3>
+  <div class="modal-content" style="max-width:320px; padding:14px;">
+    <h3 style="margin-top:0; margin-bottom:10px; font-size:14px; color:#fca5a5;">＋ 手動代理追加（LINE・口頭）</h3>
     <form id="admin-manual-add-form">
-      <label style="font-size:11px; color:#cbd5e1; margin-top:8px;">区分（種別）<span class="required">*</span></label>
-      <select id="m-add-category" style="margin-bottom:8px;">
-        <option value="プレイヤー">参加者（プレイヤー）</option>
-        <option value="番組スタッフ">番組スタッフ（ロケハン・撮影等）</option>
-        <option value="同伴者">同伴者（見学・保護者等）</option>
-      </select>
+      <div class="compact-form-row">
+        <div class="compact-field-group">
+          <label>区分<span class="required">*</span></label>
+          <select id="m-add-category">
+            <option value="プレイヤー">選手</option>
+            <option value="番組スタッフ">スタッフ</option>
+            <option value="同伴者">同伴者</option>
+          </select>
+        </div>
+        <div class="compact-field-group">
+          <label>参加日<span class="required">*</span></label>
+          <input type="date" id="m-add-date" required style="color-scheme:dark;">
+        </div>
+      </div>
 
-      <label style="font-size:11px; color:#cbd5e1;">お名前<span class="required">*</span></label>
-      <input type="text" id="m-add-name" placeholder="例：山田 太郎、TBSスタッフA" required style="margin-bottom:8px;">
+      <div class="compact-field-group" style="margin-bottom:8px;">
+        <label>お名前<span class="required">*</span></label>
+        <input type="text" id="m-add-name" placeholder="例：山田 太郎、TBSスタッフA" required>
+      </div>
 
-      <label style="font-size:11px; color:#cbd5e1;">参加日（タップして選択）<span class="required">*</span></label>
-      <input type="date" id="m-add-date" required style="margin-bottom:8px; color-scheme: dark;">
-
-      <label style="font-size:11px; color:#cbd5e1;">参加時間</label>
-      <select id="m-add-time" style="margin-bottom:8px;">
-        <option value="終日">終日</option>
-        <option value="午前のみ">午前のみ</option>
-        <option value="午後のみ">午後のみ</option>
-        <option value="9:00〜17:00">9:00〜17:00</option>
-      </select>
-
-      <label style="font-size:11px; color:#cbd5e1;">交通手段・車両<span class="required">*</span></label>
-      <select id="m-add-transport" style="margin-bottom:8px;">
-        <option value="自車">🚗 自車（車を持ち込み）</option>
-        <option value="乗り合い（同乗）">🤝 相乗り（同乗）</option>
-        <option value="現地までバス">🚌 バス</option>
-        <option value="タクシー">🚕 タクシー</option>
-        <option value="その他">🚲 その他・送迎等</option>
-      </select>
+      <div class="compact-form-row">
+        <div class="compact-field-group">
+          <label>参加時間</label>
+          <select id="m-add-time">
+            <option value="終日">終日</option>
+            <option value="午前のみ">午前のみ</option>
+            <option value="午後のみ">午後のみ</option>
+            <option value="9:00〜17:00">9〜17時</option>
+          </select>
+        </div>
+        <div class="compact-field-group">
+          <label>交通手段<span class="required">*</span></label>
+          <select id="m-add-transport">
+            <option value="自車">🚗 自車</option>
+            <option value="乗り合い（同乗）">🤝 相乗り</option>
+            <option value="現地までバス">🚌 バス</option>
+            <option value="タクシー">🚕 タクシー</option>
+            <option value="その他">🚲 その他</option>
+          </select>
+        </div>
+      </div>
 
       <div id="m-add-car-settings" style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-bottom:8px;">
-        <label style="font-size:11px; color:#cbd5e1;">車種（駐車台数カウント用）</label>
-        <select id="m-add-car-type" style="margin-bottom:6px;">
-          <option value="普通車">普通車</option>
-          <option value="軽自動車">軽自動車</option>
-          <option value="その他">その他（ロケバス・バイク等）</option>
-        </select>
-        <label style="font-size:11px; color:#cbd5e1;">指定号車名（任意・空欄時は苗字自動）</label>
-        <input type="text" id="m-add-car-custom-name" placeholder="例：山田号車、ロケバス1号" style="font-size:12px;">
+        <div class="compact-form-row" style="margin-bottom:4px;">
+          <div class="compact-field-group">
+            <label>車種</label>
+            <select id="m-add-car-type">
+              <option value="普通車">普通車</option>
+              <option value="軽自動車">軽自動車</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div class="compact-field-group">
+            <label>指定号車名(任意)</label>
+            <input type="text" id="m-add-car-custom-name" placeholder="例: 山田号車">
+          </div>
+        </div>
       </div>
 
       <div id="m-add-share-settings" class="hidden" style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-bottom:8px;">
-        <label style="font-size:11px; color:#cbd5e1;">同乗先の号車（運転者名）</label>
-        <input type="text" id="m-add-share-leader" placeholder="例：内宮 修造" style="font-size:12px;">
+        <div class="compact-field-group">
+          <label>同乗先の運転者名</label>
+          <input type="text" id="m-add-share-leader" placeholder="例: 内宮 修造">
+        </div>
       </div>
 
-      <label style="font-size:11px; color:#cbd5e1;">備考</label>
-      <input type="text" id="m-add-note" placeholder="例：LINEで受付済み、機材搬入あり等" style="margin-bottom:12px; font-size:12px;">
+      <div class="compact-field-group" style="margin-bottom:12px;">
+        <label>備考</label>
+        <input type="text" id="m-add-note" placeholder="例: LINE受付済み、機材搬入等">
+      </div>
 
       <div style="display:flex; gap:8px;">
         <button type="button" class="tab-btn" id="btn-admin-add-cancel" style="border:1px solid var(--border);">閉じる</button>
-        <button type="submit" class="btn-submit" style="margin:0; padding:8px;">追加して保存</button>
+        <button type="submit" class="btn-submit" style="margin:0; padding:8px;">追加保存</button>
       </div>
     </form>
   </div>
@@ -1760,15 +1817,13 @@ function updateTriggerDisplay() {
   }).join('');
 }
 
-// タイムゾーンによる前日・翌日ズレを完全に排除した日付解析
+// 【絶対ズレない日付パーサー】文字列から直接年月日を抽出
 function parseDateParts(raw) {
   if (!raw) return null;
   var s = String(raw).trim();
-  // 1. ISOタイムスタンプ形式（例: 2026-10-04T15:00:00...）
   if (s.indexOf('T') !== -1) {
     s = s.split('T')[0];
   }
-  // 2. YYYY-MM-DD または YYYY/MM/DD
   var m = s.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
   if (m) {
     return {
@@ -1800,7 +1855,6 @@ function normalizeDateKey(dateStr) {
   return String(dateStr).trim();
 }
 
-// 汎用姓名分離（苗字抽出）
 function extractLastName(str) {
   if (!str) return "";
   var s = String(str).trim();
@@ -2816,7 +2870,7 @@ function renderAdminAttendanceHTML(list) {
       html += '<span class="member-name">' + escapeHtml(m.name) + '</span>';
       html += '</div>';
       
-      // 連絡済みトグルスイッチ（センター揃え） ＋ 交通バッジ ＋ 削除ボタン
+      // 連絡済みトグルスイッチ ＋ 交通バッジ ＋ 削除ボタン
       html += '<div style="display:flex; align-items:center; gap:8px;">';
       html += '<div class="status-toggle-box">';
       html += '<label class="status-toggle-label" style="color:' + (isContacted ? '#34d399' : '#94a3b8') + ';">';
@@ -2874,7 +2928,6 @@ function renderAdminAttendanceHTML(list) {
 
   container.innerHTML = html;
 
-  // 連絡済みチェックイベント
   container.querySelectorAll('.contacted-checkbox').forEach(function(cb) {
     cb.onchange = function() {
       var d = this.getAttribute('data-date');
