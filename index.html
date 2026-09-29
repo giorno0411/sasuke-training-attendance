@@ -37,7 +37,7 @@
   
   .container { width: 100%; max-width: 580px; }
 
-  /* スマホでも重ならないスマートヘッダー */
+  /* スマホでも重ならないヘッダー */
   header {
     display: flex;
     justify-content: space-between;
@@ -160,7 +160,7 @@
     font-size: 11px;
   }
 
-  /* 代理回答切り替えスイッチ */
+  /* 代理回答トグル */
   .proxy-toggle-wrap {
     display: flex;
     align-items: center;
@@ -178,7 +178,7 @@
     accent-color: var(--accent);
   }
 
-  /* コンパクト日程選択バー */
+  /* 日程選択バー */
   .date-bar-input {
     background: rgba(11, 15, 25, 0.75);
     border: 1px solid var(--border);
@@ -213,7 +213,7 @@
     font-weight: 600;
   }
 
-  /* ミニカレンダーポップアップ */
+  /* ミニカレンダーモーダル */
   .mini-cal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -314,7 +314,6 @@
     cursor: pointer;
   }
 
-  /* 日程ごとの詳細入力カード */
   .day-config-card {
     background: rgba(15, 23, 42, 0.75);
     border: 1px solid rgba(239, 68, 68, 0.4);
@@ -407,7 +406,7 @@
     display: none;
   }
 
-  /* 注意事項（スリムな箇条書き・タイトル白色） */
+  /* 注意事項 */
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -455,7 +454,7 @@
     text-underline-offset: 3px;
   }
 
-  /* セット稼働状況カードスタイル */
+  /* セット稼働状況 */
   .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
@@ -628,7 +627,6 @@
   }
   .carpool-title { font-weight: bold; color: #34d399; margin-bottom: 4px; }
 
-  /* 削除ボタン */
   .btn-del-single {
     background: rgba(239, 68, 68, 0.15);
     border: 1px solid rgba(239, 68, 68, 0.3);
@@ -664,7 +662,6 @@
     color: #fff;
   }
 
-  /* 管理者用カードスタイル */
   .admin-edit-card {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
@@ -693,7 +690,6 @@
     width: auto;
   }
 
-  /* 認証モーダル */
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -720,7 +716,6 @@
 </head>
 <body>
 
-<!-- 個別認証ゲートモーダル（未認証時に全画面ブロック） -->
 <div id="gate-modal" class="modal-overlay hidden">
   <div class="modal-content" style="text-align:center;">
     <div style="font-size:28px; margin-bottom:8px;">🔒</div>
@@ -751,7 +746,6 @@
       ✓ 参加情報を送信しました！回答ありがとうございます。
     </div>
 
-    <!-- 認証済みメンバー表示バナー -->
     <div class="auth-user-bar" id="auth-banner" style="display:none;">
       <span>👤 ログイン中: <span class="auth-user-name" id="auth-display-name"></span></span>
       <span class="auth-user-reauth" onclick="resetUserAuth()">コード再入力</span>
@@ -760,25 +754,21 @@
     <div class="card">
       <form id="attendance-form" onsubmit="submitAttendance(event)">
         
-        <!-- 参加者氏名 -->
         <div class="form-group">
           <label>参加者氏名<span class="required">*</span></label>
           <input type="text" id="field-name" placeholder="例：内宮修造" required>
 
-          <!-- 代理回答トグル -->
           <label class="proxy-toggle-wrap">
             <input type="checkbox" id="field-is-proxy" onchange="toggleProxyInput(this.checked)">
             <span>代理で回答する（本人以外が入力する場合）</span>
           </label>
         </div>
 
-        <!-- 代理回答者氏名入力枠（チェック時のみ展開） -->
         <div class="form-group hidden" id="proxy-name-group">
           <label>代理回答者氏名<span class="required">*</span></label>
           <input type="text" id="field-proxy-name" placeholder="代理で入力されている方のお名前">
         </div>
 
-        <!-- 参加希望日程：コンパクトバー -->
         <div class="form-group">
           <label>参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" onclick="openCalendarPopup()">
@@ -787,10 +777,8 @@
           </div>
         </div>
 
-        <!-- 日程ごとの動的設定エリア -->
         <div id="days-config-container"></div>
 
-        <!-- お連れ様・同伴者 -->
         <div class="form-group">
           <label>お連れ様・同伴者（見学・補助等）</label>
           <div class="companion-row">
@@ -806,7 +794,6 @@
           </div>
         </div>
 
-        <!-- 備考・その他ご要望 -->
         <div class="form-group">
           <label>備考・その他ご要望</label>
           <textarea id="field-note" rows="2" placeholder="その他ご要望があればご記入ください。"></textarea>
@@ -822,7 +809,7 @@
     <div class="card" id="rules-display-container"></div>
   </div>
 
-  <!-- 3. セット稼働状況ページ（ステージ別） -->
+  <!-- 3. セット稼働状況ページ -->
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
@@ -837,15 +824,12 @@
   <!-- 4. 管理者専用画面 -->
   <div id="view-admin" class="hidden">
     <div class="card">
-      
-      <!-- 管理者サブラビゲーション -->
       <div class="admin-subnav">
         <button class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 参加状況</button>
         <button class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット設定</button>
         <button class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
       </div>
 
-      <!-- サブタブ1: 参加集計 -->
       <div id="admin-subview-attendance">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
@@ -855,13 +839,11 @@
           <div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>
         </div>
 
-        <!-- 回答の全件一括削除ボタン -->
         <div class="admin-clear-all-wrap">
           <button type="button" class="btn-clear-all" onclick="clearAllAttendance()">⚠️ 回答データを全件削除（リセット）</button>
         </div>
       </div>
 
-      <!-- サブタブ2: セット稼働設定 -->
       <div id="admin-subview-obstacles" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">⚙️ セット稼働状況の編集</h2>
@@ -877,7 +859,6 @@
         </form>
       </div>
 
-      <!-- サブタブ3: 注意事項編集（赤字強調・太字・下線の3種） -->
       <div id="admin-subview-rules" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">📜 注意事項の編集</h2>
@@ -892,7 +873,6 @@
           <button type="submit" class="btn-submit" id="btn-save-rules" style="margin-top:14px;">💾 注意事項を保存する</button>
         </form>
       </div>
-
     </div>
   </div>
 
@@ -937,15 +917,10 @@
 </div>
 
 <script>
-// ★Google Apps ScriptのURL（ご自身のURLに差し替えてください）
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
-
-// 管理者PIN設定
 const ADMIN_PIN = "7978815";
-
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 
-// 注意事項データ（初期デフォルト値）
 let ruleSections = [
   {
     title: "⚠️ 安全・怪我の防止",
@@ -973,7 +948,6 @@ let ruleSections = [
   }
 ];
 
-// ステージ別セットデータ（初期デフォルト値）
 let stageData = [
   {
     stage: "1st STAGE",
@@ -1037,7 +1011,6 @@ window.addEventListener('DOMContentLoaded', () => {
   loadRemoteRules();
 });
 
-// 個別コードによるアクセスチェック
 function checkGateAccess() {
   const savedName = localStorage.getItem('uchimiya_auth_user');
   if (savedName) {
@@ -1051,7 +1024,6 @@ function checkGateAccess() {
   }, 150);
 }
 
-// GASと照合してコードを検証
 async function verifyGateCode() {
   const inputEl = document.getElementById('gate-code-input');
   const btn = document.getElementById('btn-gate-verify');
@@ -1085,7 +1057,6 @@ async function verifyGateCode() {
   }
 }
 
-// 認証成功時のユーザー設定
 function applyAuthenticatedUser(name) {
   const nameField = document.getElementById('field-name');
   const proxyCheckbox = document.getElementById('field-is-proxy');
@@ -1102,7 +1073,6 @@ function applyAuthenticatedUser(name) {
   }
 }
 
-// コードの再入力（別メンバー切り替え）
 function resetUserAuth() {
   if (confirm("認証情報をリセットして、別のコードを入力しますか？")) {
     localStorage.removeItem('uchimiya_auth_user');
@@ -1111,7 +1081,6 @@ function resetUserAuth() {
   }
 }
 
-// 代理回答入力枠の切り替え
 function toggleProxyInput(checked) {
   const group = document.getElementById('proxy-name-group');
   const proxyInput = document.getElementById('field-proxy-name');
@@ -1134,7 +1103,6 @@ function toggleProxyInput(checked) {
   }
 }
 
-// 注意事項の装飾フォーマット関数
 function formatRuleItem(text, title) {
   let str = escapeHtml(text);
 
@@ -1305,7 +1273,6 @@ async function loadRemoteObstacles() {
   } catch(e) {}
 }
 
-// ユーザー向けセット稼働状況のレンダリング（注意マークなし「理由：」）
 function renderStageGroups() {
   const container = document.getElementById('stage-groups-container');
   if (!container) return;
@@ -1604,7 +1571,6 @@ function renderDaysConfigCards() {
             </label>
           </div>
 
-          <!-- 自車の車種選択 -->
           <div id="car-box-${d}" class="conditional-box hidden">
             <label style="font-size:11px; margin-bottom:4px;">車種（台数把握のため）<span class="required">*</span></label>
             <select class="field-car-type">
@@ -1614,10 +1580,9 @@ function renderDaysConfigCards() {
             </select>
           </div>
 
-          <!-- 乗り合いの代表者名 ＆ 乗り合い車両の車種選択 -->
           <div id="share-box-${d}" class="conditional-box hidden">
             <label style="font-size:11px; margin-bottom:4px;">相乗り代表者（運転者）のお名前<span class="required">*</span></label>
-            <input type="text" class="field-car-leader" placeholder="本名・スペースなしで入力（例：内宮修造）" style="margin-bottom:8px;">
+            <input type="text" class="field-car-leader" placeholder="例：内宮号" style="margin-bottom:8px;">
             
             <label style="font-size:11px; margin-bottom:4px;">相乗り車両の車種<span class="required">*</span></label>
             <select class="field-carpool-type">
@@ -1715,7 +1680,7 @@ async function submitAttendance(e) {
     } else if (transportVal.includes("乗り合い")) {
       carLeader = card.querySelector('.field-car-leader').value.trim().replace(/\s+/g, '');
       if (!carLeader) {
-        alert(`${formatDateLabel(d)} の相乗り代表者（運転者）のお名前をスペースなしでご記入ください。`);
+        alert(`${formatDateLabel(d)} の相乗り代表者（運転者）のお名前をご記入ください。`);
         return;
       }
       carType = card.querySelector('.field-carpool-type').value;
@@ -1820,23 +1785,20 @@ async function verifyAdminPin() {
   }
 }
 
-// 日付ラベルの整形（UTC変換による1日ズレを完全に防ぐセーフパーサー）
+// タイムゾーンによるズレを完全に排除した日付ラベル生成関数
 function formatDateLabel(dateStr) {
   if (!dateStr) return "日程未指定";
   
-  // 1. "YYYY-MM-DD" や "YYYY/MM/DD"、"YYYY.MM.DD" から直接年・月・日を抽出
   const match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
   if (match) {
     const y = parseInt(match[1], 10);
     const m = parseInt(match[2], 10);
     const d = parseInt(match[3], 10);
-    // ローカルタイムでDateオブジェクトを初期化
     const dt = new Date(y, m - 1, d);
     const w = isNaN(dt.getDay()) ? "" : `(${weekDays[dt.getDay()]})`;
     return `${m}月${d}日${w}`;
   }
 
-  // 2. ISO文字列などのフォールバック（Tで分割して日付部分のみ抽出）
   if (String(dateStr).includes('T')) {
     const isoDatePart = String(dateStr).split('T')[0];
     const isoMatch = isoDatePart.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
@@ -1853,14 +1815,25 @@ function formatDateLabel(dateStr) {
   return String(dateStr);
 }
 
-// 同伴者人数のパース用ヘルパー関数
+function normalizeDateKey(dateStr) {
+  if (!dateStr) return "未指定";
+  const match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (match) {
+    const y = match[1];
+    const m = String(match[2]).padStart(2, '0');
+    const d = String(match[3]).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  return String(dateStr);
+}
+
 function parseCompanionCount(str) {
   if (!str) return 0;
   const match = String(str).match(/(\d+)/);
   return match ? parseInt(match[1], 10) : 0;
 }
 
-// 参加集計データの取得（参加者一覧を日付直下に配置、その下に相乗りグループを表示）
+// 参加集計データの取得（日付 ➔ 参加者一覧 ➔ 相乗りリスト の順に描画）
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
@@ -1878,9 +1851,9 @@ async function fetchAdminData() {
 
     const groups = {};
     list.forEach(item => {
-      const d = item.date || "未指定";
-      if (!groups[d]) groups[d] = [];
-      groups[d].push(item);
+      const key = normalizeDateKey(item.date);
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(item);
     });
 
     const sortedDates = Object.keys(groups).sort();
@@ -1914,7 +1887,6 @@ async function fetchAdminData() {
         }
       });
 
-      // 乗り合い代表者の車両カウント
       Object.keys(carpoolMap).forEach(leader => {
         const alreadyCountedAsOwnCar = countedCars.some(c => c.owner === leader);
         if (!alreadyCountedAsOwnCar) {
@@ -1941,7 +1913,7 @@ async function fetchAdminData() {
 
       html += `
         <div class="admin-date-group">
-          <!-- 1. 日付ヘッダー ＆ 集計サマリー -->
+          <!-- 1. 日付ヘッダー ＆ サマリー -->
           <div class="admin-date-header">
             <span>📅 ${formatDateLabel(date)}</span>
             <div class="admin-head-badges">
@@ -1956,7 +1928,7 @@ async function fetchAdminData() {
             <span>🚗 <b>車両計: <span class="car-stat-badge">${totalCars}台</span></b> (普通: ${carsStandard}台 / 軽: ${carsLight}台${carsOther > 0 ? ` / 他: ${carsOther}台` : ''})</span>
           </div>
 
-          <!-- 2. 日付直下：参加者カード一覧（氏名・時間・手段） -->
+          <!-- 2. 日付直下：参加者カード一覧 -->
       `;
 
       members.forEach(m => {
@@ -1991,7 +1963,7 @@ async function fetchAdminData() {
         `;
       });
 
-      // 3. 参加者一覧の下：相乗り同乗者グループ・号車リスト
+      // 3. 参加者一覧の下：相乗り同乗者グループ
       if (Object.keys(carpoolMap).length > 0) {
         html += `
           <div class="carpool-group">
@@ -2014,7 +1986,6 @@ async function fetchAdminData() {
   }
 }
 
-// 1件削除（GET通信で直接行番号を消去）
 async function deleteSingleAttendance(name, date, rowIndex) {
   if (!confirm(`「${name}」さんの ${formatDateLabel(date)} の回答を削除しますか？`)) {
     return;
@@ -2042,7 +2013,6 @@ async function deleteSingleAttendance(name, date, rowIndex) {
   }
 }
 
-// 全件クリア（GET通信）
 async function clearAllAttendance() {
   if (!confirm("【警告】本当にすべての回答データを削除しますか？\n（この操作は元に戻せません）")) {
     return;
