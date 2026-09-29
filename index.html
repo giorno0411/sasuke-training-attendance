@@ -159,6 +159,7 @@
     font-size: 11px;
   }
 
+  /* 他プレイヤー・同伴者追加用カードUI */
   .entry-card {
     background: rgba(11, 15, 25, 0.65);
     border: 1px dashed rgba(255, 255, 255, 0.2);
@@ -199,6 +200,7 @@
     gap: 6px;
   }
 
+  /* 追加ボタン */
   .btn-add-entry {
     background: rgba(30, 41, 59, 0.8);
     border: 1px dashed var(--accent);
@@ -456,6 +458,7 @@
     display: none;
   }
 
+  /* 注意事項（・サイズ3px） */
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -503,6 +506,7 @@
     text-underline-offset: 3px;
   }
 
+  /* セット稼働状況 */
   .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
@@ -577,6 +581,7 @@
     border-left-color: #ef4444;
   }
 
+  /* 管理者画面 */
   .admin-subnav {
     display: flex;
     gap: 4px;
@@ -1156,14 +1161,13 @@ let calYear, calMonth;
 const selectedDates = new Set();
 let registeredRecords = [];
 
-// 号車統合マッピング辞書
+// 号車統合マッピング
 let carpoolMergeMap = {};
 try {
   const savedMap = localStorage.getItem('uchimiya_carpool_merge_map');
   if (savedMap) carpoolMergeMap = JSON.parse(savedMap);
 } catch(e) {}
 
-// 号車選択肢の一時保持オブジェクト（HTML属性へのJSON埋め込み構文エラーを防止）
 const adminDateExistingCars = {};
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -1366,7 +1370,7 @@ function formatRuleItem(text, title) {
     '<span class="urgent-highlight">ぜひ積極的なお手伝いをお願いいたします！</span>'
   );
 
-  if (title.includes("駐車場") && str.includes("駐車レイアウト")) {
+  if (title && title.includes("駐車場") && str.includes("駐車レイアウト")) {
     str += `
       <div style="margin: 10px 0 6px 0;">
         <a href="parking-layout.png" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">
@@ -1818,7 +1822,7 @@ function renderDaysConfigCards() {
   }
 
   let html = '';
-  arr.forEach((d, idx) => {
+  arr.forEach((d) => {
     html += `
       <div class="day-config-card" data-date="${d}">
         <div class="day-config-title">
@@ -2257,7 +2261,7 @@ function normalizeCarpoolKey(str) {
   return s;
 }
 
-// 号車統合モーダルを開く（安全なキャッシュ配列から参照）
+// 号車統合モーダル処理
 let currentMergeTarget = { date: '', rawLeader: '' };
 
 function openMergeCarModalByDate(date, rawLeader) {
@@ -2383,7 +2387,7 @@ async function fetchAdminData() {
           });
         }
 
-        if (m.transport.includes("乗り合い") && m.carLeader) {
+        if (m.transport && m.transport.includes("乗り合い") && m.carLeader) {
           const leaderRaw = String(m.carLeader).trim();
           const baseKey = normalizeCarpoolKey(leaderRaw);
 
@@ -2429,7 +2433,6 @@ async function fetchAdminData() {
       const totalCars = countedCarsMap.size;
       const grandTotalPeople = playerTotal + companionTotal;
 
-      // 日付ごとの号車リストを安全に保持
       adminDateExistingCars[date] = Object.keys(carpoolMap);
 
       html += `
@@ -2469,9 +2472,9 @@ async function fetchAdminData() {
 
         let badgeCls = 'transport-other';
         if (m.transport === '自車') badgeCls = 'transport-car';
-        else if (m.transport.includes('乗り合い')) badgeCls = 'transport-share';
-        else if (m.transport.includes('バス')) badgeCls = 'transport-bus';
-        else if (m.transport.includes('タクシー')) badgeCls = 'transport-taxi';
+        else if (m.transport && m.transport.includes('乗り合い')) badgeCls = 'transport-share';
+        else if (m.transport && m.transport.includes('バス')) badgeCls = 'transport-bus';
+        else if (m.transport && m.transport.includes('タクシー')) badgeCls = 'transport-taxi';
 
         const carInfo = m.carType ? ` (${m.carType})` : '';
         const hasCompanion = m.companionCount && m.companionCount !== '0名';
@@ -2490,8 +2493,8 @@ async function fetchAdminData() {
                 <span class="member-name">${escapeHtml(m.name)}</span>
               </div>
               <div style="display:flex; align-items:center; gap:6px;">
-                <span class="badge-transport ${badgeCls}">${escapeHtml(m.transport)}${escapeHtml(carInfo)}</span>
-                <button type="button" class="btn-del-single" onclick="deleteSingleAttendance('${escapeHtml(m.name)}', '${escapeHtml(m.date)}', ${m.rowIndex || 0})">🗑️ 削除</button>
+                <span class="badge-transport ${badgeCls}">${escapeHtml(m.transport || 'その他')}${escapeHtml(carInfo)}</span>
+                <button type="button" class="btn-del-single" onclick="deleteSingleAttendance('${escapeJsString(m.name)}', '${escapeJsString(m.date)}', ${m.rowIndex || 0})">🗑️ 削除</button>
               </div>
             </div>
             <div style="font-size:12px; color:#38bdf8;">⏰ ${escapeHtml(m.time || '時間指定なし')}</div>
@@ -2502,7 +2505,7 @@ async function fetchAdminData() {
         `;
       });
 
-      // 3. 参加者一覧の下：相乗り同乗者グループ（安全な呼び出し引数に修正）
+      // 3. 参加者一覧の下：相乗り同乗者グループ
       if (Object.keys(carpoolMap).length > 0) {
         html += `
           <div class="carpool-group">
@@ -2517,9 +2520,9 @@ async function fetchAdminData() {
                     ・<b>${escapeHtml(carpoolDisplayNames[k])}</b> [${escapeHtml(carpoolCarTypes[k] \vert{}\vert{} '普通車')}] (${carpoolMap[k].length}名同乗): ${escapeHtml(carpoolMap[k].join(', '))}${isMerged ? `<span style="font-size:10px; color:#60a5fa; margin-left:4px;">(統合済)</span>` : ''}
                   </div>
                   <div>
-                    <button type="button" class="btn-merge-car" onclick="openMergeCarModalByDate('${date}', '${escapeHtml(k)}')">✏️ 統合・変更</button>
+                    <button type="button" class="btn-merge-car" onclick="openMergeCarModalByDate('${escapeJsString(date)}', '${escapeJsString(k)}')">✏️ 統合・変更</button>
                     ${isMerged ? origKeys.filter(ok => carpoolMergeMap[`${date}:::${ok}`]).map(ok => `
-                      <button type="button" class="btn-unmerge-car" onclick="unmergeCar('${date}', '${escapeHtml(ok)}')">↩️ 解除</button>
+                      <button type="button" class="btn-unmerge-car" onclick="unmergeCar('${escapeJsString(date)}', '${escapeJsString(ok)}')">↩️ 解除</button>
                     `).join('') : ''}
                   </div>
                 </div>
@@ -2592,6 +2595,11 @@ async function clearAllAttendance() {
 function escapeHtml(str) {
   if (!str) return "";
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function escapeJsString(str) {
+  if (!str) return "";
+  return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
 </script>
 </body>
