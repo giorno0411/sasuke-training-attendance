@@ -279,7 +279,7 @@
     border-radius: 12px;
     padding: 20px;
     width: 100%;
-    max-width: 320px;
+    max-width: 340px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
   }
 
@@ -1008,22 +1008,16 @@
 
 <!-- 号車統合モーダル -->
 <div id="merge-car-modal" class="modal-overlay">
-  <div class="modal-content" style="max-width:340px;">
-    <h3 style="margin-top:0; font-size:15px;">🚗 相乗り号車の統合・名称変更</h3>
-    <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">
-      対象：<b id="merge-target-original-name" style="color:#f8fafc;"></b><br>
-      別の既存号車と合流させるか、統一された新しい号車名を入力してください。
-    </p>
+  <div class="modal-content">
+    <h3 style="margin-top:0; font-size:15px;">🚗 相乗り号車の統合・名称統一</h3>
     
-    <label style="font-size:11px; color:#cbd5e1;">既存の号車を選択して合流</label>
-    <select id="merge-select-existing" style="margin-bottom:10px; font-size:13px;">
-      <option value="">-- 新しい名前を直接入力 --</option>
-    </select>
+    <label style="font-size:11px; color:#cbd5e1; margin-top:8px;">統一前の号車名（参加者回答）</label>
+    <div id="merge-target-original-name" style="color:#f8fafc; font-weight:bold; font-size:14px; margin-bottom:12px; padding:6px 10px; background:rgba(0,0,0,0.3); border-radius:6px;"></div>
+    
+    <label style="font-size:11px; color:#cbd5e1;">既存号車を選択して統一</label>
+    <select id="merge-select-existing" style="margin-bottom:10px; font-size:13px;"></select>
 
-    <label style="font-size:11px; color:#cbd5e1;">統一後の号車名</label>
-    <input type="text" id="merge-new-name-input" placeholder="例：内宮号" style="margin-bottom:14px;">
-
-    <div style="display:flex; gap:8px;">
+    <div style="display:flex; gap:8px; margin-top:10px;">
       <button type="button" class="tab-btn" id="btn-merge-cancel" style="border:1px solid var(--border);">キャンセル</button>
       <button type="button" class="btn-submit" id="btn-merge-submit" style="margin:0; padding:8px;">統合する</button>
     </div>
@@ -1668,9 +1662,9 @@ function renderAdminRulesEditor() {
     html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">';
     html += '<label style="font-size:11px; color:#cbd5e1; margin:0;">本文（選択して装飾ボタン）</label>';
     html += '<div style="display:flex; gap:5px;">';
-    html += '<button type="button" class="tab-btn btn-fmt" data-idx="' + idx + '" data-type="red" style="padding:3px 8px; font-size:11px; color:#ef4444; border:1px solid rgba(239,68,68,0.4);">🔴 赤字強調</button>';
-    html += '<button type="button" class="tab-btn btn-fmt" data-idx="' + idx + '" data-type="b" style="padding:3px 8px; font-size:11px; font-weight:bold; border:1px solid var(--border);">B</button>';
-    html += '<button type="button" class="tab-btn btn-fmt" data-idx="' + idx + '" data-type="u" style="padding:3px 8px; font-size:11px; text-decoration:underline; border:1px solid var(--border);">U</button>';
+    html += '<button type="button" class="tab-btn btn-fmt" data-idx="' + idx + '" data-type="red" style="padding:3px 8px; font-size:11px; color:#ef4444; border:1px solid rgba(239,68,68,0.4);" onclick="return false;">🔴 赤字強調</button>';
+    html += '<button type="button" class="tab-btn btn-fmt" data-idx="' + idx + '" data-type="b" style="padding:3px 8px; font-size:11px; font-weight:bold; border:1px solid var(--border);" onclick="return false;">B</button>';
+    html += '<button type="button" class="tab-btn btn-fmt" data-idx="' + idx + '" data-type="u" style="padding:3px 8px; font-size:11px; text-decoration:underline; border:1px solid var(--border);" onclick="return false;">U</button>';
     html += '</div></div>';
     html += '<textarea id="rule-content-' + idx + '" class="rule-content-input" data-idx="' + idx + '" rows="4" style="font-size:12px; line-height:1.5;">' + escapeHtml(sec.content) + '</textarea>';
     html += '</div>';
@@ -1903,7 +1897,7 @@ function fetchAdminData() {
               if (!carpoolMap[finalLeaderKey]) {
                 carpoolMap[finalLeaderKey] = [];
                 carpoolCarTypes[finalLeaderKey] = m.carType || "普通車";
-                carpoolDisplayNames[finalLeaderKey] = finalLeaderKey + "号";
+                carpoolDisplayNames[finalLeaderKey] = finalLeaderKey + "号車";
                 carpoolOriginalKeys[finalLeaderKey] = [];
               }
               carpoolMap[finalLeaderKey].push(m.name);
@@ -1992,7 +1986,7 @@ function fetchAdminData() {
           html += '</div></div>';
           html += '<div style="font-size:12px; color:#38bdf8;">⏰ ' + escapeHtml(m.time || '時間指定なし') + '</div>';
           if (displayedLeader) {
-            html += '<div style="font-size:12px; color:#34d399;">🤝 相乗り: ' + escapeHtml(displayedLeader) + '号</div>';
+            html += '<div style="font-size:12px; color:#34d399;">🤝 相乗り: ' + escapeHtml(displayedLeader) + '号車</div>';
           }
           if (hasCompanion) {
             html += '<div style="font-size:12px; color:#cbd5e1;">👥 同伴: ' + escapeHtml(m.companionCount) + ' (' + escapeHtml(m.companionNames) + ')</div>';
@@ -2053,23 +2047,18 @@ function fetchAdminData() {
           var leader = this.getAttribute('data-leader');
           currentMergeTarget = { date: date, rawLeader: leader };
           var title = document.getElementById('merge-target-original-name');
-          if (title) title.innerText = leader + "号";
+          if (title) title.innerText = leader + "号車";
 
           var existingOptions = adminDateExistingCars[date] || [];
           var sel = document.getElementById('merge-select-existing');
           if (sel) {
-            sel.innerHTML = '<option value="">-- 新しい名前を直接入力 --</option>';
+            var optsHtml = '';
             existingOptions.forEach(function(opt) {
-              if (opt !== leader) {
-                var el = document.createElement('option');
-                el.value = opt;
-                el.innerText = opt + "号 に合流";
-                sel.appendChild(el);
-              }
+              optsHtml += '<option value="' + opt + '" ' + (opt === leader ? 'selected' : '') + '>' + opt + '号車</option>';
             });
+            optsHtml += '<option value="__ADD_CUSTOM__">＋ 任意で新しい号車名を追加…</option>';
+            sel.innerHTML = optsHtml;
           }
-          var nameInput = document.getElementById('merge-new-name-input');
-          if (nameInput) nameInput.value = leader;
           showModal('merge-car-modal');
         };
       });
@@ -2078,7 +2067,7 @@ function fetchAdminData() {
         btn.onclick = function() {
           var date = this.getAttribute('data-date');
           var leader = this.getAttribute('data-leader');
-          if (confirm("「" + leader + "号」の統合を解除し、元の入力に戻しますか？")) {
+          if (confirm("「" + leader + "号車」の統合を解除し、元の入力に戻しますか？")) {
             delete carpoolMergeMap[date + ":::" + leader];
             localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap));
             fetchAdminData();
@@ -2091,20 +2080,17 @@ function fetchAdminData() {
     });
 }
 
-// すべてのイベントリスナーを安全にバインド
 window.addEventListener('DOMContentLoaded', function() {
   updateTriggerDisplay();
   renderRulesDisplay();
   renderStageGroups();
   checkGateAccess();
 
-  // 認証関連
   var btnGate = document.getElementById('btn-gate-verify');
   if (btnGate) btnGate.onclick = verifyGateCode;
   var btnReset = document.getElementById('btn-reset-auth');
   if (btnReset) btnReset.onclick = resetUserAuth;
 
-  // タブ
   var tbf = document.getElementById('tab-btn-form');
   if (tbf) tbf.onclick = function() { switchTab('form'); };
   var tbc = document.getElementById('tab-btn-column');
@@ -2112,7 +2098,6 @@ window.addEventListener('DOMContentLoaded', function() {
   var tbs = document.getElementById('tab-btn-status');
   if (tbs) tbs.onclick = function() { switchTab('status'); };
 
-  // 管理者サブタブ
   var btnSubAtt = document.getElementById('admin-sub-btn-att');
   if (btnSubAtt) btnSubAtt.onclick = function() { switchAdminSubTab('attendance'); };
   var btnSubRules = document.getElementById('admin-sub-btn-rules');
@@ -2120,7 +2105,6 @@ window.addEventListener('DOMContentLoaded', function() {
   var btnSubObs = document.getElementById('admin-sub-btn-obs');
   if (btnSubObs) btnSubObs.onclick = function() { switchAdminSubTab('obstacles'); };
 
-  // カレンダー
   var bar = document.getElementById('date-picker-bar');
   if (bar) bar.onclick = openCalendarPopup;
   var calDone = document.getElementById('btn-cal-done');
@@ -2132,13 +2116,11 @@ window.addEventListener('DOMContentLoaded', function() {
   var calModal = document.getElementById('cal-popup-modal');
   if (calModal) calModal.onclick = closeCalendarPopup;
 
-  // 追加ボタン
   var btnAddP = document.getElementById('btn-add-player');
   if (btnAddP) btnAddP.onclick = function() { addOtherPlayerCard(); };
   var btnAddC = document.getElementById('btn-add-companion');
   if (btnAddC) btnAddC.onclick = function() { addCompanionCard(); };
 
-  // 管理者モーダル
   var btnOpenAdmin = document.getElementById('btn-open-admin');
   if (btnOpenAdmin) btnOpenAdmin.onclick = function() {
     showModal('admin-modal');
@@ -2166,7 +2148,6 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // 管理者操作
   var btnRefresh = document.getElementById('btn-refresh-admin');
   if (btnRefresh) btnRefresh.onclick = fetchAdminData;
   var btnClearAll = document.getElementById('btn-clear-all-data');
@@ -2180,7 +2161,6 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // 注意事項追加・保存
   var btnAddRuleSec = document.getElementById('btn-add-rule-sec');
   if (btnAddRuleSec) btnAddRuleSec.onclick = function() {
     syncRulesData();
@@ -2206,7 +2186,6 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   };
 
-  // セット設定保存
   var obsForm = document.getElementById('admin-obs-form');
   if (obsForm) obsForm.onsubmit = function(e) {
     e.preventDefault();
@@ -2225,34 +2204,49 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   };
 
-  // 号車統合モーダル
   var mergeSel = document.getElementById('merge-select-existing');
-  if (mergeSel) mergeSel.onchange = function() {
-    var inp = document.getElementById('merge-new-name-input');
-    if (this.value && inp) inp.value = this.value;
-  };
+  if (mergeSel) {
+    mergeSel.onchange = function() {
+      if (this.value === '__ADD_CUSTOM__') {
+        var inputName = prompt("追加したい号車名を入力してください（例：高須）");
+        if (inputName && inputName.trim()) {
+          var cleanName = normalizeCarpoolKey(inputName.trim());
+          var newOpt = document.createElement('option');
+          newOpt.value = cleanName;
+          newOpt.innerText = cleanName + "号車";
+          this.insertBefore(newOpt, this.lastElementChild);
+          this.value = cleanName;
+        } else {
+          this.selectedIndex = 0;
+        }
+      }
+    };
+  }
+
   var btnMergeCancel = document.getElementById('btn-merge-cancel');
   if (btnMergeCancel) btnMergeCancel.onclick = function() { hideModal('merge-car-modal'); };
+  
   var btnMergeSubmit = document.getElementById('btn-merge-submit');
-  if (btnMergeSubmit) btnMergeSubmit.onclick = function() {
-    var inp = document.getElementById('merge-new-name-input');
-    var newName = inp ? inp.value.trim().replace(/(号車|号|車)$/g, '') : '';
-    if (!newName) {
-      alert("統合先の号車名を入力してください。");
-      return;
-    }
-    var key = currentMergeTarget.date + ":::" + currentMergeTarget.rawLeader;
-    carpoolMergeMap[key] = newName;
-    localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap));
-    hideModal('merge-car-modal');
-    fetchAdminData();
-  };
+  if (btnMergeSubmit) {
+    btnMergeSubmit.onclick = function() {
+      var sel = document.getElementById('merge-select-existing');
+      var chosenName = sel ? sel.value : '';
+      if (!chosenName || chosenName === '__ADD_CUSTOM__') {
+        alert("統一先の号車名を選択してください。");
+        return;
+      }
+      var cleanTarget = normalizeCarpoolKey(chosenName);
+      var key = currentMergeTarget.date + ":::" + currentMergeTarget.rawLeader;
+      carpoolMergeMap[key] = cleanTarget;
+      localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap));
+      hideModal('merge-car-modal');
+      fetchAdminData();
+    };
+  }
 
-  // フォーム送信
   var form = document.getElementById('attendance-form');
   if (form) form.onsubmit = submitAttendance;
 
-  // リモートデータ取得
   setTimeout(function() {
     fetch(GAS_URL + "?type=obstacles&t=" + Date.now())
       .then(function(res) { return res.json(); })
@@ -2278,7 +2272,11 @@ window.addEventListener('DOMContentLoaded', function() {
         }
       }).catch(function() {});
 
-    fetchRegisteredAttendance().catch(function() {});
+    fetch(GAS_URL + "?type=attendance&t=" + Date.now())
+      .then(function(res) { return res.json(); })
+      .then(function(list) {
+        if (Array.isArray(list)) registeredRecords = list;
+      }).catch(function() {});
   }, 100);
 });
 
@@ -2484,7 +2482,11 @@ function submitAttendance(e) {
     updateTriggerDisplay();
     renderDaysConfigCards();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    fetchRegisteredAttendance().catch(function() {});
+    fetch(GAS_URL + "?type=attendance&t=" + Date.now())
+      .then(function(res) { return res.json(); })
+      .then(function(list) {
+        if (Array.isArray(list)) registeredRecords = list;
+      }).catch(function() {});
   })
   .catch(function() {
     alert("送信に失敗しました。電波環境を確認してください。");
