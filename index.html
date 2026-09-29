@@ -476,7 +476,7 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 24px;
-    width: 260px;
+    width: 240px;
     text-align: center;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
   }
@@ -705,23 +705,32 @@
     flex-wrap: wrap;
   }
 
-  /* 開催 / 中止 トグルスイッチ */
+  /* 開催 / 中止 トグルスイッチ（上下完全中央揃え） */
   .status-toggle-box {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
-    padding: 3px 8px;
+    padding: 2px 8px;
     border-radius: 6px;
     font-size: 11px;
+    height: 24px;
+    line-height: 1;
   }
   .status-toggle-label {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 3px;
     cursor: pointer;
     font-weight: bold;
+    margin: 0;
+    line-height: 1;
+  }
+  .status-toggle-label input {
+    margin: 0;
+    vertical-align: middle;
   }
 
   .admin-card-stats {
@@ -1053,7 +1062,11 @@
 
         <div class="form-group">
           <label>お連れ様・同伴者（見学等の非プレイヤー）</label>
-          <p style="font-size:11px; color:var(--text-sub); margin:0 0 6px 0;">お連れ様がいる場合は追加し、役割・人数・交通手段を選択してください。</p>
+          <p style="font-size:11px; color:var(--text-sub); margin:0 0 6px 0; line-height:1.5;">
+            お連れ様がいる場合は追加し、続柄・人数・交通手段を選択してください。<br>
+            ※ご家族が複数名の場合は代表者をご記入ください（例：内宮花子）<br>
+            ※スタッフやトレーナーの方をお呼びする場合は会社名等は省き、お名前をご入力ください（例：山本さん、田中様／苗字のみも可能です）。
+          </p>
           <div id="companions-container"></div>
           <button type="button" class="btn-add-entry-cyan" id="btn-add-companion">
             <span>＋ 同伴者を追加する</span>
@@ -1223,12 +1236,11 @@
   </div>
 </div>
 
-<!-- 送信中砂時計モーダル -->
+<!-- 砂時計プログレスモーダル（全処理共通） -->
 <div id="submit-progress-modal" class="modal-overlay">
   <div class="progress-modal-box">
     <div class="hourglass-icon">⏳</div>
-    <div id="progress-status-text" style="font-size:13px; font-weight:bold; color:#f8fafc;">送信中...</div>
-    <div style="font-size:11px; color:var(--text-sub); margin-top:4px;">スプレッドシートへ書き込んでいます</div>
+    <div id="progress-status-text" style="font-size:13px; font-weight:bold; color:#f8fafc;">データ処理中...</div>
     <div class="progress-bar-wrap">
       <div id="progress-bar-inner" class="progress-bar-fill"></div>
     </div>
@@ -1356,14 +1368,12 @@ var calMonth = new Date().getMonth();
 var selectedDates = new Set();
 var registeredRecords = [];
 
-// 開催・中止トグル状態の保持マップ { '2026-03-29': 'canceled' }
 var dateStatusMap = {};
 try {
   var savedStatus = localStorage.getItem('uchimiya_date_status_map');
   if (savedStatus) dateStatusMap = JSON.parse(savedStatus);
 } catch(e) {}
 
-// キャッシュ復元
 try {
   var savedRecords = localStorage.getItem('uchimiya_cached_records');
   if (savedRecords) registeredRecords = JSON.parse(savedRecords);
@@ -1383,6 +1393,34 @@ try {
 
 var currentMergeTarget = { date: '', rawLeader: '' };
 var currentFeedbackTarget = '';
+var globalProgressTimer = null;
+
+function showProgressModal(text) {
+  var modal = document.getElementById('submit-progress-modal');
+  var txt = document.getElementById('progress-status-text');
+  var bar = document.getElementById('progress-bar-inner');
+  if (txt) txt.innerText = text || "データ処理中...";
+  if (bar) bar.style.width = '25%';
+  if (modal) modal.style.display = 'flex';
+
+  clearInterval(globalProgressTimer);
+  globalProgressTimer = setInterval(function() {
+    var cur = parseInt(bar.style.width) || 25;
+    if (cur < 85) bar.style.width = (cur + 15) + '%';
+  }, 300);
+}
+
+function finishProgressModal(successText, callback) {
+  clearInterval(globalProgressTimer);
+  var txt = document.getElementById('progress-status-text');
+  var bar = document.getElementById('progress-bar-inner');
+  if (bar) bar.style.width = '100%';
+  if (txt) txt.innerText = successText || "完了しました！";
+  setTimeout(function() {
+    hideModal('submit-progress-modal');
+    if (callback) callback();
+  }, 400);
+}
 
 function escapeHtml(str) {
   if (!str) return "";
@@ -1657,24 +1695,21 @@ function normalizeDateKey(dateStr) {
   return String(dateStr);
 }
 
-// 汎用姓名分離（半角/全角スペース・敬称・文字数を正しく解釈し、姓のみを100%取り出す）
+// 汎用姓名分離（苗字を100%抽出）
 function extractLastName(str) {
   if (!str) return "";
   var s = String(str).trim();
-  
-  // 1. カッコ書き（例：「（同伴:〇〇行）」など）を除去
   s = s.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').trim();
-
-  // 2. 末尾の敬称や「号車」などの装飾を除去
   s = s.replace(/(号車|号|車|くん|さん|君|様|ちゃん)$/g, '').trim();
 
-  // 3. 半角スペース・全角スペース・連続空白で分割し、先頭の「姓」を取り出す
   var parts = s.split(/[\s ]+/);
   if (parts.length > 1 && parts[0]) {
     return parts[0].trim();
   }
 
-  // 4. スペースが入っていなかった場合の汎用フォールバック
+  if (s.indexOf('内宮') === 0) return '内宮';
+  if (s.indexOf('石川') === 0) return '石川';
+
   if (s.length === 3 || s.length === 4) {
     return s.substring(0, 2);
   }
@@ -1689,6 +1724,37 @@ function normalizeCarpoolKey(str) {
   if (!str) return "";
   var lastName = extractLastName(str);
   return lastName.replace(/(号車|号|車)$/g, '').trim();
+}
+
+// 同伴者が自車の場合の号車表記抽出（内宮（花子）号車、山本号車など「さん」は除去）
+function formatCompanionCarName(rawName) {
+  if (!rawName) return "同伴号車";
+  var s = String(rawName).trim();
+  var m = s.match(/（同伴:(.*?)行）/) || s.match(/\(同伴:(.*?)行\)/);
+  var baseHostName = m ? m[1] : "";
+  var hostLastName = baseHostName ? extractLastName(baseHostName) : "";
+
+  var compOnly = s.replace(/（同伴:.*?行）/g, '').replace(/\(同伴:.*?行\)/g, '').trim();
+  compOnly = compOnly.replace(/(号車|号|車)$/g, '').trim();
+
+  var parts = compOnly.split(/[\s ]+/);
+  if (parts.length > 1) {
+    var cLast = parts[0];
+    var cFirst = parts.slice(1).join('').replace(/(くん|さん|君|様|ちゃん)$/g, '').trim();
+    if (hostLastName && cLast === hostLastName) {
+      return cLast + "（" + cFirst + "）号車";
+    }
+    return cLast + "号車";
+  }
+
+  if (hostLastName && compOnly.indexOf(hostLastName) === 0 && compOnly.length > hostLastName.length) {
+    var cFirst = compOnly.substring(hostLastName.length).replace(/(くん|さん|君|様|ちゃん)$/g, '').trim();
+    return hostLastName + "（" + cFirst + "）号車";
+  }
+
+  // 「山本さん」「田中様」などの敬称を削って「山本号車」「田中号車」にする
+  var cleanName = compOnly.replace(/(くん|さん|君|様|ちゃん)$/g, '').trim();
+  return cleanName + "号車";
 }
 
 function parseCompanionCount(str) {
@@ -1790,7 +1856,6 @@ function renderDaysConfigCards() {
   });
 }
 
-// 他参加者（プレイヤー）の「姓」「名」分割入力
 function addOtherPlayerCard(lastName, firstName, transport, carType) {
   lastName = lastName || '';
   firstName = firstName || '';
@@ -1855,7 +1920,7 @@ function addCompanionCard(name, role, count, transport, carType) {
 
   var html = '';
   html += '<div class="entry-card-top">';
-  html += '<input type="text" class="field-companion-item-name" placeholder="例：内宮 花子（家族）、田中さん（スタッフ）、山本くん（友人）" value="' + escapeHtml(name) + '" required style="margin:0; flex:1; font-size:12px;">';
+  html += '<input type="text" class="field-companion-item-name" placeholder="例：内宮花子、山本さん、田中様" value="' + escapeHtml(name) + '" required style="margin:0; flex:1; font-size:12px;">';
   html += '<button type="button" class="btn-remove-entry">✕</button>';
   html += '</div>';
   html += '<div class="entry-card-sub-row">';
@@ -2399,7 +2464,6 @@ function loadRemoteFeedbacks() {
     });
 }
 
-// 開催・中止の切り替え
 function toggleDateExecutionStatus(date, status) {
   dateStatusMap[date] = status;
   try {
@@ -2412,7 +2476,6 @@ function toggleDateExecutionStatus(date, status) {
   }
 }
 
-// 参加状況データの描画
 function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   if (!container) return;
@@ -2462,12 +2525,21 @@ function renderAdminAttendanceHTML(list) {
       }
 
       if (m.transport === "自車") {
-        var lastNameOnly = normalizeCarpoolKey(m.name);
-        countedCarsMap.set(lastNameOnly, {
-          type: m.carType || "普通車",
-          owner: lastNameOnly + "号車",
-          isCompanion: isCompanionVehicle
-        });
+        if (isCompanionVehicle) {
+          var compCarTitle = formatCompanionCarName(m.name);
+          countedCarsMap.set("COMPANION_" + m.name, {
+            type: m.carType || "普通車",
+            owner: compCarTitle,
+            isCompanion: true
+          });
+        } else {
+          var lastNameOnly = normalizeCarpoolKey(m.name);
+          countedCarsMap.set(lastNameOnly, {
+            type: m.carType || "普通車",
+            owner: lastNameOnly + "号車",
+            isCompanion: false
+          });
+        }
       }
 
       if (m.transport && m.transport.includes("乗り合い") && m.carLeader) {
@@ -2519,7 +2591,7 @@ function renderAdminAttendanceHTML(list) {
     html += '<div style="display:flex; align-items:center; gap:8px;">';
     html += '<span>📅 ' + formatDateLabel(date) + '</span>';
     
-    // 開催・中止判定トグル
+    // 開催・中止トグル（完全センター合わせ）
     html += '<div class="status-toggle-box">';
     html += '<label class="status-toggle-label" style="color:#34d399;">';
     html += '<input type="radio" name="exec-status-' + date + '" value="active" ' + (!isDateCanceled ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'active\')"> 開催';
@@ -2671,14 +2743,17 @@ function renderAdminAttendanceHTML(list) {
         return;
       }
 
+      showProgressModal("一括削除中...");
       Promise.all(rows.map(function(r) {
         return fetch(GAS_URL + "?type=delete_single&rowIndex=" + r + "&t=" + Date.now()).then(function(res){ return res.json(); });
       })).then(function() {
-        alert("選択した " + names.length + " 件を削除しました。");
-        fetchAdminData(true);
+        finishProgressModal("削除完了！", function() {
+          fetchAdminData(true);
+        });
       }).catch(function() {
-        alert("削除中に通信エラーが発生しました。最新化してご確認ください。");
-        fetchAdminData(true);
+        finishProgressModal("通信エラーが発生しました", function() {
+          fetchAdminData(true);
+        });
       });
     };
   });
@@ -2704,11 +2779,13 @@ function renderAdminAttendanceHTML(list) {
       var date = this.getAttribute('data-date');
       var row = Number(this.getAttribute('data-row'));
       if (confirm("「" + name + "」さんの " + formatDateLabel(date) + " の回答を削除しますか？")) {
+        showProgressModal("削除中...");
         fetch(GAS_URL + "?type=delete_single&rowIndex=" + row + "&t=" + Date.now())
           .then(function(res) { return res.json(); })
           .then(function() {
-            alert("削除しました。");
-            fetchAdminData(true);
+            finishProgressModal("削除完了！", function() {
+              fetchAdminData(true);
+            });
           });
       }
     };
@@ -2758,10 +2835,12 @@ function fetchAdminData(forceRefresh) {
   var container = document.getElementById('admin-data-container');
   if (!container) return;
 
-  if (!forceRefresh && registeredRecords && registeredRecords.length > 0) {
-    renderAdminAttendanceHTML(registeredRecords);
+  if (forceRefresh) {
+    showProgressModal("最新データを取得中...");
   } else if (!registeredRecords || registeredRecords.length === 0) {
     container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
+  } else {
+    renderAdminAttendanceHTML(registeredRecords);
   }
 
   fetch(GAS_URL + "?type=attendance&t=" + Date.now())
@@ -2772,8 +2851,10 @@ function fetchAdminData(forceRefresh) {
         try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
         renderAdminAttendanceHTML(registeredRecords);
       }
+      if (forceRefresh) finishProgressModal("更新完了！");
     })
     .catch(function() {
+      if (forceRefresh) finishProgressModal("通信に失敗しました");
       if (!registeredRecords || registeredRecords.length === 0) {
         container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:15px;">データの取得に失敗しました</div>';
       }
@@ -2861,10 +2942,12 @@ window.addEventListener('DOMContentLoaded', function() {
   var btnClearAll = document.getElementById('btn-clear-all-data');
   if (btnClearAll) btnClearAll.onclick = function() {
     if (confirm("本当にすべての回答データを削除しますか？\n（この操作は元に戻せません）")) {
+      showProgressModal("全データをリセット中...");
       fetch(GAS_URL + "?type=clear_all&t=" + Date.now())
         .then(function() {
-          alert("すべての回答データを消去しました。");
-          fetchAdminData(true);
+          finishProgressModal("全件削除完了！", function() {
+            fetchAdminData(true);
+          });
         });
     }
   };
@@ -2879,8 +2962,7 @@ window.addEventListener('DOMContentLoaded', function() {
   if (rulesForm) rulesForm.onsubmit = function(e) {
     e.preventDefault();
     syncRulesData();
-    var btn = document.getElementById('btn-save-rules');
-    if (btn) { btn.disabled = true; btn.innerText = "保存中..."; }
+    showProgressModal("注意事項を保存中...");
     fetch(GAS_URL, {
       method: "POST",
       mode: "no-cors",
@@ -2888,18 +2970,16 @@ window.addEventListener('DOMContentLoaded', function() {
       body: JSON.stringify({ action: "update_rules", rules: ruleSections })
     }).then(function() {
       renderRulesDisplay();
-      alert("注意事項を更新・保存しました！");
-    }).finally(function() {
-      if (btn) { btn.disabled = false; btn.innerText = "💾 注意事項を保存する"; }
+      finishProgressModal("注意事項を保存しました！");
+    }).catch(function() {
+      finishProgressModal("保存に失敗しました");
     });
   };
 
   var obsForm = document.getElementById('admin-obs-form');
   if (obsForm) obsForm.onsubmit = function(e) {
     e.preventDefault();
-    var btn = document.getElementById('btn-save-obs');
-    if (btn) { btn.disabled = true; btn.innerText = "保存中..."; }
-    
+    showProgressModal("セット稼働状況を保存中...");
     try { localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData)); } catch(e){}
 
     fetch(GAS_URL, {
@@ -2909,14 +2989,18 @@ window.addEventListener('DOMContentLoaded', function() {
       body: JSON.stringify({ action: "update_obstacles", stages: stageData })
     }).then(function() {
       renderStageGroups();
-      alert("セット稼働状況・写真を更新・保存しました！");
-    }).finally(function() {
-      if (btn) { btn.disabled = false; btn.innerText = "💾 セット稼働状況を保存する"; }
+      finishProgressModal("稼働状況を保存しました！");
+    }).catch(function() {
+      finishProgressModal("保存に失敗しました");
     });
   };
 
   var btnRefFeedbacks = document.getElementById('btn-refresh-feedbacks');
-  if (btnRefFeedbacks) btnRefFeedbacks.onclick = loadRemoteFeedbacks;
+  if (btnRefFeedbacks) btnRefFeedbacks.onclick = function() {
+    showProgressModal("要望を読み込み中...");
+    loadRemoteFeedbacks();
+    setTimeout(function() { finishProgressModal("更新完了！"); }, 500);
+  };
 
   var btnCloseViewer = document.getElementById('btn-viewer-close');
   if (btnCloseViewer) btnCloseViewer.onclick = function() { hideModal('photo-viewer-modal'); };
@@ -2934,9 +3018,8 @@ window.addEventListener('DOMContentLoaded', function() {
         alert("ご要望・ご意見を入力してください。");
         return;
       }
-      this.disabled = true;
-      this.innerText = "送信中...";
-      var self = this;
+      hideModal('feedback-modal');
+      showProgressModal("ご要望を送信中...");
       fetch(GAS_URL, {
         method: "POST",
         mode: "no-cors",
@@ -2949,11 +3032,9 @@ window.addEventListener('DOMContentLoaded', function() {
           date: new Date().toLocaleDateString('ja-JP')
         })
       }).then(function() {
-        alert("ご要望を送信しました！管理者が確認いたします。");
-        hideModal('feedback-modal');
-      }).finally(function() {
-        self.disabled = false;
-        self.innerText = "送信する";
+        finishProgressModal("送信完了！確認いたします。");
+      }).catch(function() {
+        finishProgressModal("送信に失敗しました");
       });
     };
   }
@@ -3053,12 +3134,15 @@ window.addEventListener('DOMContentLoaded', function() {
     fetch(GAS_URL + "?type=attendance&t=" + Date.now())
       .then(function(res) { return res.json(); })
       .then(function(list) {
-        if (Array.isArray(list)) registeredRecords = list;
+        if (Array.isArray(list)) {
+          registeredRecords = list;
+          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
+        }
       }).catch(function() {});
   }, 100);
 });
 
-// 送信処理（砂時計プログレス表示＋安心の通信完了検知）
+// 送信処理（砂時計プログレス表示＋高速通信）
 function submitAttendance(e) {
   e.preventDefault();
   var arr = Array.from(selectedDates).sort();
@@ -3078,7 +3162,7 @@ function submitAttendance(e) {
   document.querySelectorAll('.other-player-card').forEach(function(c) {
     var last = c.querySelector('.field-other-player-last').value.trim();
     var first = c.querySelector('.field-other-player-first').value.trim();
-    var full = last + (firstName ? ' ' + first : '');
+    var full = last + (first ? ' ' + first : '');
     var t = c.querySelector('.field-other-player-transport').value;
     var ct = t === '自車' ? c.querySelector('.field-other-player-car-type').value : '';
     if (last || first) {
@@ -3251,19 +3335,8 @@ function submitAttendance(e) {
     });
   });
 
-  // 砂時計プログレスバーの表示開始
-  showModal('submit-progress-modal');
-  var progBar = document.getElementById('progress-bar-inner');
-  var progText = document.getElementById('progress-status-text');
-  progBar.style.width = '20%';
-  progText.innerText = "データを送信中...";
+  showProgressModal("データ送信中...");
 
-  var progTimer = setInterval(function() {
-    var cur = parseInt(progBar.style.width) || 20;
-    if (cur < 85) progBar.style.width = (cur + 15) + '%';
-  }, 350);
-
-  // 通信実行
   Promise.all(payloads.map(function(p) {
     return fetch(GAS_URL, {
       method: "POST",
@@ -3273,12 +3346,7 @@ function submitAttendance(e) {
     });
   }))
   .then(function() {
-    clearInterval(progTimer);
-    progBar.style.width = '100%';
-    progText.innerText = "✓ 送信完了！";
-
-    setTimeout(function() {
-      hideModal('submit-progress-modal');
+    finishProgressModal("✓ 送信完了！", function() {
       var sMsg = document.getElementById('success-msg');
       if (sMsg) sMsg.style.display = 'block';
       var aForm = document.getElementById('attendance-form');
@@ -3299,14 +3367,15 @@ function submitAttendance(e) {
       fetch(GAS_URL + "?type=attendance&t=" + Date.now())
         .then(function(res) { return res.json(); })
         .then(function(list) {
-          if (Array.isArray(list)) registeredRecords = list;
+          if (Array.isArray(list)) {
+            registeredRecords = list;
+            try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
+          }
         }).catch(function() {});
-    }, 450);
+    });
   })
   .catch(function() {
-    clearInterval(progTimer);
-    hideModal('submit-progress-modal');
-    alert("送信に失敗しました。電波環境を確認してください。");
+    finishProgressModal("送信に失敗しました");
   });
 }
 </script>
