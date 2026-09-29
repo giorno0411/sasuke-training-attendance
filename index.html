@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>U PARK PORTAL</title>
+
+<!-- OGP設定（LINE・SNS等でのリンク共有プレビュー用） -->
+<meta property="og:title" content="U PARK PORTAL">
+<meta property="og:description" content="内宮パーク 合宿・合同トレーニング専用ポータル">
+<meta property="og:type" content="website">
+<meta name="twitter:title" content="U PARK PORTAL">
+<meta name="twitter:description" content="内宮パーク 合宿・合同トレーニング専用ポータル">
+
 <style>
   :root {
     --bg: #0b0f19;
@@ -83,10 +91,11 @@
     background: transparent;
     border: none;
     color: var(--text-sub);
-    padding: 8px 4px;
+    padding: 8px 3px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: clamp(11px, 3.1vw, 12.5px);
     font-weight: bold;
+    letter-spacing: -0.2px;
     transition: all 0.2s;
     text-align: center;
     white-space: nowrap;
@@ -1016,7 +1025,7 @@
   </header>
 
   <div class="tab-nav">
-    <button type="button" class="tab-btn active" id="tab-btn-form">✍️ 参加回答</button>
+    <button type="button" class="tab-btn active" id="tab-btn-form">✍️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column">📜 注意事項</button>
     <button type="button" class="tab-btn" id="tab-btn-status">⚙️ セット稼働状況</button>
   </div>
@@ -1056,9 +1065,9 @@
         </div>
 
         <div class="form-group">
-          <label>参加希望日程（タップして選択）<span class="required">*</span></label>
+          <label>合トレ参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" id="date-picker-bar">
-            <div id="date-picker-display" class="date-bar-text">📅 参加希望日程をタップして選択...</div>
+            <div id="date-picker-display" class="date-bar-text">📅 合トレ参加希望日程をタップして選択...</div>
             <span style="font-size:18px;">🗓️</span>
           </div>
         </div>
@@ -1668,7 +1677,7 @@ function updateTriggerDisplay() {
   var arr = Array.from(selectedDates).sort();
   if (arr.length === 0) {
     display.className = "date-bar-text";
-    display.innerText = "📅 参加希望日程をタップして選択...";
+    display.innerText = "📅 合トレ参加希望日程をタップして選択...";
     return;
   }
   display.className = "date-pills-wrap";
@@ -2740,7 +2749,6 @@ function renderAdminAttendanceHTML(list) {
 
   container.innerHTML = html;
 
-  // チェックボックス・一括削除のイベント結びつけ
   container.querySelectorAll('.batch-select-all').forEach(function(allCb) {
     allCb.onchange = function() {
       var d = this.getAttribute('data-date');
@@ -3189,7 +3197,7 @@ function submitAttendance(e) {
   e.preventDefault();
   var arr = Array.from(selectedDates).sort();
   if (arr.length === 0) {
-    alert("参加希望日程を1つ以上選択してください。");
+    alert("合トレ参加希望日程を1つ以上選択してください。");
     openCalendarPopup();
     return;
   }
