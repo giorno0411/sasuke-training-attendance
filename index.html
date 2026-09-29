@@ -1,0 +1,2501 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>内宮パーク 合トレ参加確認</title>
+<style>
+  :root {
+    --bg: #0b0f19;
+    --card-bg: rgba(22, 31, 48, 0.88);
+    --border: rgba(255, 255, 255, 0.12);
+    --text: #f8fafc;
+    --text-sub: #94a3b8;
+    --accent: #ef4444;
+    --accent-hover: #dc2626;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --cyan: #06b6d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif;
+    background-color: var(--bg);
+    background-image: linear-gradient(rgba(11, 15, 25, 0.82), rgba(11, 15, 25, 0.90)), url('bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: var(--text);
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  .container { width: 100%; max-width: 580px; position: relative; z-index: 1; }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 2px 14px 2px;
+    gap: 8px;
+  }
+  h1 { 
+    font-size: 19px; 
+    margin: 0; 
+    font-weight: 800; 
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+    flex: 1;
+    line-height: 1.3;
+  }
+
+  .admin-trigger {
+    flex-shrink: 0;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    backdrop-filter: blur(4px);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    padding: 4px;
+    border-radius: 8px;
+    margin: 4px 0 16px 0;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-sub);
+    padding: 8px 4px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.2s;
+    text-align: center;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: rgba(30, 41, 59, 0.9);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  }
+
+  .form-group { margin-bottom: 15px; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #cbd5e1;
+    margin-bottom: 6px;
+  }
+  .required { color: var(--accent); margin-left: 3px; }
+  
+  input[type="text"], input[type="password"], select, textarea {
+    width: 100%;
+    background: rgba(11, 15, 25, 0.75);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus { 
+    border-color: var(--accent); 
+    background: rgba(11, 15, 25, 0.95);
+  }
+
+  .auth-user-bar {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+  .auth-user-name {
+    font-weight: bold;
+    color: #34d399;
+  }
+  .auth-user-reauth {
+    color: #94a3b8;
+    text-decoration: underline;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .entry-card {
+    background: rgba(11, 15, 25, 0.65);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .entry-card.companion-card {
+    border-color: rgba(6, 182, 212, 0.35);
+  }
+  .entry-card-top {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .entry-card-sub-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .btn-remove-entry {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .entry-transport-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .btn-add-entry {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px dashed var(--accent);
+    color: #fca5a5;
+    width: 100%;
+    padding: 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    cursor: pointer;
+  }
+  .btn-add-entry-cyan {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px dashed var(--cyan);
+    color: #67e8f9;
+    width: 100%;
+    padding: 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    cursor: pointer;
+  }
+
+  .date-bar-input {
+    background: rgba(11, 15, 25, 0.75);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 42px;
+    cursor: pointer;
+  }
+  .date-bar-text {
+    font-size: 13px;
+    color: var(--text-sub);
+  }
+  .date-pills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .date-selected-pill {
+    background: rgba(239, 68, 68, 0.25);
+    border: 1px solid var(--accent);
+    color: #fca5a5;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    justify-content: center;
+    align-items: center;
+    z-index: 100000;
+    padding: 16px;
+  }
+
+  .modal-content {
+    background: #161f30;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 320px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+  }
+
+  .mini-cal-box {
+    background: #151d2c;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    width: 290px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+  }
+  .mini-cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .mini-cal-header-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #f8fafc;
+  }
+  .mini-cal-nav-btn {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .mini-cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--text-sub);
+    margin-bottom: 6px;
+  }
+  .mini-cal-weekdays .sun { color: #f87171; }
+  .mini-cal-weekdays .sat { color: #60a5fa; }
+  .mini-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .mini-cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border-radius: 6px;
+    user-select: none;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .mini-cal-day.disabled {
+    opacity: 0.18;
+    cursor: not-allowed;
+    background: transparent;
+  }
+  .mini-cal-day.today { border-color: #38bdf8; }
+  .mini-cal-day.selected {
+    background: rgba(239, 68, 68, 0.45) !important;
+    border-color: var(--accent) !important;
+    color: #fff !important;
+    font-weight: bold;
+  }
+  .mini-cal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .mini-cal-done-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .day-config-card {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .day-config-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #fca5a5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+
+  .radio-pill-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .radio-pill-label {
+    background: rgba(11, 15, 25, 0.75);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 6px;
+    font-size: 12px;
+    text-align: center;
+    user-select: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .radio-pill-label input { display: none; }
+  .radio-pill-label.checked {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: var(--accent);
+    color: #fca5a5;
+  }
+
+  .time-custom-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .conditional-box {
+    margin-top: 8px;
+    padding: 10px;
+    background: rgba(11, 15, 25, 0.6);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+  }
+
+  .btn-submit {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    margin-top: 6px;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    cursor: pointer;
+  }
+  .btn-submit:active { background: var(--accent-hover); }
+
+  .submit-success-box {
+    background: rgba(6, 78, 59, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid #10b981;
+    color: #a7f3d0;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 14px;
+    display: none;
+  }
+
+  .column-section { margin-bottom: 18px; }
+  .column-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+    border-left: 3px solid var(--accent);
+    padding-left: 8px;
+    margin-bottom: 8px;
+  }
+  .column-body {
+    font-size: 13px;
+    color: #cbd5e1;
+    line-height: 1.65;
+    background: rgba(11, 15, 25, 0.65);
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .column-body ul { 
+    margin: 0; 
+    padding-left: 0; 
+    list-style: none;
+  }
+  .column-body li { 
+    position: relative;
+    padding-left: 14px; 
+    margin-bottom: 8px; 
+  }
+  .column-body li:last-child { margin-bottom: 0; }
+  .column-body li::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 10px;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background-color: var(--text-sub);
+  }
+
+  .urgent-highlight {
+    color: #ef4444;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .stage-section { margin-bottom: 18px; }
+  .stage-header {
+    font-size: 13px;
+    font-weight: 800;
+    color: #93c5fd;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding-left: 4px;
+    border-left: 3px solid #3b82f6;
+  }
+  .obstacle-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .obstacle-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .obstacle-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .obstacle-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f8fafc;
+  }
+  .status-badge {
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .status-active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  .status-tuning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  .status-pause {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  .obstacle-note-box {
+    font-size: 11px;
+    line-height: 1.45;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.25);
+    border-left: 3px solid #f59e0b;
+    color: #e2e8f0;
+  }
+  .obstacle-note-box.pause {
+    border-left-color: #ef4444;
+  }
+
+  .admin-subnav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+  .admin-sub-btn {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+    padding: 7px 4px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .admin-sub-btn.active {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: var(--accent);
+    color: #fca5a5;
+  }
+
+  .admin-date-group { margin-bottom: 22px; }
+  .admin-date-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(30, 41, 59, 0.95);
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    border-left: 4px solid var(--accent);
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .admin-head-badges {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .admin-card-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 11px;
+    margin-bottom: 8px;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 7px 10px;
+    border-radius: 6px;
+    color: #94a3b8;
+  }
+  .car-stat-badge { color: #60a5fa; font-weight: bold; }
+  .people-stat-badge { color: #fca5a5; font-weight: bold; }
+
+  .car-breakdown-box {
+    background: rgba(30, 58, 138, 0.15);
+    border: 1px solid rgba(96, 165, 250, 0.25);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .car-breakdown-title {
+    font-weight: bold;
+    color: #93c5fd;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .car-breakdown-item {
+    margin-bottom: 3px;
+    color: #cbd5e1;
+    line-height: 1.4;
+  }
+
+  .admin-member-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .member-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .member-name { font-size: 14px; font-weight: bold; }
+  
+  .badge-transport {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .transport-car { background: #1e3a8a; color: #93c5fd; }
+  .transport-share { background: #064e3b; color: #a7f3d0; }
+  .transport-bus { background: #701a75; color: #f5d0fe; }
+  .transport-taxi { background: #854d0e; color: #fef08a; }
+  .transport-other { background: #334155; color: #cbd5e1; }
+
+  .carpool-group {
+    background: rgba(6, 78, 59, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 8px 0 6px 0;
+    font-size: 12px;
+  }
+  .carpool-title { font-weight: bold; color: #34d399; margin-bottom: 6px; }
+
+  .carpool-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    padding-bottom: 3px;
+    border-bottom: 1px dashed rgba(255,255,255,0.06);
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .btn-merge-car {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #34d399;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .btn-unmerge-car {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 4px;
+    cursor: pointer;
+  }
+
+  .btn-del-single {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .admin-clear-all-wrap {
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+    text-align: center;
+  }
+  .btn-clear-all {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .admin-edit-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .admin-obs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .admin-obs-name {
+    font-size: 13px;
+    font-weight: bold;
+    color: #f8fafc;
+  }
+  .admin-obs-select {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    background: #0f172a;
+    border: 1px solid var(--border);
+    color: #fff;
+    width: auto;
+  }
+
+  .order-btn-group {
+    display: flex;
+    gap: 4px;
+  }
+  .btn-order-move {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+    padding: 2px 7px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- 個別認証ゲートモーダル -->
+<div id="gate-modal" class="modal-overlay">
+  <div class="modal-content" style="text-align:center;">
+    <div style="font-size:28px; margin-bottom:8px;">🔒</div>
+    <h3 style="margin:0 0 6px 0; font-size:16px;">関係者限定アクセス</h3>
+    <p style="font-size:12px; color:var(--text-sub); margin-bottom:14px; line-height:1.5;">
+      本フォームは招待メンバー専用です。<br>案内された「個別コード」を入力してください。
+    </p>
+    <input type="password" id="gate-code-input" inputmode="numeric" autocomplete="off" placeholder="個別コードを入力" style="margin-bottom:12px; text-align:center;">
+    <button type="button" class="btn-submit" id="btn-gate-verify" style="margin:0; padding:10px;">認証して入場 ↵</button>
+  </div>
+</div>
+
+<div class="container">
+  <header>
+    <h1>内宮パーク 合トレ参加確認</h1>
+    <button type="button" class="admin-trigger" id="btn-open-admin">🔒 管理者</button>
+  </header>
+
+  <div class="tab-nav">
+    <button type="button" class="tab-btn active" id="tab-btn-form">✍️ 参加回答</button>
+    <button type="button" class="tab-btn" id="tab-btn-column">📜 注意事項</button>
+    <button type="button" class="tab-btn" id="tab-btn-status">⚙️ セット稼働状況</button>
+  </div>
+
+  <!-- 1. 参加送信フォーム -->
+  <div id="view-form">
+    <div class="submit-success-box" id="success-msg">
+      ✓ 参加情報を送信しました！回答ありがとうございます。
+    </div>
+
+    <div class="auth-user-bar" id="auth-banner" style="display:none;">
+      <span>👤 ログイン中: <span class="auth-user-name" id="auth-display-name"></span></span>
+      <span class="auth-user-reauth" id="btn-reset-auth">コード再入力</span>
+    </div>
+
+    <div class="card">
+      <form id="attendance-form">
+        
+        <div class="form-group">
+          <label>参加者（プレイヤー）氏名<span class="required">*</span></label>
+          <input type="text" id="field-name" placeholder="例：内宮修造" required>
+        </div>
+
+        <div class="form-group">
+          <label>他参加者（プレイヤー）氏名</label>
+          <div id="other-players-container"></div>
+          <button type="button" class="btn-add-entry" id="btn-add-player">
+            <span>＋ 他の参加者（プレイヤー）を追加する</span>
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label>参加希望日程（タップして選択）<span class="required">*</span></label>
+          <div class="date-bar-input" id="date-picker-bar">
+            <div id="date-picker-display" class="date-bar-text">📅 参加希望日程をタップして選択...</div>
+            <span style="font-size:18px;">🗓️</span>
+          </div>
+        </div>
+
+        <div id="days-config-container"></div>
+
+        <div class="form-group">
+          <label>お連れ様・同伴者（見学等の非プレイヤー）</label>
+          <p style="font-size:11px; color:var(--text-sub); margin:0 0 6px 0;">お連れ様がいる場合は追加し、役割・人数・交通手段を選択してください。</p>
+          <div id="companions-container"></div>
+          <button type="button" class="btn-add-entry-cyan" id="btn-add-companion">
+            <span>＋ 同伴者を追加する</span>
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label>備考・その他ご要望</label>
+          <textarea id="field-note" rows="2" placeholder="その他ご要望があればご記入ください。"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-submit-form">参加情報を送信する ↵</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. 注意事項ページ -->
+  <div id="view-column" class="hidden">
+    <div class="card" id="rules-display-container"></div>
+  </div>
+
+  <!-- 3. セット稼働状況ページ -->
+  <div id="view-status" class="hidden">
+    <div class="card">
+      <div style="margin-bottom: 14px;">
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
+        <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。</p>
+      </div>
+      <div id="stage-groups-container"></div>
+    </div>
+  </div>
+
+  <!-- 4. 管理者専用画面 -->
+  <div id="view-admin" class="hidden">
+    <div class="card">
+      <div class="admin-subnav">
+        <button type="button" class="admin-sub-btn active" id="admin-sub-btn-att">👥 参加状況</button>
+        <button type="button" class="admin-sub-btn" id="admin-sub-btn-rules">📜 注意事項編集</button>
+        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs">⚙️ セット稼働状況編集</button>
+      </div>
+
+      <div id="admin-subview-attendance">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
+          <button type="button" class="tab-btn" id="btn-refresh-admin" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 最新化</button>
+        </div>
+        <div id="admin-data-container">
+          <div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>
+        </div>
+
+        <div class="admin-clear-all-wrap">
+          <button type="button" class="btn-clear-all" id="btn-clear-all-data">⚠️ 回答データを全件削除（リセット）</button>
+        </div>
+      </div>
+
+      <div id="admin-subview-rules" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="font-size:15px; margin:0;">📜 注意事項の編集</h2>
+          <button type="button" class="tab-btn" id="btn-reload-rules" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
+        </div>
+        <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
+          文字を選択して装飾ボタンを押せます。改行で箇条書きになります。順序は「▲」「▼」で入れ替えられます。
+        </p>
+
+        <form id="admin-rules-form">
+          <div id="admin-rules-edit-list"></div>
+          
+          <button type="button" class="btn-add-entry" id="btn-add-rule-sec" style="margin: 10px 0 16px 0; padding:10px;">
+            <span>＋ 新しい注意事項項目を追加する</span>
+          </button>
+
+          <button type="submit" class="btn-submit" id="btn-save-rules">💾 注意事項を保存する</button>
+        </form>
+
+        <div style="margin-top:24px; padding-top:16px; border-top:1px dashed var(--border);">
+          <div style="font-size:13px; font-weight:bold; color:#93c5fd; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <span>👁️ 公開プレビュー（ユーザー画面と同じ表示）</span>
+          </div>
+          <div id="rules-live-preview-container"></div>
+        </div>
+      </div>
+
+      <div id="admin-subview-obstacles" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="font-size:15px; margin:0;">⚙️ セット稼働状況の編集</h2>
+          <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
+        </div>
+        <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
+          ステータスや停止時の理由を入力し、一番下の「保存」を押してください。
+        </p>
+
+        <form id="admin-obs-form">
+          <div id="admin-obstacle-edit-list"></div>
+          <button type="submit" class="btn-submit" id="btn-save-obs" style="margin-top:14px;">💾 セット稼働状況を保存する</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ミニカレンダーポップアップ -->
+<div id="cal-popup-modal" class="modal-overlay">
+  <div class="mini-cal-box" id="cal-box-inner">
+    <div class="mini-cal-header">
+      <button type="button" class="mini-cal-nav-btn" id="btn-cal-prev">‹ 前月</button>
+      <div class="mini-cal-header-title" id="cal-month-year"></div>
+      <button type="button" class="mini-cal-nav-btn" id="btn-cal-next">翌月 ›</button>
+    </div>
+    <div class="mini-cal-weekdays">
+      <span class="sun">日</span>
+      <span>月</span>
+      <span>火</span>
+      <span>水</span>
+      <span>木</span>
+      <span>金</span>
+      <span class="sat">土</span>
+    </div>
+    <div class="mini-cal-grid" id="cal-days-grid"></div>
+    <div class="mini-cal-footer">
+      <span id="cal-popup-count" style="font-size:11px; color:#94a3b8;">0日選択中</span>
+      <button type="button" class="mini-cal-done-btn" id="btn-cal-done">決定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 管理者認証モーダル -->
+<div id="admin-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0; font-size:15px;">🔒 管理者ログイン</h3>
+    <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">管理者パスワードを入力してください。</p>
+    <input type="password" id="admin-pin-input" inputmode="text" autocomplete="off" placeholder="パスワードを入力" style="margin-bottom:12px;">
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="tab-btn" id="btn-admin-cancel" style="border:1px solid var(--border);">キャンセル</button>
+      <button type="button" class="btn-submit" id="btn-admin-login" style="margin:0; padding:8px;">ログイン</button>
+    </div>
+  </div>
+</div>
+
+<!-- 号車統合モーダル -->
+<div id="merge-car-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width:340px;">
+    <h3 style="margin-top:0; font-size:15px;">🚗 相乗り号車の統合・名称変更</h3>
+    <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">
+      対象：<b id="merge-target-original-name" style="color:#f8fafc;"></b><br>
+      別の既存号車と合流させるか、統一された新しい号車名を入力してください。
+    </p>
+    
+    <label style="font-size:11px; color:#cbd5e1;">既存の号車を選択して合流</label>
+    <select id="merge-select-existing" style="margin-bottom:10px; font-size:13px;">
+      <option value="">-- 新しい名前を直接入力 --</option>
+    </select>
+
+    <label style="font-size:11px; color:#cbd5e1;">統一後の号車名</label>
+    <input type="text" id="merge-new-name-input" placeholder="例：内宮号" style="margin-bottom:14px;">
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="tab-btn" id="btn-merge-cancel" style="border:1px solid var(--border);">キャンセル</button>
+      <button type="button" class="btn-submit" id="btn-merge-submit" style="margin:0; padding:8px;">統合する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
+var ADMIN_PIN = "okpl";
+var weekDays = ["日", "月", "火", "水", "木", "金", "土"];
+
+var ruleSections = [
+  {
+    title: "⚠️ 安全・怪我の防止",
+    content: "練習前は関節や筋肉のストレッチ、ウォーミングアップを入念に行ってください。\nトライ前は着地ポイントにマットがあるか、ズレや隙間がないかを必ず確認してください。また、マットを一時的に移動した場合は、使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。\nパーク内での怪我や事故につきましては、原則として自己責任の上でご参加ください。万が一に備え、各自でスポーツ安全保険等への加入を推奨します。"
+  },
+  {
+    title: "🚗 駐車場・アクセスルール",
+    content: "お車でお越しの方は、下記「駐車レイアウト」をご参照し、指定の駐車エリアへ奥から詰めて駐車をお願いいたします。\n渋滞等で到着が遅れる場合は、必ず事前にご連絡をお願いいたします。"
+  },
+  {
+    title: "👟 シューズ・服装について",
+    content: "パーク内は砂が多く、靴やウェア等が汚れやすい環境です。練習着とは別に、替えの靴・靴下・着替えをご持参いただくことを強く推奨します。\n「そり立つ壁」の滑り止めシート等、一部のエリアでは靴底（ソール）が激しく摩耗する可能性がありますので、練習用シューズの着用をおすすめします。"
+  },
+  {
+    title: "📦 備品について",
+    content: "チョークや松脂スプレー等の消耗品は、各自でご持参いただけると大変助かります。※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。\n現地のプロテクターを使用する際は、必ず正しい手順にて装着してください。（例：膝プロテクターは靴を脱いでから着用する）\nテーピングや衣類等の忘れ物が非常に多いため、合トレ終了の1時間ほど前から余裕を持って片付け始めることを推奨します。"
+  },
+  {
+    title: "🧹 施設利用のマナー",
+    content: "出たゴミは、各自でお持ち帰りのご協力をお願いいたします。\n近隣住民の方へのご挨拶等、気持ちの良いコミュニケーションを心がけていただけますと幸いです。\nエリアのセット準備や片付けは、皆様のご協力によってスムーズに進みます。ぜひ積極的なお手伝いをお願いいたします！"
+  },
+  {
+    title: "📌 その他",
+    content: "合トレメンバー確定後、当日のスケジュール共有や事務連絡用に、グループラインを作成させていただきます。\n本フォームは関係者限定となりますので、招待されていない方へのリンク転送・共有はご遠慮ください。"
+  }
+];
+
+var stageData = [
+  {
+    stage: "1st STAGE",
+    items: [
+      { name: "新プリズムシーソー", status: "active", note: "" },
+      { name: "ローリングヒル上り", status: "active", note: "" },
+      { name: "ローリングヒル下り", status: "active", note: "" },
+      { name: "フィッシュボーンリバース", status: "active", note: "" },
+      { name: "ドラゴングライダー", status: "active", note: "" },
+      { name: "タックル", status: "active", note: "" },
+      { name: "そり立つ壁", status: "active", note: "" }
+    ]
+  },
+  {
+    stage: "2nd STAGE",
+    items: [
+      { name: "2nd用サーモンラダー", status: "active", note: "" },
+      { name: "スパイダーラン～ドロップ", status: "active", note: "" },
+      { name: "ウォールリフティング", status: "active", note: "" }
+    ]
+  },
+  {
+    stage: "3rd STAGE",
+    items: [
+      { name: "フライングバー", status: "active", note: "" },
+      { name: "サイドワインダー（回転）", status: "active", note: "" },
+      { name: "サイドワインダー（落下）", status: "active", note: "" },
+      { name: "スイングエッジ", status: "active", note: "" },
+      { name: "クリフディメンション", status: "active", note: "" },
+      { name: "バーティカルリミット.BURST", status: "active", note: "" },
+      { name: "パイプスライダー", status: "active", note: "" }
+    ]
+  },
+  {
+    stage: "FINAL STAGE",
+    items: [
+      { name: "final用サーモンラダー", status: "active", note: "" }
+    ]
+  },
+  {
+    stage: "その他",
+    items: [
+      { name: "休憩場", status: "active", note: "" },
+      { name: "アップ用器具（旧クリフ、ブランコ）", status: "active", note: "" }
+    ]
+  }
+];
+
+var calYear = new Date().getFullYear();
+var calMonth = new Date().getMonth();
+var selectedDates = new Set();
+var registeredRecords = [];
+
+var carpoolMergeMap = {};
+try {
+  var savedMap = localStorage.getItem('uchimiya_carpool_merge_map');
+  if (savedMap) carpoolMergeMap = JSON.parse(savedMap);
+} catch(e) {}
+
+var adminDateExistingCars = {};
+var currentMergeTarget = { date: '', rawLeader: '' };
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function showModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = 'flex';
+}
+function hideModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+function checkGateAccess() {
+  var savedName = localStorage.getItem('uchimiya_auth_user');
+  if (savedName) {
+    applyAuthenticatedUser(savedName);
+    hideModal('gate-modal');
+    return;
+  }
+  showModal('gate-modal');
+  setTimeout(function() {
+    var inp = document.getElementById('gate-code-input');
+    if (inp) inp.focus();
+  }, 150);
+}
+
+function applyAuthenticatedUser(name) {
+  var nameField = document.getElementById('field-name');
+  if (nameField) nameField.value = name;
+
+  var banner = document.getElementById('auth-banner');
+  var displayEl = document.getElementById('auth-display-name');
+  if (banner && displayEl) {
+    displayEl.innerText = name;
+    banner.style.display = 'flex';
+  }
+}
+
+function resetUserAuth() {
+  if (confirm("認証情報をリセットして、別のコードを入力しますか？")) {
+    localStorage.removeItem('uchimiya_auth_user');
+    localStorage.removeItem('uchimiya_auth_code');
+    location.reload();
+  }
+}
+
+function verifyGateCode() {
+  var inputEl = document.getElementById('gate-code-input');
+  var btn = document.getElementById('btn-gate-verify');
+  var code = inputEl ? inputEl.value.trim() : '';
+
+  if (!code) {
+    alert("コードを入力してください。");
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "認証中...";
+  }
+
+  fetch(GAS_URL + "?type=verify_code&code=" + encodeURIComponent(code) + "&t=" + Date.now())
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.valid && data.name) {
+        localStorage.setItem('uchimiya_auth_user', data.name);
+        localStorage.setItem('uchimiya_auth_code', code);
+        applyAuthenticatedUser(data.name);
+        hideModal('gate-modal');
+      } else {
+        alert(data.message || "認証に失敗しました。正しいコードを入力してください。");
+      }
+    })
+    .catch(function() {
+      alert("通信エラーが発生しました。電波の良い場所でお試しください。");
+    })
+    .finally(function() {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "認証して入場 ↵";
+      }
+    });
+}
+
+function switchTab(tab) {
+  var vf = document.getElementById('view-form');
+  var vc = document.getElementById('view-column');
+  var vs = document.getElementById('view-status');
+  var va = document.getElementById('view-admin');
+
+  if (vf) vf.classList.toggle('hidden', tab !== 'form');
+  if (vc) vc.classList.toggle('hidden', tab !== 'column');
+  if (vs) vs.classList.toggle('hidden', tab !== 'status');
+  if (va) va.classList.add('hidden');
+
+  var tbf = document.getElementById('tab-btn-form');
+  var tbc = document.getElementById('tab-btn-column');
+  var tbs = document.getElementById('tab-btn-status');
+
+  if (tbf) tbf.classList.toggle('active', tab === 'form');
+  if (tbc) tbc.classList.toggle('active', tab === 'column');
+  if (tbs) tbs.classList.toggle('active', tab === 'status');
+}
+
+function switchAdminSubTab(sub) {
+  var subAtt = document.getElementById('admin-subview-attendance');
+  var subRules = document.getElementById('admin-subview-rules');
+  var subObs = document.getElementById('admin-subview-obstacles');
+
+  if (subAtt) subAtt.classList.toggle('hidden', sub !== 'attendance');
+  if (subRules) subRules.classList.toggle('hidden', sub !== 'rules');
+  if (subObs) subObs.classList.toggle('hidden', sub !== 'obstacles');
+
+  var btnAtt = document.getElementById('admin-sub-btn-att');
+  var btnRules = document.getElementById('admin-sub-btn-rules');
+  var btnObs = document.getElementById('admin-sub-btn-obs');
+
+  if (btnAtt) btnAtt.classList.toggle('active', sub === 'attendance');
+  if (btnRules) btnRules.classList.toggle('active', sub === 'rules');
+  if (btnObs) btnObs.classList.toggle('active', sub === 'obstacles');
+
+  if (sub === 'rules') {
+    renderAdminRulesEditor();
+  } else if (sub === 'obstacles') {
+    renderAdminObstacleEditor();
+  }
+}
+
+function openCalendarPopup() {
+  renderCalendar();
+  showModal('cal-popup-modal');
+}
+function closeCalendarPopup() {
+  hideModal('cal-popup-modal');
+  updateTriggerDisplay();
+  renderDaysConfigCards();
+}
+
+function prevMonth() {
+  calMonth--;
+  if (calMonth < 0) {
+    calMonth = 11;
+    calYear--;
+  }
+  renderCalendar();
+}
+
+function nextMonth() {
+  calMonth++;
+  if (calMonth > 11) {
+    calMonth = 0;
+    calYear++;
+  }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  var title = document.getElementById('cal-month-year');
+  if (title) title.innerText = calYear + "年 " + (calMonth + 1) + "月";
+  var grid = document.getElementById('cal-days-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  var firstDayIndex = new Date(calYear, calMonth, 1).getDay();
+  var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (var i = 0; i < firstDayIndex; i++) {
+    var empty = document.createElement('div');
+    grid.appendChild(empty);
+  }
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    (function(dayNum) {
+      var cellDate = new Date(calYear, calMonth, dayNum);
+      cellDate.setHours(0, 0, 0, 0);
+
+      var mm = String(calMonth + 1).padStart(2, '0');
+      var dd = String(dayNum).padStart(2, '0');
+      var dateStr = calYear + "-" + mm + "-" + dd;
+
+      var cell = document.createElement('div');
+      cell.className = 'mini-cal-day';
+      cell.innerText = dayNum;
+
+      if (cellDate < today) {
+        cell.classList.add('disabled');
+      } else {
+        if (cellDate.getTime() === today.getTime()) {
+          cell.classList.add('today');
+        }
+        if (selectedDates.has(dateStr)) {
+          cell.classList.add('selected');
+        }
+        cell.onclick = function() {
+          if (selectedDates.has(dateStr)) {
+            selectedDates.delete(dateStr);
+            cell.classList.remove('selected');
+          } else {
+            selectedDates.add(dateStr);
+            cell.classList.add('selected');
+          }
+          var countEl = document.getElementById('cal-popup-count');
+          if (countEl) countEl.innerText = selectedDates.size + "日選択中";
+        };
+      }
+      grid.appendChild(cell);
+    })(d);
+  }
+
+  var countEl = document.getElementById('cal-popup-count');
+  if (countEl) countEl.innerText = selectedDates.size + "日選択中";
+}
+
+function updateTriggerDisplay() {
+  var display = document.getElementById('date-picker-display');
+  if (!display) return;
+  var arr = Array.from(selectedDates).sort();
+  if (arr.length === 0) {
+    display.className = "date-bar-text";
+    display.innerText = "📅 参加希望日程をタップして選択...";
+    return;
+  }
+  display.className = "date-pills-wrap";
+  display.innerHTML = arr.map(function(d) {
+    return '<span class="date-selected-pill">' + formatDateLabel(d) + '</span>';
+  }).join('');
+}
+
+function formatDateLabel(dateStr) {
+  if (!dateStr) return "日程未指定";
+  var match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (match) {
+    var y = parseInt(match[1], 10);
+    var m = parseInt(match[2], 10);
+    var d = parseInt(match[3], 10);
+    var dt = new Date(y, m - 1, d);
+    var w = isNaN(dt.getDay()) ? "" : "(" + weekDays[dt.getDay()] + ")";
+    return m + "月" + d + "日" + w;
+  }
+  return String(dateStr);
+}
+
+function normalizeDateKey(dateStr) {
+  if (!dateStr) return "未指定";
+  var match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (match) {
+    return match[1] + "-" + String(match[2]).padStart(2, '0') + "-" + String(match[3]).padStart(2, '0');
+  }
+  return String(dateStr);
+}
+
+function normalizeCarpoolKey(str) {
+  if (!str) return "";
+  var s = String(str).trim().replace(/\s+/g, '');
+  return s.replace(/(号車|号|車)$/g, '');
+}
+
+function parseCompanionCount(str) {
+  if (!str) return 0;
+  var match = String(str).match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
+function getTimeOptions(selectedVal) {
+  var opts = '';
+  for (var h = 0; h <= 24; h++) {
+    var t = h + ":00";
+    opts += '<option value="' + t + '" ' + (t === selectedVal ? 'selected' : '') + '>' + t + '</option>';
+  }
+  return opts;
+}
+
+function renderDaysConfigCards() {
+  var container = document.getElementById('days-config-container');
+  if (!container) return;
+  var arr = Array.from(selectedDates).sort();
+
+  if (arr.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  var html = '';
+  arr.forEach(function(d) {
+    html += '<div class="day-config-card" data-date="' + d + '">';
+    html += '<div class="day-config-title"><span>📅 ' + formatDateLabel(d) + ' の参加希望情報</span></div>';
+
+    html += '<div class="form-group" style="margin-bottom:12px;">';
+    html += '<label style="font-size:11px;">参加希望時間<span class="required">*</span></label>';
+    html += '<select class="field-time-preset" data-date="' + d + '">';
+    html += '<option value="終日">終日</option>';
+    html += '<option value="午前のみ">午前のみ</option>';
+    html += '<option value="午後のみ">午後のみ</option>';
+    html += '<option value="custom">時間を指定する (0:00〜24:00)</option>';
+    html += '</select>';
+    html += '<div id="custom-time-row-' + d + '" class="time-custom-row hidden">';
+    html += '<select class="field-time-start">' + getTimeOptions("9:00") + '</select>';
+    html += '<span style="font-size:12px; color:var(--text-sub);">〜</span>';
+    html += '<select class="field-time-end">' + getTimeOptions("17:00") + '</select>';
+    html += '</div></div>';
+
+    html += '<div class="form-group" style="margin-bottom:0;">';
+    html += '<label style="font-size:11px;">交通機関（代表者）<span class="required">*</span></label>';
+    html += '<div class="radio-pill-group">';
+    html += '<label class="radio-pill-label" data-date="' + d + '" data-type="自車"><input type="radio" name="transport-' + d + '" value="自車" required> 🚗 自車</label>';
+    html += '<label class="radio-pill-label" data-date="' + d + '" data-type="乗り合い"><input type="radio" name="transport-' + d + '" value="乗り合い（同乗）"> 🤝 乗り合い</label>';
+    html += '<label class="radio-pill-label" data-date="' + d + '" data-type="バス"><input type="radio" name="transport-' + d + '" value="現地までバス"> 🚌 バス</label>';
+    html += '<label class="radio-pill-label" data-date="' + d + '" data-type="タクシー"><input type="radio" name="transport-' + d + '" value="タクシー"> 🚕 タクシー</label>';
+    html += '<label class="radio-pill-label" style="grid-column: span 2;" data-date="' + d + '" data-type="その他"><input type="radio" name="transport-' + d + '" value="その他"> 🚲 その他</label>';
+    html += '</div>';
+
+    html += '<div id="car-box-' + d + '" class="conditional-box hidden">';
+    html += '<label style="font-size:11px; margin-bottom:4px;">車種（台数把握のため）<span class="required">*</span></label>';
+    html += '<select class="field-car-type"><option value="普通車">普通車</option><option value="軽自動車">軽自動車</option><option value="その他">その他（バイク等）</option></select>';
+    html += '</div>';
+
+    html += '<div id="share-box-' + d + '" class="conditional-box hidden">';
+    html += '<label style="font-size:11px; margin-bottom:4px;">相乗り代表者（運転者）のお名前<span class="required">*</span></label>';
+    html += '<input type="text" class="field-car-leader" placeholder="例：内宮号" style="margin-bottom:8px;">';
+    html += '<label style="font-size:11px; margin-bottom:4px;">相乗り車両の車種<span class="required">*</span></label>';
+    html += '<select class="field-carpool-type"><option value="普通車">普通車</option><option value="軽自動車">軽自動車</option><option value="その他">その他（バイク等）</option></select>';
+    html += '</div>';
+
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+
+  container.querySelectorAll('.field-time-preset').forEach(function(sel) {
+    sel.onchange = function() {
+      var d = this.getAttribute('data-date');
+      var customRow = document.getElementById('custom-time-row-' + d);
+      if (customRow) customRow.classList.toggle('hidden', this.value !== 'custom');
+    };
+  });
+
+  container.querySelectorAll('.radio-pill-label').forEach(function(lbl) {
+    lbl.onclick = function() {
+      var d = this.getAttribute('data-date');
+      var type = this.getAttribute('data-type');
+      var parent = this.closest('.form-group');
+      if (parent) {
+        parent.querySelectorAll('.radio-pill-label').forEach(function(l) { l.classList.remove('checked'); });
+      }
+      this.classList.add('checked');
+      var radio = this.querySelector('input');
+      if (radio) radio.checked = true;
+
+      var carBox = document.getElementById('car-box-' + d);
+      var shareBox = document.getElementById('share-box-' + d);
+      if (carBox) carBox.classList.toggle('hidden', type !== '自車');
+      if (shareBox) shareBox.classList.toggle('hidden', type !== '乗り合い');
+    };
+  });
+}
+
+function addOtherPlayerCard(name, transport, carType) {
+  name = name || '';
+  transport = transport || '同乗';
+  carType = carType || '普通車';
+
+  var container = document.getElementById('other-players-container');
+  if (!container) return;
+  var cardId = 'other-player-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+  var card = document.createElement('div');
+  card.className = 'entry-card other-player-card';
+  card.id = cardId;
+
+  var html = '';
+  html += '<div class="entry-card-top">';
+  html += '<input type="text" class="field-other-player-name" placeholder="他参加者（プレイヤー）のお名前" value="' + escapeHtml(name) + '" required style="margin:0;">';
+  html += '<button type="button" class="btn-remove-entry">✕</button>';
+  html += '</div>';
+  html += '<div class="entry-transport-row">';
+  html += '<div>';
+  html += '<label style="font-size:10px; margin-bottom:2px;">移動手段</label>';
+  html += '<select class="field-other-player-transport" style="padding:6px 8px; font-size:12px;">';
+  html += '<option value="同乗" ' + (transport === '同乗' ? 'selected' : '') + '>🤝 代表者と同乗</option>';
+  html += '<option value="自車" ' + (transport === '自車' ? 'selected' : '') + '>🚗 自車（別車）</option>';
+  html += '<option value="その他" ' + (transport === 'その他' ? 'selected' : '') + '>🚌 その他（公共等）</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '<div id="' + cardId + '-car-wrap" class="' + (transport === '自車' ? '' : 'hidden') + '">';
+  html += '<label style="font-size:10px; margin-bottom:2px;">車種</label>';
+  html += '<select class="field-other-player-car-type" style="padding:6px 8px; font-size:12px;">';
+  html += '<option value="普通車" ' + (carType === '普通車' ? 'selected' : '') + '>普通車</option>';
+  html += '<option value="軽自動車" ' + (carType === '軽自動車' ? 'selected' : '') + '>軽自動車</option>';
+  html += '<option value="その他" ' + (carType === 'その他' ? 'selected' : '') + '>その他</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '</div>';
+
+  card.innerHTML = html;
+  container.appendChild(card);
+
+  card.querySelector('.btn-remove-entry').onclick = function() { card.remove(); };
+  card.querySelector('.field-other-player-transport').onchange = function() {
+    var wrap = document.getElementById(cardId + '-car-wrap');
+    if (wrap) wrap.classList.toggle('hidden', this.value !== '自車');
+  };
+}
+
+function addCompanionCard(name, role, count, transport, carType) {
+  name = name || '';
+  role = role || '家族';
+  count = count || '1名';
+  transport = transport || '同乗';
+  carType = carType || '普通車';
+
+  var container = document.getElementById('companions-container');
+  if (!container) return;
+  var cardId = 'companion-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+  var card = document.createElement('div');
+  card.className = 'entry-card companion-card';
+  card.id = cardId;
+
+  var html = '';
+  html += '<div class="entry-card-top">';
+  html += '<input type="text" class="field-companion-item-name" placeholder="同伴者代表名（例：山田花子）" value="' + escapeHtml(name) + '" required style="margin:0; flex:1;">';
+  html += '<button type="button" class="btn-remove-entry">✕</button>';
+  html += '</div>';
+  html += '<div class="entry-card-sub-row">';
+  html += '<div style="flex:1;">';
+  html += '<label style="font-size:10px; margin-bottom:2px;">役割・続柄</label>';
+  html += '<select class="field-companion-item-role" style="padding:8px 8px; font-size:12px;">';
+  html += '<option value="家族" ' + (role === '家族' ? 'selected' : '') + '>家族</option>';
+  html += '<option value="カメラマン" ' + (role === 'カメラマン' ? 'selected' : '') + '>カメラマン</option>';
+  html += '<option value="トレーナー" ' + (role === 'トレーナー' ? 'selected' : '') + '>トレーナー</option>';
+  html += '<option value="友人・知人" ' + (role === '友人・知人' ? 'selected' : '') + '>友人・知人</option>';
+  html += '<option value="その他" ' + (role === 'その他' ? 'selected' : '') + '>その他</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '<div style="width:110px;">';
+  html += '<label style="font-size:10px; margin-bottom:2px; color:var(--cyan);">人数</label>';
+  html += '<select class="field-companion-item-count" style="padding:8px 8px; font-size:12px; border-color:var(--cyan); color:#67e8f9;">';
+  html += '<option value="1名" ' + (count === '1名' ? 'selected' : '') + '>1名</option>';
+  html += '<option value="2名" ' + (count === '2名' ? 'selected' : '') + '>2名</option>';
+  html += '<option value="3名" ' + (count === '3名' ? 'selected' : '') + '>3名</option>';
+  html += '<option value="4名" ' + (count === '4名' ? 'selected' : '') + '>4名</option>';
+  html += '<option value="5名以上" ' + (count === '5名以上' ? 'selected' : '') + '>5名以上</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="entry-transport-row">';
+  html += '<div>';
+  html += '<label style="font-size:10px; margin-bottom:2px;">移動手段</label>';
+  html += '<select class="field-companion-item-transport" style="padding:6px 8px; font-size:12px;">';
+  html += '<option value="同乗" ' + (transport === '同乗' ? 'selected' : '') + '>🤝 代表者と同乗</option>';
+  html += '<option value="自車" ' + (transport === '自車' ? 'selected' : '') + '>🚗 自車（別車）</option>';
+  html += '<option value="その他" ' + (transport === 'その他' ? 'selected' : '') + '>🚌 その他（公共等）</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '<div id="' + cardId + '-car-wrap" class="' + (transport === '自車' ? '' : 'hidden') + '">';
+  html += '<label style="font-size:10px; margin-bottom:2px;">車種</label>';
+  html += '<select class="field-companion-item-car-type" style="padding:6px 8px; font-size:12px;">';
+  html += '<option value="普通車" ' + (carType === '普通車' ? 'selected' : '') + '>普通車</option>';
+  html += '<option value="軽自動車" ' + (carType === '軽自動車' ? 'selected' : '') + '>軽自動車</option>';
+  html += '<option value="その他" ' + (carType === 'その他' ? 'selected' : '') + '>その他</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '</div>';
+
+  card.innerHTML = html;
+  container.appendChild(card);
+
+  card.querySelector('.btn-remove-entry').onclick = function() { card.remove(); };
+  card.querySelector('.field-companion-item-transport').onchange = function() {
+    var wrap = document.getElementById(cardId + '-car-wrap');
+    if (wrap) wrap.classList.toggle('hidden', this.value !== '自車');
+  };
+}
+
+function formatRuleItem(text, title) {
+  var str = escapeHtml(text);
+  str = str.replace(/&lt;span class=&quot;urgent-highlight&quot;&gt;(.*?)&lt;\/span&gt;/g, '<span class="urgent-highlight">$1</span>');
+  str = str.replace(/&lt;b&gt;(.*?)&lt;\/b&gt;/g, '<b>$1</b>');
+  str = str.replace(/&lt;u&gt;(.*?)&lt;\/u&gt;/g, '<u>$1</u>');
+
+  str = str.replace(
+    /使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。/g,
+    '<span class="urgent-highlight">使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。</span>'
+  );
+  str = str.replace(
+    /※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。/g,
+    '<span class="urgent-highlight">※消耗品の差し入れ・プレゼントは大歓迎です！泣いて喜びます。</span>'
+  );
+  str = str.replace(
+    /ぜひ積極的なお手伝いをお願いいたします！/g,
+    '<span class="urgent-highlight">ぜひ積極的なお手伝いをお願いいたします！</span>'
+  );
+
+  if (title && title.includes("駐車場") && str.includes("駐車レイアウト")) {
+    str += '<div style="margin: 10px 0 6px 0;"><a href="parking-layout.png" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">🗺️ 駐車レイアウト</a></div>';
+  }
+  return str;
+}
+
+function renderRulesDisplay() {
+  var container = document.getElementById('rules-display-container');
+  if (!container) return;
+
+  var html = '';
+  ruleSections.forEach(function(section) {
+    var lines = section.content.split('\n').filter(function(l) { return l.trim() !== ''; });
+    html += '<div class="column-section">';
+    html += '<div class="column-title">' + escapeHtml(section.title) + '</div>';
+    html += '<div class="column-body"><ul>';
+    lines.forEach(function(line) {
+      html += '<li>' + formatRuleItem(line, section.title) + '</li>';
+    });
+    html += '</ul></div></div>';
+  });
+  container.innerHTML = html;
+
+  var preview = document.getElementById('rules-live-preview-container');
+  if (preview) preview.innerHTML = html;
+}
+
+function renderAdminRulesEditor() {
+  var container = document.getElementById('admin-rules-edit-list');
+  if (!container) return;
+
+  var html = '';
+  ruleSections.forEach(function(sec, idx) {
+    html += '<div class="admin-edit-card" id="rule-card-' + idx + '">';
+    html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">';
+    html += '<div style="display:flex; align-items:center; gap:6px;">';
+    html += '<label style="font-size:12px; color:#93c5fd; margin:0;">項目 #' + (idx + 1) + '</label>';
+    html += '<div class="order-btn-group">';
+    html += '<button type="button" class="btn-order-move btn-move-up" data-idx="' + idx + '" ' + (idx === 0 ? 'disabled' : '') + '>▲</button>';
+    html += '<button type="button" class="btn-order-move btn-move-down" data-idx="' + idx + '" ' + (idx === ruleSections.length - 1 ? 'disabled' : '') + '>▼</button>';
+    html += '</div></div>';
+    html += '<button type="button" class="btn-del-single btn-del-rule" data-idx="' + idx + '">🗑️ 削除</button>';
+    html += '</div>';
+
+    html += '<input type="text" id="rule-title-' + idx + '" class="rule-title-input" data-idx="' + idx + '" value="' + escapeHtml(sec.title) + '" style="margin-bottom:8px; font-weight:bold;">';
+    html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">';
+    html += '<label style="font-size:11px; color:#cbd5e1; margin:0;">本文（選択して装飾ボタン）</label>';
+    html += '<div style="display:flex; gap:5px;">';
+    html += '<button type="button" class="tab-btn btn-fmt" data-idx="' + idx + '" data-type="red" style="padding:3px 8px; font-size:11px; color:#ef4444; border:1px solid rgba(239,68,68,0.4);">🔴 赤字強調</button>';
+    html += '<button type="button" class="tab-btn btn-fmt" data-idx="' + idx + '" data-type="b" style="padding:3px 8px; font-size:11px; font-weight:bold; border:1px solid var(--border);">B</button>';
+    html += '<button type="button" class="tab-btn btn-fmt" data-idx="' + idx + '" data-type="u" style="padding:3px 8px; font-size:11px; text-decoration:underline; border:1px solid var(--border);">U</button>';
+    html += '</div></div>';
+    html += '<textarea id="rule-content-' + idx + '" class="rule-content-input" data-idx="' + idx + '" rows="4" style="font-size:12px; line-height:1.5;">' + escapeHtml(sec.content) + '</textarea>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+  renderRulesDisplay();
+
+  container.querySelectorAll('.btn-move-up').forEach(function(b) {
+    b.onclick = function() {
+      var i = Number(this.getAttribute('data-idx'));
+      if (i > 0) {
+        syncRulesData();
+        var tmp = ruleSections[i];
+        ruleSections[i] = ruleSections[i - 1];
+        ruleSections[i - 1] = tmp;
+        renderAdminRulesEditor();
+      }
+    };
+  });
+  container.querySelectorAll('.btn-move-down').forEach(function(b) {
+    b.onclick = function() {
+      var i = Number(this.getAttribute('data-idx'));
+      if (i < ruleSections.length - 1) {
+        syncRulesData();
+        var tmp = ruleSections[i];
+        ruleSections[i] = ruleSections[i + 1];
+        ruleSections[i + 1] = tmp;
+        renderAdminRulesEditor();
+      }
+    };
+  });
+  container.querySelectorAll('.btn-del-rule').forEach(function(b) {
+    b.onclick = function() {
+      var i = Number(this.getAttribute('data-idx'));
+      if (confirm("この注意事項項目を削除しますか？")) {
+        syncRulesData();
+        ruleSections.splice(i, 1);
+        renderAdminRulesEditor();
+      }
+    };
+  });
+  container.querySelectorAll('.rule-title-input, .rule-content-input').forEach(function(el) {
+    el.oninput = function() {
+      syncRulesData();
+      renderRulesDisplay();
+    };
+  });
+  container.querySelectorAll('.btn-fmt').forEach(function(b) {
+    b.onclick = function() {
+      var idx = Number(this.getAttribute('data-idx'));
+      var type = this.getAttribute('data-type');
+      var ta = document.getElementById('rule-content-' + idx);
+      if (!ta) return;
+      var s = ta.selectionStart;
+      var e = ta.selectionEnd;
+      var sel = ta.value.substring(s, e);
+      if (!sel) {
+        alert("装飾したい文字を選択した状態でボタンを押してください。");
+        return;
+      }
+      var tagged = '';
+      if (type === 'red') tagged = '<span class="urgent-highlight">' + sel + '</span>';
+      else if (type === 'b') tagged = '<b>' + sel + '</b>';
+      else if (type === 'u') tagged = '<u>' + sel + '</u>';
+      ta.setRangeText(tagged, s, e, 'select');
+      syncRulesData();
+      renderRulesDisplay();
+    };
+  });
+}
+
+function syncRulesData() {
+  ruleSections.forEach(function(sec, idx) {
+    var titleEl = document.getElementById('rule-title-' + idx);
+    var contentEl = document.getElementById('rule-content-' + idx);
+    if (titleEl) sec.title = titleEl.value;
+    if (contentEl) sec.content = contentEl.value;
+  });
+}
+
+function renderStageGroups() {
+  var container = document.getElementById('stage-groups-container');
+  if (!container) return;
+
+  var html = '';
+  stageData.forEach(function(group) {
+    html += '<div class="stage-section">';
+    html += '<div class="stage-header">' + escapeHtml(group.stage) + '</div>';
+    html += '<div class="obstacle-grid">';
+    group.items.forEach(function(item) {
+      var badgeClass = 'status-active';
+      var icon = '🟢';
+      var statusText = '稼働中';
+      if (item.status === 'tuning') {
+        badgeClass = 'status-tuning';
+        icon = '🟡';
+        statusText = '調整中';
+      } else if (item.status === 'pause') {
+        badgeClass = 'status-pause';
+        icon = '🔴';
+        statusText = '休止中';
+      }
+      var hasNote = (item.status !== 'active') && item.note && item.note.trim() !== '';
+      var noteClass = item.status === 'pause' ? 'obstacle-note-box pause' : 'obstacle-note-box';
+
+      html += '<div class="obstacle-card">';
+      html += '<div class="obstacle-top-row">';
+      html += '<div class="obstacle-name">' + escapeHtml(item.name) + '</div>';
+      html += '<div class="status-badge ' + badgeClass + '">' + icon + ' ' + statusText + '</div>';
+      html += '</div>';
+      if (hasNote) {
+        html += '<div class="' + noteClass + '">理由：' + escapeHtml(item.note) + '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+function renderAdminObstacleEditor() {
+  var container = document.getElementById('admin-obstacle-edit-list');
+  if (!container) return;
+
+  var html = '';
+  stageData.forEach(function(group, gIdx) {
+    html += '<div style="font-weight:bold; font-size:13px; color:#93c5fd; margin:12px 0 6px 0; border-left:3px solid #3b82f6; padding-left:6px;">' + escapeHtml(group.stage) + '</div>';
+    group.items.forEach(function(item, iIdx) {
+      var isHalted = item.status !== 'active';
+      html += '<div class="admin-edit-card">';
+      html += '<div class="admin-obs-header">';
+      html += '<span class="admin-obs-name">' + escapeHtml(item.name) + '</span>';
+      html += '<select class="admin-obs-select" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '">';
+      html += '<option value="active" ' + (item.status === 'active' ? 'selected' : '') + '>🟢 稼働中</option>';
+      html += '<option value="tuning" ' + (item.status === 'tuning' ? 'selected' : '') + '>🟡 調整中</option>';
+      html += '<option value="pause" ' + (item.status === 'pause' ? 'selected' : '') + '>🔴 休止中</option>';
+      html += '</select>';
+      html += '</div>';
+      html += '<div id="obs-wrap-' + gIdx + '-' + iIdx + '" class="' + (isHalted ? '' : 'hidden') + '">';
+      html += '<input type="text" class="obs-note-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" value="' + escapeHtml(item.note || '') + '" placeholder="理由を入力" style="font-size:12px; padding:6px 10px;">';
+      html += '</div></div>';
+    });
+  });
+  container.innerHTML = html;
+
+  container.querySelectorAll('.admin-obs-select').forEach(function(sel) {
+    sel.onchange = function() {
+      var g = this.getAttribute('data-gidx');
+      var i = this.getAttribute('data-iidx');
+      var wrap = document.getElementById('obs-wrap-' + g + '-' + i);
+      if (wrap) wrap.classList.toggle('hidden', this.value === 'active');
+      stageData[g].items[i].status = this.value;
+    };
+  });
+  container.querySelectorAll('.obs-note-input').forEach(function(inp) {
+    inp.oninput = function() {
+      var g = this.getAttribute('data-gidx');
+      var i = this.getAttribute('data-iidx');
+      stageData[g].items[i].note = this.value.trim();
+    };
+  });
+}
+
+function fetchAdminData() {
+  var container = document.getElementById('admin-data-container');
+  if (!container) return;
+  container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
+
+  fetch(GAS_URL + "?type=attendance&t=" + Date.now())
+    .then(function(res) { return res.json(); })
+    .then(function(list) {
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">回答はまだありません</div>';
+        return;
+      }
+      registeredRecords = list;
+
+      var deduplicatedMap = new Map();
+      list.forEach(function(item) {
+        var pKey = normalizeDateKey(item.date) + "___" + String(item.name || '').trim();
+        if (!deduplicatedMap.has(pKey) || (item.rowIndex > deduplicatedMap.get(pKey).rowIndex)) {
+          deduplicatedMap.set(pKey, item);
+        }
+      });
+      var cleanList = Array.from(deduplicatedMap.values());
+
+      var groups = {};
+      cleanList.forEach(function(item) {
+        var key = normalizeDateKey(item.date);
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+      });
+
+      var sortedDates = Object.keys(groups).sort();
+      var html = '';
+
+      sortedDates.forEach(function(date) {
+        var members = groups[date];
+        var companionTotal = 0;
+        var playerTotal = 0;
+        var carpoolMap = {};
+        var carpoolCarTypes = {};
+        var carpoolDisplayNames = {};
+        var carpoolOriginalKeys = {};
+        var countedCarsMap = new Map();
+
+        members.forEach(function(m) {
+          var isCompanionVehicle = String(m.name).includes('（同伴:');
+          if (!isCompanionVehicle) {
+            playerTotal++;
+            companionTotal += parseCompanionCount(m.companionCount);
+          }
+
+          if (m.transport === "自車") {
+            var ownerKey = normalizeCarpoolKey(m.name);
+            countedCarsMap.set(ownerKey, {
+              type: m.carType || "普通車",
+              owner: m.name,
+              isCompanion: isCompanionVehicle
+            });
+          }
+
+          if (m.transport && m.transport.includes("乗り合い") && m.carLeader) {
+            var leaderRaw = String(m.carLeader).trim();
+            var baseKey = normalizeCarpoolKey(leaderRaw);
+            var mapKey = date + ":::" + baseKey;
+            var finalLeaderKey = carpoolMergeMap[mapKey] ? normalizeCarpoolKey(carpoolMergeMap[mapKey]) : baseKey;
+
+            if (finalLeaderKey) {
+              if (!carpoolMap[finalLeaderKey]) {
+                carpoolMap[finalLeaderKey] = [];
+                carpoolCarTypes[finalLeaderKey] = m.carType || "普通車";
+                carpoolDisplayNames[finalLeaderKey] = finalLeaderKey + "号";
+                carpoolOriginalKeys[finalLeaderKey] = [];
+              }
+              carpoolMap[finalLeaderKey].push(m.name);
+              if (!carpoolOriginalKeys[finalLeaderKey].includes(baseKey)) {
+                carpoolOriginalKeys[finalLeaderKey].push(baseKey);
+              }
+            }
+          }
+        });
+
+        Object.keys(carpoolMap).forEach(function(leaderKey) {
+          if (!countedCarsMap.has(leaderKey)) {
+            countedCarsMap.set(leaderKey, {
+              type: carpoolCarTypes[leaderKey] || "普通車",
+              owner: carpoolDisplayNames[leaderKey],
+              isCarpool: true
+            });
+          }
+        });
+
+        var carsStandard = 0;
+        var carsLight = 0;
+        var carsOther = 0;
+
+        countedCarsMap.forEach(function(c) {
+          if (c.type === "普通車") carsStandard++;
+          else if (c.type === "軽自動車") carsLight++;
+          else carsOther++;
+        });
+
+        var totalCars = countedCarsMap.size;
+        var grandTotalPeople = playerTotal + companionTotal;
+
+        adminDateExistingCars[date] = Object.keys(carpoolMap);
+
+        html += '<div class="admin-date-group">';
+        html += '<div class="admin-date-header">';
+        html += '<span>📅 ' + formatDateLabel(date) + '</span>';
+        html += '<div class="admin-head-badges">';
+        html += '<span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">参加(プレイヤー): ' + playerTotal + '名</span>';
+        if (companionTotal > 0) {
+          html += '<span style="font-size:10px; background:#475569; color:#f1f5f9; padding:2px 6px; border-radius:10px; white-space:nowrap;">同伴: ' + companionTotal + '名</span>';
+        }
+        html += '<span style="font-size:10px; background:#10b981; color:#fff; padding:2px 7px; border-radius:10px; font-weight:bold; white-space:nowrap;">計: ' + grandTotalPeople + '名</span>';
+        html += '</div></div>';
+
+        html += '<div class="admin-card-stats">';
+        html += '<span>👥 <b>人数計: <span class="people-stat-badge">' + grandTotalPeople + '名</span></b> (プレイヤー: ' + playerTotal + '名 / 同伴者: ' + companionTotal + '名)</span>';
+        html += '<span>🚗 <b>車両計: <span class="car-stat-badge">' + totalCars + '台</span></b> (普通: ' + carsStandard + '台 / 軽: ' + carsLight + '台' + (carsOther > 0 ? ' / 他: ' + carsOther + '台' : '') + ')</span>';
+        html += '</div>';
+
+        if (totalCars > 0) {
+          html += '<div class="car-breakdown-box">';
+          html += '<div class="car-breakdown-title">🚗 駐車車両の内訳・オーナー一覧（計 ' + totalCars + '台）</div>';
+          countedCarsMap.forEach(function(c) {
+            var tag = c.isCarpool ? '<span style="color:#34d399; font-size:11px;">(相乗り車両)</span>' : (c.isCompanion ? '<span style="color:#67e8f9; font-size:11px;">(同伴者車両)</span>' : '<span style="color:#93c5fd; font-size:11px;">(自車)</span>');
+            html += '<div class="car-breakdown-item">・<b>' + escapeHtml(c.owner) + '</b> [' + escapeHtml(c.type) + '] ' + tag + '</div>';
+          });
+          html += '</div>';
+        }
+
+        members.forEach(function(m) {
+          var isCompanionVehicle = String(m.name).includes('（同伴:');
+          var badgeCls = 'transport-other';
+          if (m.transport === '自車') badgeCls = 'transport-car';
+          else if (m.transport && m.transport.includes('乗り合い')) badgeCls = 'transport-share';
+          else if (m.transport && m.transport.includes('バス')) badgeCls = 'transport-bus';
+          else if (m.transport && m.transport.includes('タクシー')) badgeCls = 'transport-taxi';
+
+          var carInfo = m.carType ? ' (' + m.carType + ')' : '';
+          var hasCompanion = m.companionCount && m.companionCount !== '0名';
+          var hasNote = m.note && m.note.trim() !== '';
+
+          var displayedLeader = m.carLeader ? normalizeCarpoolKey(m.carLeader) : '';
+          if (displayedLeader) {
+            var mapKey = date + ":::" + displayedLeader;
+            if (carpoolMergeMap[mapKey]) displayedLeader = carpoolMergeMap[mapKey];
+          }
+
+          html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'opacity:0.75; border-left:3px solid #60a5fa;' : '') + '">';
+          html += '<div class="member-top-row">';
+          html += '<div><span class="member-name">' + escapeHtml(m.name) + '</span></div>';
+          html += '<div style="display:flex; align-items:center; gap:6px;">';
+          html += '<span class="badge-transport ' + badgeCls + '">' + escapeHtml(m.transport || 'その他') + escapeHtml(carInfo) + '</span>';
+          html += '<button type="button" class="btn-del-single btn-del-attendee" data-name="' + escapeHtml(m.name) + '" data-date="' + escapeHtml(m.date) + '" data-row="' + (m.rowIndex || 0) + '">🗑️ 削除</button>';
+          html += '</div></div>';
+          html += '<div style="font-size:12px; color:#38bdf8;">⏰ ' + escapeHtml(m.time || '時間指定なし') + '</div>';
+          if (displayedLeader) {
+            html += '<div style="font-size:12px; color:#34d399;">🤝 相乗り: ' + escapeHtml(displayedLeader) + '号</div>';
+          }
+          if (hasCompanion) {
+            html += '<div style="font-size:12px; color:#cbd5e1;">👥 同伴: ' + escapeHtml(m.companionCount) + ' (' + escapeHtml(m.companionNames) + ')</div>';
+          }
+          if (hasNote) {
+            html += '<div style="font-size:12px; color:#cbd5e1; border-top:1px dashed rgba(255,255,255,0.08); padding-top:4px; margin-top:2px;">💬 備考: ' + escapeHtml(m.note) + '</div>';
+          }
+          html += '</div>';
+        });
+
+        if (Object.keys(carpoolMap).length > 0) {
+          html += '<div class="carpool-group">';
+          html += '<div class="carpool-title">🤝 相乗り車両・同乗者リスト</div>';
+          Object.keys(carpoolMap).forEach(function(k) {
+            var origKeys = carpoolOriginalKeys[k] || [k];
+            var isMerged = origKeys.some(function(ok) { return carpoolMergeMap[date + ":::" + ok]; });
+
+            html += '<div class="carpool-item-row">';
+            html += '<div>・<b>' + escapeHtml(carpoolDisplayNames[k]) + '</b> [' + escapeHtml(carpoolCarTypes[k] || '普通車') + '] (' + carpoolMap[k].length + '名同乗): ' + escapeHtml(carpoolMap[k].join(', '));
+            if (isMerged) html += '<span style="font-size:10px; color:#60a5fa; margin-left:4px;">(統合済)</span>';
+            html += '</div>';
+            html += '<div>';
+            html += '<button type="button" class="btn-merge-car btn-do-merge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(k) + '">✏️ 統合・変更</button>';
+            if (isMerged) {
+              origKeys.filter(function(ok) { return carpoolMergeMap[date + ":::" + ok]; }).forEach(function(ok) {
+                html += '<button type="button" class="btn-unmerge-car btn-do-unmerge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(ok) + '">↩️ 解除</button>';
+              });
+            }
+            html += '</div></div>';
+          });
+          html += '</div>';
+        }
+
+        html += '</div>';
+      });
+
+      container.innerHTML = html;
+
+      container.querySelectorAll('.btn-del-attendee').forEach(function(btn) {
+        btn.onclick = function() {
+          var name = this.getAttribute('data-name');
+          var date = this.getAttribute('data-date');
+          var row = Number(this.getAttribute('data-row'));
+          if (confirm("「" + name + "」さんの " + formatDateLabel(date) + " の回答を削除しますか？")) {
+            fetch(GAS_URL + "?type=delete_single&rowIndex=" + row + "&t=" + Date.now())
+              .then(function(res) { return res.json(); })
+              .then(function() {
+                alert("削除しました。");
+                fetchAdminData();
+              });
+          }
+        };
+      });
+
+      container.querySelectorAll('.btn-do-merge').forEach(function(btn) {
+        btn.onclick = function() {
+          var date = this.getAttribute('data-date');
+          var leader = this.getAttribute('data-leader');
+          currentMergeTarget = { date: date, rawLeader: leader };
+          var title = document.getElementById('merge-target-original-name');
+          if (title) title.innerText = leader + "号";
+
+          var existingOptions = adminDateExistingCars[date] || [];
+          var sel = document.getElementById('merge-select-existing');
+          if (sel) {
+            sel.innerHTML = '<option value="">-- 新しい名前を直接入力 --</option>';
+            existingOptions.forEach(function(opt) {
+              if (opt !== leader) {
+                var el = document.createElement('option');
+                el.value = opt;
+                el.innerText = opt + "号 に合流";
+                sel.appendChild(el);
+              }
+            });
+          }
+          var nameInput = document.getElementById('merge-new-name-input');
+          if (nameInput) nameInput.value = leader;
+          showModal('merge-car-modal');
+        };
+      });
+
+      container.querySelectorAll('.btn-do-unmerge').forEach(function(btn) {
+        btn.onclick = function() {
+          var date = this.getAttribute('data-date');
+          var leader = this.getAttribute('data-leader');
+          if (confirm("「" + leader + "号」の統合を解除し、元の入力に戻しますか？")) {
+            delete carpoolMergeMap[date + ":::" + leader];
+            localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap));
+            fetchAdminData();
+          }
+        };
+      });
+    })
+    .catch(function() {
+      container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:15px;">データの取得に失敗しました</div>';
+    });
+}
+
+// すべてのイベントリスナーを安全にバインド
+window.addEventListener('DOMContentLoaded', function() {
+  updateTriggerDisplay();
+  renderRulesDisplay();
+  renderStageGroups();
+  checkGateAccess();
+
+  // 認証関連
+  var btnGate = document.getElementById('btn-gate-verify');
+  if (btnGate) btnGate.onclick = verifyGateCode;
+  var btnReset = document.getElementById('btn-reset-auth');
+  if (btnReset) btnReset.onclick = resetUserAuth;
+
+  // タブ
+  var tbf = document.getElementById('tab-btn-form');
+  if (tbf) tbf.onclick = function() { switchTab('form'); };
+  var tbc = document.getElementById('tab-btn-column');
+  if (tbc) tbc.onclick = function() { switchTab('column'); };
+  var tbs = document.getElementById('tab-btn-status');
+  if (tbs) tbs.onclick = function() { switchTab('status'); };
+
+  // 管理者サブタブ
+  var btnSubAtt = document.getElementById('admin-sub-btn-att');
+  if (btnSubAtt) btnSubAtt.onclick = function() { switchAdminSubTab('attendance'); };
+  var btnSubRules = document.getElementById('admin-sub-btn-rules');
+  if (btnSubRules) btnSubRules.onclick = function() { switchAdminSubTab('rules'); };
+  var btnSubObs = document.getElementById('admin-sub-btn-obs');
+  if (btnSubObs) btnSubObs.onclick = function() { switchAdminSubTab('obstacles'); };
+
+  // カレンダー
+  var bar = document.getElementById('date-picker-bar');
+  if (bar) bar.onclick = openCalendarPopup;
+  var calDone = document.getElementById('btn-cal-done');
+  if (calDone) calDone.onclick = closeCalendarPopup;
+  var calPrev = document.getElementById('btn-cal-prev');
+  if (calPrev) calPrev.onclick = prevMonth;
+  var calNext = document.getElementById('btn-cal-next');
+  if (calNext) calNext.onclick = nextMonth;
+  var calModal = document.getElementById('cal-popup-modal');
+  if (calModal) calModal.onclick = closeCalendarPopup;
+
+  // 追加ボタン
+  var btnAddP = document.getElementById('btn-add-player');
+  if (btnAddP) btnAddP.onclick = function() { addOtherPlayerCard(); };
+  var btnAddC = document.getElementById('btn-add-companion');
+  if (btnAddC) btnAddC.onclick = function() { addCompanionCard(); };
+
+  // 管理者モーダル
+  var btnOpenAdmin = document.getElementById('btn-open-admin');
+  if (btnOpenAdmin) btnOpenAdmin.onclick = function() {
+    showModal('admin-modal');
+    var inp = document.getElementById('admin-pin-input');
+    if (inp) { inp.value = ''; inp.focus(); }
+  };
+  var btnAdminCancel = document.getElementById('btn-admin-cancel');
+  if (btnAdminCancel) btnAdminCancel.onclick = function() { hideModal('admin-modal'); };
+  var btnAdminLogin = document.getElementById('btn-admin-login');
+  if (btnAdminLogin) btnAdminLogin.onclick = function() {
+    var val = (document.getElementById('admin-pin-input').value || '').trim();
+    if (val === ADMIN_PIN) {
+      hideModal('admin-modal');
+      document.getElementById('view-form').classList.add('hidden');
+      document.getElementById('view-column').classList.add('hidden');
+      document.getElementById('view-status').classList.add('hidden');
+      document.getElementById('view-admin').classList.remove('hidden');
+      document.getElementById('tab-btn-form').classList.remove('active');
+      document.getElementById('tab-btn-column').classList.remove('active');
+      document.getElementById('tab-btn-status').classList.remove('active');
+      fetchAdminData();
+    } else {
+      alert("パスワードが正しくありません。");
+      hideModal('admin-modal');
+    }
+  };
+
+  // 管理者操作
+  var btnRefresh = document.getElementById('btn-refresh-admin');
+  if (btnRefresh) btnRefresh.onclick = fetchAdminData;
+  var btnClearAll = document.getElementById('btn-clear-all-data');
+  if (btnClearAll) btnClearAll.onclick = function() {
+    if (confirm("本当にすべての回答データを削除しますか？\n（この操作は元に戻せません）")) {
+      fetch(GAS_URL + "?type=clear_all&t=" + Date.now())
+        .then(function() {
+          alert("すべての回答データを消去しました。");
+          fetchAdminData();
+        });
+    }
+  };
+
+  // 注意事項追加・保存
+  var btnAddRuleSec = document.getElementById('btn-add-rule-sec');
+  if (btnAddRuleSec) btnAddRuleSec.onclick = function() {
+    syncRulesData();
+    ruleSections.push({ title: "新しい項目", content: "注意事項の内容をここに入力してください。" });
+    renderAdminRulesEditor();
+  };
+  var rulesForm = document.getElementById('admin-rules-form');
+  if (rulesForm) rulesForm.onsubmit = function(e) {
+    e.preventDefault();
+    syncRulesData();
+    var btn = document.getElementById('btn-save-rules');
+    if (btn) { btn.disabled = true; btn.innerText = "保存中..."; }
+    fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ action: "update_rules", rules: ruleSections })
+    }).then(function() {
+      renderRulesDisplay();
+      alert("注意事項を更新・保存しました！");
+    }).finally(function() {
+      if (btn) { btn.disabled = false; btn.innerText = "💾 注意事項を保存する"; }
+    });
+  };
+
+  // セット設定保存
+  var obsForm = document.getElementById('admin-obs-form');
+  if (obsForm) obsForm.onsubmit = function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('btn-save-obs');
+    if (btn) { btn.disabled = true; btn.innerText = "保存中..."; }
+    fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ action: "update_obstacles", stages: stageData })
+    }).then(function() {
+      renderStageGroups();
+      alert("セット稼働状況を更新・保存しました！");
+    }).finally(function() {
+      if (btn) { btn.disabled = false; btn.innerText = "💾 セット稼働状況を保存する"; }
+    });
+  };
+
+  // 号車統合モーダル
+  var mergeSel = document.getElementById('merge-select-existing');
+  if (mergeSel) mergeSel.onchange = function() {
+    var inp = document.getElementById('merge-new-name-input');
+    if (this.value && inp) inp.value = this.value;
+  };
+  var btnMergeCancel = document.getElementById('btn-merge-cancel');
+  if (btnMergeCancel) btnMergeCancel.onclick = function() { hideModal('merge-car-modal'); };
+  var btnMergeSubmit = document.getElementById('btn-merge-submit');
+  if (btnMergeSubmit) btnMergeSubmit.onclick = function() {
+    var inp = document.getElementById('merge-new-name-input');
+    var newName = inp ? inp.value.trim().replace(/(号車|号|車)$/g, '') : '';
+    if (!newName) {
+      alert("統合先の号車名を入力してください。");
+      return;
+    }
+    var key = currentMergeTarget.date + ":::" + currentMergeTarget.rawLeader;
+    carpoolMergeMap[key] = newName;
+    localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap));
+    hideModal('merge-car-modal');
+    fetchAdminData();
+  };
+
+  // フォーム送信
+  var form = document.getElementById('attendance-form');
+  if (form) form.onsubmit = submitAttendance;
+
+  // リモートデータ取得
+  setTimeout(function() {
+    fetch(GAS_URL + "?type=obstacles&t=" + Date.now())
+      .then(function(res) { return res.json(); })
+      .then(function(remoteList) {
+        if (remoteList && Array.isArray(remoteList) && remoteList.length > 0) {
+          var map = {};
+          remoteList.forEach(function(r) { map[r.name] = { status: r.status, note: r.note || "" }; });
+          stageData.forEach(function(g) {
+            g.items.forEach(function(it) {
+              if (map[it.name]) { it.status = map[it.name].status; it.note = map[it.name].note; }
+            });
+          });
+          renderStageGroups();
+        }
+      }).catch(function() {});
+
+    fetch(GAS_URL + "?type=rules&t=" + Date.now())
+      .then(function(res) { return res.json(); })
+      .then(function(remoteRules) {
+        if (remoteRules && Array.isArray(remoteRules) && remoteRules.length > 0) {
+          ruleSections = remoteRules;
+          renderRulesDisplay();
+        }
+      }).catch(function() {});
+
+    fetchRegisteredAttendance().catch(function() {});
+  }, 100);
+});
+
+function submitAttendance(e) {
+  e.preventDefault();
+  var arr = Array.from(selectedDates).sort();
+  if (arr.length === 0) {
+    alert("参加希望日程を1つ以上選択してください。");
+    openCalendarPopup();
+    return;
+  }
+  var primaryName = (document.getElementById('field-name').value || '').trim();
+  if (!primaryName) {
+    alert("参加者（プレイヤー）氏名を入力してください。");
+    return;
+  }
+
+  var otherPlayers = [];
+  var nameDuplicateAlert = false;
+  document.querySelectorAll('.other-player-card').forEach(function(c) {
+    var n = c.querySelector('.field-other-player-name').value.trim();
+    var t = c.querySelector('.field-other-player-transport').value;
+    var ct = t === '自車' ? c.querySelector('.field-other-player-car-type').value : '';
+    if (n) {
+      if (n === primaryName || otherPlayers.some(function(p) { return p.name === n; })) {
+        nameDuplicateAlert = true;
+      }
+      otherPlayers.push({ name: n, transportMode: t, carType: ct });
+    }
+  });
+
+  var companionList = [];
+  var totalCompanionHeadcount = 0;
+  document.querySelectorAll('.companion-card').forEach(function(c) {
+    var n = c.querySelector('.field-companion-item-name').value.trim();
+    var role = c.querySelector('.field-companion-item-role').value;
+    var cntVal = c.querySelector('.field-companion-item-count').value;
+    var numMatch = cntVal ? cntVal.match(/(\d+)/) : null;
+    var headcount = numMatch ? parseInt(numMatch[1], 10) : 1;
+    var t = c.querySelector('.field-companion-item-transport').value;
+    var ct = t === '自車' ? c.querySelector('.field-companion-item-car-type').value : '';
+
+    totalCompanionHeadcount += headcount;
+    if (n) {
+      companionList.push({ name: n, role: role, count: headcount, transportMode: t, carType: ct });
+    }
+  });
+
+  if (nameDuplicateAlert) {
+    alert("参加者名に同一のお名前が重複して入力されています。確認してください。");
+    return;
+  }
+
+  var companionCountStr = totalCompanionHeadcount > 0 ? totalCompanionHeadcount + "名" : "0名";
+  var companionNamesStr = companionList.length > 0 
+    ? companionList.map(function(c) {
+        var transStr = c.transportMode === '自車' ? "[自車:" + c.carType + "]" : "[" + c.transportMode + "]";
+        return c.name + "(" + c.role + " " + c.count + "名" + transStr + ")";
+      }).join('、')
+    : "なし";
+
+  var note = (document.getElementById('field-note').value || '').trim();
+
+  var primaryDayConfigs = [];
+  for (var i = 0; i < arr.length; i++) {
+    var d = arr[i];
+    var card = document.querySelector('.day-config-card[data-date="' + d + '"]');
+    if (!card) continue;
+
+    var transportRadio = card.querySelector('input[name="transport-' + d + '"]:checked');
+    if (!transportRadio) {
+      alert(formatDateLabel(d) + " の交通機関を選択してください。");
+      return;
+    }
+    var transportVal = transportRadio.value;
+    var carType = "";
+    var carLeader = "";
+
+    if (transportVal === "自車") {
+      carType = card.querySelector('.field-car-type').value;
+    } else if (transportVal.includes("乗り合い")) {
+      carLeader = card.querySelector('.field-car-leader').value.trim().replace(/\s+/g, '');
+      if (!carLeader) {
+        alert(formatDateLabel(d) + " の相乗り代表者（運転者）のお名前をご記入ください。");
+        return;
+      }
+      carType = card.querySelector('.field-carpool-type').value;
+    }
+
+    var presetTime = card.querySelector('.field-time-preset').value;
+    var finalTime = presetTime;
+    if (presetTime === 'custom') {
+      var s = card.querySelector('.field-time-start').value;
+      var end = card.querySelector('.field-time-end').value;
+      finalTime = s + "〜" + end;
+    }
+
+    primaryDayConfigs.push({
+      date: d,
+      time: finalTime,
+      transport: transportVal,
+      carType: carType,
+      carLeader: carLeader
+    });
+  }
+
+  var btn = document.getElementById('btn-submit-form');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "送信中...";
+  }
+
+  var payloads = [
+    {
+      name: primaryName,
+      proxyName: "",
+      days: primaryDayConfigs,
+      companionCount: companionCountStr,
+      companionNames: companionNamesStr,
+      note: note
+    }
+  ];
+
+  otherPlayers.forEach(function(op) {
+    var opDayConfigs = primaryDayConfigs.map(function(cfg) {
+      var tVal = cfg.transport;
+      var cType = "";
+      var cLeader = "";
+
+      if (op.transportMode === '同乗') {
+        tVal = "乗り合い（同乗）";
+        cLeader = cfg.transport === "自車" ? primaryName : (cfg.carLeader || primaryName);
+        cType = cfg.carType || "普通車";
+      } else if (op.transportMode === '自車') {
+        tVal = "自車";
+        cType = op.carType || "普通車";
+      } else {
+        tVal = "その他";
+      }
+
+      return {
+        date: cfg.date,
+        time: cfg.time,
+        transport: tVal,
+        carType: cType,
+        carLeader: cLeader
+      };
+    });
+
+    payloads.push({
+      name: op.name,
+      proxyName: "",
+      days: opDayConfigs,
+      companionCount: "0名",
+      companionNames: "なし",
+      note: "（" + primaryName + " 様と同時申込）"
+    });
+  });
+
+  companionList.filter(function(c) { return c.transportMode === '自車'; }).forEach(function(comp) {
+    var compCarDayConfigs = primaryDayConfigs.map(function(cfg) {
+      return {
+        date: cfg.date,
+        time: cfg.time,
+        transport: "自車",
+        carType: comp.carType || "普通車",
+        carLeader: ""
+      };
+    });
+
+    payloads.push({
+      name: comp.name + "（同伴:" + primaryName + "行）",
+      proxyName: "",
+      days: compCarDayConfigs,
+      companionCount: "0名",
+      companionNames: "なし",
+      note: "（" + primaryName + " 様の同伴者・車両枠確保）"
+    });
+  });
+
+  Promise.all(payloads.map(function(p) {
+    return fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(p)
+    });
+  }))
+  .then(function() {
+    var sMsg = document.getElementById('success-msg');
+    if (sMsg) sMsg.style.display = 'block';
+    var aForm = document.getElementById('attendance-form');
+    if (aForm) aForm.reset();
+    var opc = document.getElementById('other-players-container');
+    if (opc) opc.innerHTML = '';
+    var cc = document.getElementById('companions-container');
+    if (cc) cc.innerHTML = '';
+
+    var authUser = localStorage.getItem('uchimiya_auth_user');
+    if (authUser) applyAuthenticatedUser(authUser);
+
+    selectedDates.clear();
+    updateTriggerDisplay();
+    renderDaysConfigCards();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    fetchRegisteredAttendance().catch(function() {});
+  })
+  .catch(function() {
+    alert("送信に失敗しました。電波環境を確認してください。");
+  })
+  .finally(function() {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "参加情報を送信する ↵";
+    }
+  });
+}
+</script>
+</body>
+</html>
