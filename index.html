@@ -809,7 +809,6 @@
     cursor: pointer;
   }
 
-  /* セット編集カード */
   .admin-edit-card {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
@@ -866,7 +865,6 @@
     cursor: pointer;
   }
 
-  /* 写真サムネイル */
   .photo-thumbs-wrap {
     display: flex;
     gap: 6px;
@@ -2339,7 +2337,7 @@ function fetchAdminData() {
           }
 
           if (m.transport === "自車") {
-            // スプレッドシートの「姓 名」から姓を抽出し、〇〇号車とする
+            // スプレッドシートの「姓 名」から姓を抽出し、〇〇号車とする（石川 翔 → 石川号車）
             var lastNameOnly = normalizeCarpoolKey(m.name);
             countedCarsMap.set(lastNameOnly, {
               type: m.carType || "普通車",
@@ -2614,7 +2612,7 @@ function fetchAdminData() {
           var leader = this.getAttribute('data-leader');
           if (confirm("「" + leader + "号車」の統合を解除し、元の入力に戻しますか？")) {
             delete carpoolMergeMap[date + ":::" + leader];
-            localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap));
+            try { localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap)); } catch(e){}
             fetchAdminData();
           }
           return false;
