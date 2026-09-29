@@ -2343,7 +2343,6 @@ function unmergeCar(date, rawLeader) {
   }
 }
 
-// 参加集計データの取得（安全なDOM・データ属性バインド）
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   if (!container) return;
@@ -2555,7 +2554,6 @@ async function fetchAdminData() {
 
     container.innerHTML = html;
 
-    // 安全な動的イベントバインド（構文エラーゼロ化）
     container.querySelectorAll('.btn-del-single').forEach(btn => {
       btn.onclick = function() {
         deleteSingleAttendance(this.getAttribute('data-del-name'), this.getAttribute('data-del-date'), Number(this.getAttribute('data-del-row')));
@@ -2605,15 +2603,15 @@ async function deleteSingleAttendance(name, date, rowIndex) {
 }
 
 async function clearAllAttendance() {
-  if (!confirm("【警告】本当にすべての回答データを削除しますか？\n（この操作は元に戻せません）")) {
+  if (!confirm("本当にすべての回答データを削除しますか？\n（この操作は元に戻せません）")) {
     return;
   }
-  if (!confirm("本当に実行しますか？スプレッドシートの参加回答データがすべて消去されます。")) {
+  if (!confirm("スプレッドシートの参加回答データがすべて消去されます。よろしいですか？")) {
     return;
   }
 
   try {
-    const url = `${GAS_URL}?type=clear_all&t=${Date.now()}`;
+    const url = GAS_URL + "?type=clear_all&t=" + Date.now();
     const res = await fetch(url, { cache: "no-store" });
     const data = await res.json();
 
@@ -2621,10 +2619,10 @@ async function clearAllAttendance() {
       alert("すべての回答データを消去しました。");
       fetchAdminData();
     } else {
-      alert("全件削除に失敗しました。");
+      alert("削除に失敗しました。");
     }
   } catch(e) {
-    alert("全件削除に失敗しました。");
+    alert("通信エラーが発生しました。");
   }
 }
 
