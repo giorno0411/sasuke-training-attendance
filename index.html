@@ -456,7 +456,6 @@
     display: none;
   }
 
-  /* 注意事項 */
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -504,7 +503,6 @@
     text-underline-offset: 3px;
   }
 
-  /* セット稼働状況 */
   .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
@@ -579,7 +577,6 @@
     border-left-color: #ef4444;
   }
 
-  /* 管理者画面 */
   .admin-subnav {
     display: flex;
     gap: 4px;
@@ -639,7 +636,6 @@
   .car-stat-badge { color: #60a5fa; font-weight: bold; }
   .people-stat-badge { color: #fca5a5; font-weight: bold; }
 
-  /* 車両内訳リスト用スタイル */
   .car-breakdown-box {
     background: rgba(30, 58, 138, 0.15);
     border: 1px solid rgba(96, 165, 250, 0.25);
@@ -944,7 +940,6 @@
   <!-- 4. 管理者専用画面 -->
   <div id="view-admin" class="hidden">
     <div class="card">
-      <!-- サブナビ順序：参加状況 ➔ 注意事項 ➔ セット稼働状況編集 -->
       <div class="admin-subnav">
         <button class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 参加状況</button>
         <button class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
@@ -1161,14 +1156,15 @@ let calYear, calMonth;
 const selectedDates = new Set();
 let registeredRecords = [];
 
-// 号車統合マッピング辞書（localStorageで永続化）
-// 形式: { "2026-05-10:::内宮修造。笑": "内宮" }
+// 号車統合マッピング辞書
 let carpoolMergeMap = {};
-
 try {
   const savedMap = localStorage.getItem('uchimiya_carpool_merge_map');
   if (savedMap) carpoolMergeMap = JSON.parse(savedMap);
 } catch(e) {}
+
+// 号車選択肢の一時保持オブジェクト（HTML属性へのJSON埋め込み構文エラーを防止）
+const adminDateExistingCars = {};
 
 window.addEventListener('DOMContentLoaded', () => {
   checkGateAccess();
@@ -2261,13 +2257,14 @@ function normalizeCarpoolKey(str) {
   return s;
 }
 
-// 現在開いているモーダルの統合対象
+// 号車統合モーダルを開く（安全なキャッシュ配列から参照）
 let currentMergeTarget = { date: '', rawLeader: '' };
 
-function openMergeCarModal(date, rawLeader, existingOptions) {
+function openMergeCarModalByDate(date, rawLeader) {
   currentMergeTarget = { date, rawLeader };
   document.getElementById('merge-target-original-name').innerText = `${rawLeader}号`;
 
+  const existingOptions = adminDateExistingCars[date] || [];
   const sel = document.getElementById('merge-select-existing');
   sel.innerHTML = '<option value="">-- 新しい名前を直接入力 --</option>';
 
@@ -2318,7 +2315,7 @@ function unmergeCar(date, rawLeader) {
   }
 }
 
-// 参加集計データの取得（手動号車統合・名寄せ対応）
+// 参加集計データの取得
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
@@ -2369,7 +2366,6 @@ async function fetchAdminData() {
 
       const countedCarsMap = new Map();
 
-      // この日の相乗りキーを収集・統合マッピング適用
       members.forEach(m => {
         const isCompanionVehicleEntry = String(m.name).includes('（同伴:');
 
@@ -2391,7 +2387,6 @@ async function fetchAdminData() {
           const leaderRaw = String(m.carLeader).trim();
           const baseKey = normalizeCarpoolKey(leaderRaw);
 
-          // 管理者手動統合マッピングの確認
           const mapKey = `${date}:::${baseKey}`;
           const finalLeaderKey = carpoolMergeMap[mapKey] ? normalizeCarpoolKey(carpoolMergeMap[mapKey]) : baseKey;
 
@@ -2434,7 +2429,8 @@ async function fetchAdminData() {
       const totalCars = countedCarsMap.size;
       const grandTotalPeople = playerTotal + companionTotal;
 
-      const existingLeaderKeys = Object.keys(carpoolMap);
+      // 日付ごとの号車リストを安全に保持
+      adminDateExistingCars[date] = Object.keys(carpoolMap);
 
       html += `
         <div class="admin-date-group">
@@ -2506,7 +2502,7 @@ async function fetchAdminData() {
         `;
       });
 
-      // 3. 参加者一覧の下：相乗り同乗者グループ（統合編集ボタン付き）
+      // 3. 参加者一覧の下：相乗り同乗者グループ（安全な呼び出し引数に修正）
       if (Object.keys(carpoolMap).length > 0) {
         html += `
           <div class="carpool-group">
@@ -2518,10 +2514,10 @@ async function fetchAdminData() {
               return `
                 <div class="carpool-item-row">
                   <div>
-                    ・<b>${escapeHtml(carpoolDisplayNames[k])}</b> [${escapeHtml(carpoolCarTypes[k] \vert{}\vert{} '普通車')}] (${carpoolMap[k].length}名同乗): ${escapeHtml(carpoolMap[k].join(', '))}${isMerged ? `<span style="font-size:10px; color:#60a5fa; margin-left:4px;">(統合済: ${escapeHtml(origKeys.join(', '))})</span>` : ''}
+                    ・<b>${escapeHtml(carpoolDisplayNames[k])}</b> [${escapeHtml(carpoolCarTypes[k] \vert{}\vert{} '普通車')}] (${carpoolMap[k].length}名同乗): ${escapeHtml(carpoolMap[k].join(', '))}${isMerged ? `<span style="font-size:10px; color:#60a5fa; margin-left:4px;">(統合済)</span>` : ''}
                   </div>
                   <div>
-                    <button type="button" class="btn-merge-car" onclick="openMergeCarModal('${date}', '${escapeHtml(k)}',${JSON.stringify(existingLeaderKeys)})">✏️ 統合・名称変更</button>
+                    <button type="button" class="btn-merge-car" onclick="openMergeCarModalByDate('${date}', '${escapeHtml(k)}')">✏️ 統合・変更</button>
                     ${isMerged ? origKeys.filter(ok => carpoolMergeMap[`${date}:::${ok}`]).map(ok => `
                       <button type="button" class="btn-unmerge-car" onclick="unmergeCar('${date}', '${escapeHtml(ok)}')">↩️ 解除</button>
                     `).join('') : ''}
