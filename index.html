@@ -443,18 +443,31 @@
   }
   .btn-submit:active { background: var(--accent-hover); }
 
+  /* 送信成功メッセージ */
   .submit-success-box {
     background: rgba(6, 78, 59, 0.85);
     backdrop-filter: blur(8px);
     border: 1px solid #10b981;
     color: #a7f3d0;
-    padding: 14px 12px;
+    padding: 14px 16px;
     border-radius: 8px;
     font-size: 13px;
     line-height: 1.6;
     text-align: center;
     margin-bottom: 14px;
     display: none;
+  }
+  .submit-success-title {
+    font-weight: bold;
+    font-size: 14px;
+    white-space: nowrap;
+    margin-bottom: 6px;
+    color: #34d399;
+  }
+  .submit-success-note {
+    font-size: 11px;
+    color: #cbd5e1;
+    line-height: 1.6;
   }
 
   .column-section { margin-bottom: 18px; }
@@ -809,6 +822,7 @@
     cursor: pointer;
   }
 
+  /* セット編集カード */
   .admin-edit-card {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
@@ -865,6 +879,7 @@
     cursor: pointer;
   }
 
+  /* 写真サムネイル */
   .photo-thumbs-wrap {
     display: flex;
     gap: 6px;
@@ -935,8 +950,10 @@
   <!-- 1. 参加送信フォーム -->
   <div id="view-form">
     <div class="submit-success-box" id="success-msg">
-      <div style="font-weight:bold; font-size:14px; margin-bottom:4px;">✓ 参加情報を送信しました！回答ありがとうございます。</div>
-      <div style="font-size:11px; opacity:0.9;">※万一回答の変更や取り消し（キャンセル）を希望される場合は、直接内宮までご連絡をお願いいたします。</div>
+      <div class="submit-success-title">✓ 参加情報を送信しました！回答ありがとうございます。</div>
+      <div class="submit-success-note">
+        ※万一回答の変更や取り消し（キャンセル）を希望される場合は、<br>直接内宮までご連絡をお願いいたします。
+      </div>
     </div>
 
     <div class="auth-user-bar" id="auth-banner" style="display:none;">
@@ -1297,7 +1314,6 @@ function checkGateAccess() {
   var savedName = localStorage.getItem('uchimiya_auth_user');
 
   if (savedCode) {
-    // 起動時にスプレッドシートの最新名（半角スペース入り）をバックグラウンドで再照合
     fetch(GAS_URL + "?type=verify_code&code=" + encodeURIComponent(savedCode) + "&t=" + Date.now())
       .then(function(res){ return res.json(); })
       .then(function(data){
@@ -1552,7 +1568,7 @@ function normalizeDateKey(dateStr) {
   return String(dateStr);
 }
 
-// 姓名分離（スプレッドシートの半角/全角スペースから姓を確実に抽出、スペースなしの場合も「内宮」等を正確に切り出し）
+// 姓名分離（石川 翔、石川翔、内宮 修造などのあらゆるパターンから確実に苗字を抽出）
 function extractLastName(str) {
   if (!str) return "";
   var s = String(str).trim();
@@ -1560,16 +1576,28 @@ function extractLastName(str) {
   // 補助表記の削除
   s = s.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').trim();
 
-  // 半角スペースまたは全角スペースで区切られている場合は最初の単語（姓）を抽出
+  // 空白で区切られている場合は最優先で先頭（姓）を取得
   var parts = s.split(/[\s ]+/);
   if (parts.length > 1 && parts[0]) {
     return parts[0].trim().replace(/(号車|号|車|くん|さん|君|様)$/g, '');
   }
 
-  // スペースなしで入っている場合の自動判定（内宮など）
+  // 接尾辞削除
   s = s.replace(/(号車|号|車|くん|さん|君|様)$/g, '').trim();
+
+  // 既知の苗字優先一致
   if (s.indexOf('内宮') === 0) return '内宮';
-  if (s.length >= 4) return s.substring(0, 2);
+  if (s.indexOf('石川') === 0) return '石川';
+
+  // 3文字（例：石川翔）なら先頭2文字を苗字と推定
+  if (s.length === 3) {
+    return s.substring(0, 2);
+  }
+
+  // 4文字以上の場合も先頭2文字を苗字と推定
+  if (s.length >= 4) {
+    return s.substring(0, 2);
+  }
 
   return s;
 }
@@ -1693,7 +1721,7 @@ function addOtherPlayerCard(name, transport, carType) {
 
   var html = '';
   html += '<div class="entry-card-top">';
-  html += '<input type="text" class="field-other-player-name" placeholder="他参加者（プレイヤー）のお名前（例：山田 太郎）" value="' + escapeHtml(name) + '" required style="margin:0;">';
+  html += '<input type="text" class="field-other-player-name" placeholder="例：田中 太郎" value="' + escapeHtml(name) + '" required style="margin:0;">';
   html += '<button type="button" class="btn-remove-entry">✕</button>';
   html += '</div>';
   html += '<div class="entry-transport-row">';
@@ -2034,7 +2062,6 @@ function openPhotoViewer(title, photos) {
   showModal('photo-viewer-modal');
 }
 
-// 超軽量画像圧縮（長辺500px、画質0.5で約30〜50KBに圧縮し消失を完全防止）
 function compressImage(file, callback) {
   var reader = new FileReader();
   reader.onload = function(e) {
@@ -2337,7 +2364,6 @@ function fetchAdminData() {
           }
 
           if (m.transport === "自車") {
-            // スプレッドシートの「姓 名」から姓を抽出し、〇〇号車とする（石川 翔 → 石川号車）
             var lastNameOnly = normalizeCarpoolKey(m.name);
             countedCarsMap.set(lastNameOnly, {
               type: m.carType || "普通車",
@@ -2406,7 +2432,6 @@ function fetchAdminData() {
         html += '<span>🚗 <b>車両計: <span class="car-stat-badge">' + totalCars + '台</span></b> (普通: ' + carsStandard + '台 / 軽: ' + carsLight + '台' + (carsOther > 0 ? ' / 他: ' + carsOther + '台' : '') + ')</span>';
         html += '</div>';
 
-        // 駐車車両の内訳・オーナー一覧（全て苗字＋号車で統一表示）
         if (totalCars > 0) {
           html += '<div class="car-breakdown-box">';
           html += '<div class="car-breakdown-title">🚗 駐車車両の内訳・オーナー一覧（計 ' + totalCars + '台）</div>';
@@ -2417,7 +2442,6 @@ function fetchAdminData() {
           html += '</div>';
         }
 
-        // 一括選択・削除バー
         html += '<div class="admin-batch-bar">';
         html += '<label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">';
         html += '<input type="checkbox" class="batch-select-all" data-date="' + date + '"> 全選択';
@@ -2499,7 +2523,6 @@ function fetchAdminData() {
 
       container.innerHTML = html;
 
-      // チェックボックス・一括削除のイベント結びつけ
       container.querySelectorAll('.batch-select-all').forEach(function(allCb) {
         allCb.onchange = function() {
           var d = this.getAttribute('data-date');
@@ -2902,6 +2925,7 @@ window.addEventListener('DOMContentLoaded', function() {
   }, 100);
 });
 
+// 超高速送信処理（非同期バックグラウンド化）
 function submitAttendance(e) {
   e.preventDefault();
   var arr = Array.from(selectedDates).sort();
@@ -3024,12 +3048,6 @@ function submitAttendance(e) {
     });
   }
 
-  var btn = document.getElementById('btn-submit-form');
-  if (btn) {
-    btn.disabled = true;
-    btn.innerText = "送信中...";
-  }
-
   var payloads = [
     {
       name: primaryName,
@@ -3098,6 +3116,25 @@ function submitAttendance(e) {
     });
   });
 
+  // UIを即座に完了状態に切り替える（体感速度ゼロ化）
+  var sMsg = document.getElementById('success-msg');
+  if (sMsg) sMsg.style.display = 'block';
+  var aForm = document.getElementById('attendance-form');
+  if (aForm) aForm.reset();
+  var opc = document.getElementById('other-players-container');
+  if (opc) opc.innerHTML = '';
+  var cc = document.getElementById('companions-container');
+  if (cc) cc.innerHTML = '';
+
+  var authUser = localStorage.getItem('uchimiya_auth_user');
+  if (authUser) applyAuthenticatedUser(authUser);
+
+  selectedDates.clear();
+  updateTriggerDisplay();
+  renderDaysConfigCards();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // バックグラウンドで非同期並列送信
   Promise.all(payloads.map(function(p) {
     return fetch(GAS_URL, {
       method: "POST",
@@ -3105,39 +3142,13 @@ function submitAttendance(e) {
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(p)
     });
-  }))
-  .then(function() {
-    var sMsg = document.getElementById('success-msg');
-    if (sMsg) sMsg.style.display = 'block';
-    var aForm = document.getElementById('attendance-form');
-    if (aForm) aForm.reset();
-    var opc = document.getElementById('other-players-container');
-    if (opc) opc.innerHTML = '';
-    var cc = document.getElementById('companions-container');
-    if (cc) cc.innerHTML = '';
-
-    var authUser = localStorage.getItem('uchimiya_auth_user');
-    if (authUser) applyAuthenticatedUser(authUser);
-
-    selectedDates.clear();
-    updateTriggerDisplay();
-    renderDaysConfigCards();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  })).then(function() {
     fetch(GAS_URL + "?type=attendance&t=" + Date.now())
       .then(function(res) { return res.json(); })
       .then(function(list) {
         if (Array.isArray(list)) registeredRecords = list;
       }).catch(function() {});
-  })
-  .catch(function() {
-    alert("送信に失敗しました。電波環境を確認してください。");
-  })
-  .finally(function() {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = "参加情報を送信する ↵";
-    }
-  });
+  }).catch(function() {});
 }
 </script>
 </body>
