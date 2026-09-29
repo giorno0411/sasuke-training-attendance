@@ -470,6 +470,42 @@
     line-height: 1.6;
   }
 
+  /* 砂時計プログレスモーダル */
+  .progress-modal-box {
+    background: #161f30;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    width: 260px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+  }
+  .hourglass-icon {
+    font-size: 38px;
+    display: inline-block;
+    animation: spinHourglass 2s infinite ease-in-out;
+    margin-bottom: 12px;
+  }
+  @keyframes spinHourglass {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .progress-bar-wrap {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 14px;
+  }
+  .progress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -638,7 +674,16 @@
     color: #fca5a5;
   }
 
-  .admin-date-group { margin-bottom: 22px; }
+  /* 管理者日程グループと中止時グレーアウト */
+  .admin-date-group {
+    margin-bottom: 22px;
+    transition: opacity 0.2s, filter 0.2s;
+  }
+  .admin-date-group.is-canceled {
+    opacity: 0.38;
+    filter: grayscale(85%);
+  }
+
   .admin-date-header {
     display: flex;
     justify-content: space-between;
@@ -659,6 +704,26 @@
     align-items: center;
     flex-wrap: wrap;
   }
+
+  /* 開催 / 中止 トグルスイッチ */
+  .status-toggle-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+  }
+  .status-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
   .admin-card-stats {
     display: flex;
     flex-wrap: wrap;
@@ -879,7 +944,6 @@
     cursor: pointer;
   }
 
-  /* 写真サムネイル */
   .photo-thumbs-wrap {
     display: flex;
     gap: 6px;
@@ -1159,6 +1223,18 @@
   </div>
 </div>
 
+<!-- 送信中砂時計モーダル -->
+<div id="submit-progress-modal" class="modal-overlay">
+  <div class="progress-modal-box">
+    <div class="hourglass-icon">⏳</div>
+    <div id="progress-status-text" style="font-size:13px; font-weight:bold; color:#f8fafc;">送信中...</div>
+    <div style="font-size:11px; color:var(--text-sub); margin-top:4px;">スプレッドシートへ書き込んでいます</div>
+    <div class="progress-bar-wrap">
+      <div id="progress-bar-inner" class="progress-bar-fill"></div>
+    </div>
+  </div>
+</div>
+
 <!-- 写真拡大プレビューモーダル -->
 <div id="photo-viewer-modal" class="modal-overlay">
   <div class="modal-content" style="max-width:480px; padding:14px; text-align:center;">
@@ -1280,7 +1356,14 @@ var calMonth = new Date().getMonth();
 var selectedDates = new Set();
 var registeredRecords = [];
 
-// 前回の集計結果を高速描画するためのキャッシュ復元
+// 開催・中止トグル状態の保持マップ { '2026-03-29': 'canceled' }
+var dateStatusMap = {};
+try {
+  var savedStatus = localStorage.getItem('uchimiya_date_status_map');
+  if (savedStatus) dateStatusMap = JSON.parse(savedStatus);
+} catch(e) {}
+
+// キャッシュ復元
 try {
   var savedRecords = localStorage.getItem('uchimiya_cached_records');
   if (savedRecords) registeredRecords = JSON.parse(savedRecords);
@@ -1707,8 +1790,10 @@ function renderDaysConfigCards() {
   });
 }
 
-function addOtherPlayerCard(name, transport, carType) {
-  name = name || '';
+// 他参加者（プレイヤー）の「姓」「名」分割入力
+function addOtherPlayerCard(lastName, firstName, transport, carType) {
+  lastName = lastName || '';
+  firstName = firstName || '';
   transport = transport || '同乗';
   carType = carType || '普通車';
 
@@ -1721,7 +1806,8 @@ function addOtherPlayerCard(name, transport, carType) {
 
   var html = '';
   html += '<div class="entry-card-top">';
-  html += '<input type="text" class="field-other-player-name" placeholder="例：田中 太郎" value="' + escapeHtml(name) + '" required style="margin:0;">';
+  html += '<input type="text" class="field-other-player-last" placeholder="姓（例：田中）" value="' + escapeHtml(lastName) + '" required style="flex:1; margin:0;">';
+  html += '<input type="text" class="field-other-player-first" placeholder="名（例：太郎）" value="' + escapeHtml(firstName) + '" required style="flex:1; margin:0;">';
   html += '<button type="button" class="btn-remove-entry">✕</button>';
   html += '</div>';
   html += '<div class="entry-transport-row">';
@@ -1769,7 +1855,7 @@ function addCompanionCard(name, role, count, transport, carType) {
 
   var html = '';
   html += '<div class="entry-card-top">';
-  html += '<input type="text" class="field-companion-item-name" placeholder="例：内宮 花子、田中さん、山本くん" value="' + escapeHtml(name) + '" required style="margin:0; flex:1;">';
+  html += '<input type="text" class="field-companion-item-name" placeholder="例：内宮 花子（家族）、田中さん（スタッフ）、山本くん（友人）" value="' + escapeHtml(name) + '" required style="margin:0; flex:1; font-size:12px;">';
   html += '<button type="button" class="btn-remove-entry">✕</button>';
   html += '</div>';
   html += '<div class="entry-card-sub-row">';
@@ -1777,6 +1863,7 @@ function addCompanionCard(name, role, count, transport, carType) {
   html += '<label style="font-size:10px; margin-bottom:2px;">役割・続柄</label>';
   html += '<select class="field-companion-item-role" style="padding:8px 8px; font-size:12px;">';
   html += '<option value="家族" ' + (role === '家族' ? 'selected' : '') + '>家族</option>';
+  html += '<option value="スタッフ" ' + (role === 'スタッフ' ? 'selected' : '') + '>スタッフ</option>';
   html += '<option value="カメラマン" ' + (role === 'カメラマン' ? 'selected' : '') + '>カメラマン</option>';
   html += '<option value="トレーナー" ' + (role === 'トレーナー' ? 'selected' : '') + '>トレーナー</option>';
   html += '<option value="友人・知人" ' + (role === '友人・知人' ? 'selected' : '') + '>友人・知人</option>';
@@ -2312,7 +2399,20 @@ function loadRemoteFeedbacks() {
     });
 }
 
-// 参加状況データの描画（キャッシュ描画と通信取得を分離し、超高速描画）
+// 開催・中止の切り替え
+function toggleDateExecutionStatus(date, status) {
+  dateStatusMap[date] = status;
+  try {
+    localStorage.setItem('uchimiya_date_status_map', JSON.stringify(dateStatusMap));
+  } catch(e) {}
+  
+  var group = document.querySelector('.admin-date-group[data-date="' + date + '"]');
+  if (group) {
+    group.classList.toggle('is-canceled', status === 'canceled');
+  }
+}
+
+// 参加状況データの描画
 function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   if (!container) return;
@@ -2351,6 +2451,8 @@ function renderAdminAttendanceHTML(list) {
     var carpoolDisplayNames = {};
     var carpoolOriginalKeys = {};
     var countedCarsMap = new Map();
+
+    var isDateCanceled = dateStatusMap[date] === 'canceled';
 
     members.forEach(function(m) {
       var isCompanionVehicle = String(m.name).includes('（同伴:');
@@ -2412,9 +2514,22 @@ function renderAdminAttendanceHTML(list) {
     var totalCars = countedCarsMap.size;
     var grandTotalPeople = playerTotal + companionTotal;
 
-    html += '<div class="admin-date-group" data-date="' + date + '">';
+    html += '<div class="admin-date-group ' + (isDateCanceled ? 'is-canceled' : '') + '" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
+    html += '<div style="display:flex; align-items:center; gap:8px;">';
     html += '<span>📅 ' + formatDateLabel(date) + '</span>';
+    
+    // 開催・中止判定トグル
+    html += '<div class="status-toggle-box">';
+    html += '<label class="status-toggle-label" style="color:#34d399;">';
+    html += '<input type="radio" name="exec-status-' + date + '" value="active" ' + (!isDateCanceled ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'active\')"> 開催';
+    html += '</label>';
+    html += '<label class="status-toggle-label" style="color:#f87171;">';
+    html += '<input type="radio" name="exec-status-' + date + '" value="canceled" ' + (isDateCanceled ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'canceled\')"> 中止';
+    html += '</label>';
+    html += '</div>';
+
+    html += '</div>';
     html += '<div class="admin-head-badges">';
     html += '<span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">参加(プレイヤー): ' + playerTotal + '名</span>';
     if (companionTotal > 0) {
@@ -2639,19 +2754,16 @@ function renderAdminAttendanceHTML(list) {
   });
 }
 
-// キャッシュ先行読み込み（即時表示）＋非同期最新化で体感速度ゼロ化
 function fetchAdminData(forceRefresh) {
   var container = document.getElementById('admin-data-container');
   if (!container) return;
 
-  // 1. キャッシュがあれば一瞬で画面を描画（待たせない）
   if (!forceRefresh && registeredRecords && registeredRecords.length > 0) {
     renderAdminAttendanceHTML(registeredRecords);
   } else if (!registeredRecords || registeredRecords.length === 0) {
     container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
   }
 
-  // 2. バックグラウンドで最新通信を実行
   fetch(GAS_URL + "?type=attendance&t=" + Date.now())
     .then(function(res) { return res.json(); })
     .then(function(list) {
@@ -2941,15 +3053,12 @@ window.addEventListener('DOMContentLoaded', function() {
     fetch(GAS_URL + "?type=attendance&t=" + Date.now())
       .then(function(res) { return res.json(); })
       .then(function(list) {
-        if (Array.isArray(list)) {
-          registeredRecords = list;
-          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
-        }
+        if (Array.isArray(list)) registeredRecords = list;
       }).catch(function() {});
   }, 100);
 });
 
-// 超高速送信処理（非同期バックグラウンド化）
+// 送信処理（砂時計プログレス表示＋安心の通信完了検知）
 function submitAttendance(e) {
   e.preventDefault();
   var arr = Array.from(selectedDates).sort();
@@ -2967,14 +3076,16 @@ function submitAttendance(e) {
   var otherPlayers = [];
   var nameDuplicateAlert = false;
   document.querySelectorAll('.other-player-card').forEach(function(c) {
-    var n = c.querySelector('.field-other-player-name').value.trim();
+    var last = c.querySelector('.field-other-player-last').value.trim();
+    var first = c.querySelector('.field-other-player-first').value.trim();
+    var full = last + (firstName ? ' ' + first : '');
     var t = c.querySelector('.field-other-player-transport').value;
     var ct = t === '自車' ? c.querySelector('.field-other-player-car-type').value : '';
-    if (n) {
-      if (n === primaryName || otherPlayers.some(function(p) { return p.name === n; })) {
+    if (last || first) {
+      if (full === primaryName || otherPlayers.some(function(p) { return p.name === full; })) {
         nameDuplicateAlert = true;
       }
-      otherPlayers.push({ name: n, transportMode: t, carType: ct });
+      otherPlayers.push({ name: full, transportMode: t, carType: ct });
     }
   });
 
@@ -3140,25 +3251,19 @@ function submitAttendance(e) {
     });
   });
 
-  // UIを即座に完了状態に切り替える（体感速度ゼロ化）
-  var sMsg = document.getElementById('success-msg');
-  if (sMsg) sMsg.style.display = 'block';
-  var aForm = document.getElementById('attendance-form');
-  if (aForm) aForm.reset();
-  var opc = document.getElementById('other-players-container');
-  if (opc) opc.innerHTML = '';
-  var cc = document.getElementById('companions-container');
-  if (cc) cc.innerHTML = '';
+  // 砂時計プログレスバーの表示開始
+  showModal('submit-progress-modal');
+  var progBar = document.getElementById('progress-bar-inner');
+  var progText = document.getElementById('progress-status-text');
+  progBar.style.width = '20%';
+  progText.innerText = "データを送信中...";
 
-  var authUser = localStorage.getItem('uchimiya_auth_user');
-  if (authUser) applyAuthenticatedUser(authUser);
+  var progTimer = setInterval(function() {
+    var cur = parseInt(progBar.style.width) || 20;
+    if (cur < 85) progBar.style.width = (cur + 15) + '%';
+  }, 350);
 
-  selectedDates.clear();
-  updateTriggerDisplay();
-  renderDaysConfigCards();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  // バックグラウンドで非同期並列送信
+  // 通信実行
   Promise.all(payloads.map(function(p) {
     return fetch(GAS_URL, {
       method: "POST",
@@ -3166,16 +3271,43 @@ function submitAttendance(e) {
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(p)
     });
-  })).then(function() {
-    fetch(GAS_URL + "?type=attendance&t=" + Date.now())
-      .then(function(res) { return res.json(); })
-      .then(function(list) {
-        if (Array.isArray(list)) {
-          registeredRecords = list;
-          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
-        }
-      }).catch(function() {});
-  }).catch(function() {});
+  }))
+  .then(function() {
+    clearInterval(progTimer);
+    progBar.style.width = '100%';
+    progText.innerText = "✓ 送信完了！";
+
+    setTimeout(function() {
+      hideModal('submit-progress-modal');
+      var sMsg = document.getElementById('success-msg');
+      if (sMsg) sMsg.style.display = 'block';
+      var aForm = document.getElementById('attendance-form');
+      if (aForm) aForm.reset();
+      var opc = document.getElementById('other-players-container');
+      if (opc) opc.innerHTML = '';
+      var cc = document.getElementById('companions-container');
+      if (cc) cc.innerHTML = '';
+
+      var authUser = localStorage.getItem('uchimiya_auth_user');
+      if (authUser) applyAuthenticatedUser(authUser);
+
+      selectedDates.clear();
+      updateTriggerDisplay();
+      renderDaysConfigCards();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      fetch(GAS_URL + "?type=attendance&t=" + Date.now())
+        .then(function(res) { return res.json(); })
+        .then(function(list) {
+          if (Array.isArray(list)) registeredRecords = list;
+        }).catch(function() {});
+    }, 450);
+  })
+  .catch(function() {
+    clearInterval(progTimer);
+    hideModal('submit-progress-modal');
+    alert("送信に失敗しました。電波環境を確認してください。");
+  });
 }
 </script>
 </body>
