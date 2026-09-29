@@ -260,7 +260,6 @@
     font-weight: 600;
   }
 
-  /* モーダル：初期状態は完全非表示 */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -707,10 +706,6 @@
     flex-wrap: wrap;
     gap: 4px;
   }
-  .carpool-item-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-  }
   .btn-merge-car {
     background: rgba(16, 185, 129, 0.2);
     border: 1px solid rgba(16, 185, 129, 0.4);
@@ -1128,7 +1123,24 @@ try {
 
 const adminDateExistingCars = {};
 
-// モーダル表示切替
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    updateTriggerDisplay();
+    renderRulesDisplay();
+    renderStageGroups();
+  } catch(e) {}
+
+  try {
+    checkGateAccess();
+  } catch(e) {}
+
+  setTimeout(() => {
+    loadRemoteObstacles().catch(() => {});
+    loadRemoteRules().catch(() => {});
+    fetchRegisteredAttendance().catch(() => {});
+  }, 100);
+});
+
 function showModal(id) {
   const el = document.getElementById(id);
   if (el) el.style.display = 'flex';
@@ -1138,7 +1150,6 @@ function hideModal(id) {
   if (el) el.style.display = 'none';
 }
 
-// 認証チェック
 function checkGateAccess() {
   const savedName = localStorage.getItem('uchimiya_auth_user');
   if (savedName) {
@@ -2332,6 +2343,7 @@ function unmergeCar(date, rawLeader) {
   }
 }
 
+// 参加集計データの取得（安全なDOM・データ属性バインド）
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   if (!container) return;
@@ -2501,7 +2513,7 @@ async function fetchAdminData() {
               </div>
               <div style="display:flex; align-items:center; gap:6px;">
                 <span class="badge-transport ${badgeCls}">${escapeHtml(m.transport || 'その他')}${escapeHtml(carInfo)}</span>
-                <button type="button" class="btn-del-single" data-del-name="${escapeHtml(m.name)}" data-del-date="${escapeHtml(m.date)}" data-del-row="${m.rowIndex || 0}" onclick="handleDelClick(this)">🗑️ 削除</button>
+                <button type="button" class="btn-del-single" data-del-name="${escapeHtml(m.name)}" data-del-date="${escapeHtml(m.date)}" data-del-row="${m.rowIndex || 0}">🗑️ 削除</button>
               </div>
             </div>
             <div style="font-size:12px; color:#38bdf8;">⏰ ${escapeHtml(m.time || '時間指定なし')}</div>
@@ -2526,9 +2538,9 @@ async function fetchAdminData() {
                     ・<b>${escapeHtml(carpoolDisplayNames[k])}</b> [${escapeHtml(carpoolCarTypes[k] \vert{}\vert{} '普通車')}] (${carpoolMap[k].length}名同乗): ${escapeHtml(carpoolMap[k].join(', '))}${isMerged ? `<span style="font-size:10px; color:#60a5fa; margin-left:4px;">(統合済)</span>` : ''}
                   </div>
                   <div>
-                    <button type="button" class="btn-merge-car" data-merge-date="${escapeHtml(date)}" data-merge-leader="${escapeHtml(k)}" onclick="handleMergeClick(this)">✏️ 統合・変更</button>
+                    <button type="button" class="btn-merge-car" data-merge-date="${escapeHtml(date)}" data-merge-leader="${escapeHtml(k)}">✏️ 統合・変更</button>
                     ${isMerged ? origKeys.filter(ok => carpoolMergeMap[`${date}:::${ok}`]).map(ok => `
-                      <button type="button" class="btn-unmerge-car" data-unmerge-date="${escapeHtml(date)}" data-unmerge-leader="${escapeHtml(ok)}" onclick="handleUnmergeClick(this)">↩️ 解除</button>
+                      <button type="button" class="btn-unmerge-car" data-unmerge-date="${escapeHtml(date)}" data-unmerge-leader="${escapeHtml(ok)}">↩️ 解除</button>
                     `).join('') : ''}
                   </div>
                 </div>
@@ -2542,28 +2554,27 @@ async function fetchAdminData() {
     });
 
     container.innerHTML = html;
+
+    // 安全な動的イベントバインド（構文エラーゼロ化）
+    container.querySelectorAll('.btn-del-single').forEach(btn => {
+      btn.onclick = function() {
+        deleteSingleAttendance(this.getAttribute('data-del-name'), this.getAttribute('data-del-date'), Number(this.getAttribute('data-del-row')));
+      };
+    });
+    container.querySelectorAll('.btn-merge-car').forEach(btn => {
+      btn.onclick = function() {
+        openMergeCarModalByDate(this.getAttribute('data-merge-date'), this.getAttribute('data-merge-leader'));
+      };
+    });
+    container.querySelectorAll('.btn-unmerge-car').forEach(btn => {
+      btn.onclick = function() {
+        unmergeCar(this.getAttribute('data-unmerge-date'), this.getAttribute('data-unmerge-leader'));
+      };
+    });
+
   } catch (err) {
     container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:15px;">データの取得に失敗しました</div>';
   }
-}
-
-function handleDelClick(el) {
-  const name = el.getAttribute('data-del-name');
-  const date = el.getAttribute('data-del-date');
-  const row = Number(el.getAttribute('data-del-row'));
-  deleteSingleAttendance(name, date, row);
-}
-
-function handleMergeClick(el) {
-  const date = el.getAttribute('data-merge-date');
-  const leader = el.getAttribute('data-merge-leader');
-  openMergeCarModalByDate(date, leader);
-}
-
-function handleUnmergeClick(el) {
-  const date = el.getAttribute('data-unmerge-date');
-  const leader = el.getAttribute('data-unmerge-leader');
-  unmergeCar(date, leader);
 }
 
 async function deleteSingleAttendance(name, date, rowIndex) {
