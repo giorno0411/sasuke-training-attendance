@@ -67,8 +67,6 @@
     cursor: pointer;
     backdrop-filter: blur(4px);
     white-space: nowrap;
-    position: relative;
-    z-index: 10;
   }
 
   .tab-nav {
@@ -80,8 +78,6 @@
     border-radius: 8px;
     margin: 4px 0 16px 0;
     border: 1px solid var(--border);
-    position: relative;
-    z-index: 5;
   }
   .tab-btn {
     flex: 1;
@@ -112,8 +108,6 @@
     padding: 18px;
     margin-bottom: 16px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-    position: relative;
-    z-index: 2;
   }
 
   .form-group { margin-bottom: 15px; }
@@ -276,11 +270,11 @@
     font-weight: 600;
   }
 
-  /* モーダル：デフォルト完全非表示、.active時のみ画面全体に展開 */
+  /* モーダル基本スタイル：デフォルトは display: none */
   .modal-overlay {
-    display: none !important;
-    position: fixed !important;
-    top: 0; left: 0; width: 100vw; height: 100vh;
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -288,9 +282,6 @@
     align-items: center;
     z-index: 100000;
     padding: 16px;
-  }
-  .modal-overlay.active {
-    display: flex !important;
   }
 
   .modal-content {
@@ -477,7 +468,7 @@
     display: none;
   }
 
-  /* 注意事項 */
+  /* 注意事項（・サイズ3px） */
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -1168,27 +1159,20 @@ try {
 
 const adminDateExistingCars = {};
 
-// ★完全に独立した初期化処理（エラーで他が止まらないよう保護）
+// ★起動処理：画面描画を最優先し、外部通信は完全に切り離して実行
 window.addEventListener('DOMContentLoaded', () => {
-  try {
-    const now = new Date();
-    calYear = now.getFullYear();
-    calMonth = now.getMonth();
-    updateTriggerDisplay();
-    renderRulesDisplay();
-    renderStageGroups();
-  } catch(e) {
-    console.error("ローカル描画エラー:", e);
-  }
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+
+  updateTriggerDisplay();
+  renderRulesDisplay();
+  renderStageGroups();
 
   // 認証チェック
-  try {
-    checkGateAccess();
-  } catch(e) {
-    console.error("ゲートチェックエラー:", e);
-  }
+  checkGateAccess();
 
-  // 外部通信処理は安全にバックグラウンド実行
+  // バックグラウンドで非同期通信（失敗しても画面を止めない）
   setTimeout(() => {
     loadRemoteObstacles().catch(() => {});
     loadRemoteRules().catch(() => {});
@@ -1196,21 +1180,28 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 100);
 });
 
+// モーダル直接制御（displayプロパティを直接操作して透明な壁を完全排除）
+function showModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'flex';
+}
+function hideModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
 function checkGateAccess() {
   const savedName = localStorage.getItem('uchimiya_auth_user');
-  const gateEl = document.getElementById('gate-modal');
   if (savedName) {
     applyAuthenticatedUser(savedName);
-    if (gateEl) gateEl.classList.remove('active');
+    hideModal('gate-modal');
     return;
   }
-  if (gateEl) {
-    gateEl.classList.add('active');
-    setTimeout(() => {
-      const inp = document.getElementById('gate-code-input');
-      if (inp) inp.focus();
-    }, 150);
-  }
+  showModal('gate-modal');
+  setTimeout(() => {
+    const inp = document.getElementById('gate-code-input');
+    if (inp) inp.focus();
+  }, 150);
 }
 
 async function verifyGateCode() {
@@ -1234,8 +1225,7 @@ async function verifyGateCode() {
       localStorage.setItem('uchimiya_auth_user', data.name);
       localStorage.setItem('uchimiya_auth_code', code);
       applyAuthenticatedUser(data.name);
-      const gateEl = document.getElementById('gate-modal');
-      if (gateEl) gateEl.classList.remove('active');
+      hideModal('gate-modal');
     } else {
       alert(data.message || "認証に失敗しました。正しいコードを入力してください。");
     }
@@ -1368,9 +1358,7 @@ async function fetchRegisteredAttendance() {
     const res = await fetch(GAS_URL + "?type=attendance&t=" + Date.now(), { cache: "no-store" });
     const list = await res.json();
     if (Array.isArray(list)) registeredRecords = list;
-  } catch(e) {
-    console.log("過去回答取得スキップ（通信状況）");
-  }
+  } catch(e) {}
 }
 
 function formatRuleItem(text, title) {
@@ -1737,12 +1725,10 @@ function switchAdminSubTab(sub) {
 
 function openCalendarPopup() {
   renderCalendar();
-  const modal = document.getElementById('cal-popup-modal');
-  if (modal) modal.classList.add('active');
+  showModal('cal-popup-modal');
 }
 function closeCalendarPopup() {
-  const modal = document.getElementById('cal-popup-modal');
-  if (modal) modal.classList.remove('active');
+  hideModal('cal-popup-modal');
   updateTriggerDisplay();
   renderDaysConfigCards();
 }
@@ -2017,7 +2003,6 @@ async function submitAttendance(e) {
     return;
   }
 
-  // 重複回答チェック（通信可能時のみ）
   try {
     await fetchRegisteredAttendance();
     const allNamesToCheck = [primaryName, ...otherPlayers.map(p => p.name)];
@@ -2189,8 +2174,7 @@ async function submitAttendance(e) {
 }
 
 function openLoginModal() {
-  const modal = document.getElementById('admin-modal');
-  if (modal) modal.classList.add('active');
+  showModal('admin-modal');
   const input = document.getElementById('admin-pin-input');
   if (input) {
     input.value = "";
@@ -2198,8 +2182,7 @@ function openLoginModal() {
   }
 }
 function closeLoginModal() {
-  const modal = document.getElementById('admin-modal');
-  if (modal) modal.classList.remove('active');
+  hideModal('admin-modal');
 }
 
 async function logAdminAccess(status, attemptedPin) {
@@ -2312,13 +2295,11 @@ function openMergeCarModalByDate(date, rawLeader) {
   });
 
   document.getElementById('merge-new-name-input').value = rawLeader;
-  const modal = document.getElementById('merge-car-modal');
-  if (modal) modal.classList.add('active');
+  showModal('merge-car-modal');
 }
 
 function closeMergeModal() {
-  const modal = document.getElementById('merge-car-modal');
-  if (modal) modal.classList.remove('active');
+  hideModal('merge-car-modal');
 }
 
 function handleMergeSelectChange(val) {
@@ -2466,7 +2447,6 @@ async function fetchAdminData() {
 
       html += `
         <div class="admin-date-group">
-          <!-- 1. 日付ヘッダー ＆ サマリー -->
           <div class="admin-date-header">
             <span>📅 ${formatDateLabel(date)}</span>
             <div class="admin-head-badges">
@@ -2481,7 +2461,6 @@ async function fetchAdminData() {
             <span>🚗 <b>車両計: <span class="car-stat-badge">${totalCars}台</span></b> (普通: ${carsStandard}台 / 軽: ${carsLight}台${carsOther > 0 ? ` / 他: ${carsOther}台` : ''})</span>
           </div>
 
-          <!-- 車両計の内訳リスト -->
           ${totalCars > 0 ? `
             <div class="car-breakdown-box">
               <div class="car-breakdown-title">🚗 駐車車両の内訳・オーナー一覧（計 ${totalCars}台）</div>
@@ -2492,8 +2471,6 @@ async function fetchAdminData() {
               `).join('')}
             </div>
           ` : ''}
-
-          <!-- 2. 日付直下：参加者カード一覧 -->
       `;
 
       members.forEach(m => {
@@ -2534,7 +2511,6 @@ async function fetchAdminData() {
         `;
       });
 
-      // 3. 参加者一覧の下：相乗り同乗者グループ
       if (Object.keys(carpoolMap).length > 0) {
         html += `
           <div class="carpool-group">
