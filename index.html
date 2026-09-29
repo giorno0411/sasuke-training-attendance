@@ -54,11 +54,6 @@
     line-height: 1.3;
   }
 
-  button, input, select, textarea, .tab-btn, .admin-trigger, .date-bar-input {
-    pointer-events: auto !important;
-    cursor: pointer;
-  }
-
   .admin-trigger {
     flex-shrink: 0;
     background: rgba(15, 23, 42, 0.7);
@@ -70,6 +65,7 @@
     border-radius: 6px;
     backdrop-filter: blur(4px);
     white-space: nowrap;
+    cursor: pointer;
   }
 
   .tab-nav {
@@ -94,6 +90,7 @@
     transition: all 0.2s;
     text-align: center;
     white-space: nowrap;
+    cursor: pointer;
   }
   .tab-btn.active {
     background: rgba(30, 41, 59, 0.9);
@@ -157,6 +154,7 @@
     color: #94a3b8;
     text-decoration: underline;
     font-size: 11px;
+    cursor: pointer;
   }
 
   .entry-card {
@@ -191,6 +189,7 @@
     font-size: 13px;
     font-weight: bold;
     flex-shrink: 0;
+    cursor: pointer;
   }
   .entry-transport-row {
     display: grid;
@@ -212,6 +211,7 @@
     align-items: center;
     gap: 4px;
     margin-top: 4px;
+    cursor: pointer;
   }
   .btn-add-entry-cyan {
     background: rgba(15, 23, 42, 0.8);
@@ -227,6 +227,7 @@
     align-items: center;
     gap: 4px;
     margin-top: 4px;
+    cursor: pointer;
   }
 
   .date-bar-input {
@@ -238,6 +239,7 @@
     justify-content: space-between;
     align-items: center;
     min-height: 42px;
+    cursor: pointer;
   }
   .date-bar-text {
     font-size: 13px;
@@ -258,7 +260,6 @@
     font-weight: 600;
   }
 
-  /* モーダル：通常時は display:none かつ pointer-events:none で物理干渉を遮断 */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -268,13 +269,8 @@
     -webkit-backdrop-filter: blur(8px);
     justify-content: center;
     align-items: center;
-    z-index: 999999;
+    z-index: 100000;
     padding: 16px;
-    pointer-events: none;
-  }
-  .modal-overlay.open {
-    display: flex !important;
-    pointer-events: auto !important;
   }
 
   .modal-content {
@@ -285,7 +281,6 @@
     width: 100%;
     max-width: 320px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-    pointer-events: auto;
   }
 
   .mini-cal-box {
@@ -295,7 +290,6 @@
     padding: 14px;
     width: 290px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-    pointer-events: auto;
   }
   .mini-cal-header {
     display: flex;
@@ -315,6 +309,7 @@
     padding: 3px 8px;
     border-radius: 5px;
     font-size: 11px;
+    cursor: pointer;
   }
   .mini-cal-weekdays {
     display: grid;
@@ -342,6 +337,7 @@
     user-select: none;
     background: rgba(30, 41, 59, 0.5);
     border: 1px solid transparent;
+    cursor: pointer;
   }
   .mini-cal-day.disabled {
     opacity: 0.18;
@@ -371,6 +367,7 @@
     border-radius: 6px;
     font-size: 12px;
     font-weight: bold;
+    cursor: pointer;
   }
 
   .day-config-card {
@@ -406,6 +403,7 @@
     text-align: center;
     user-select: none;
     font-weight: 600;
+    cursor: pointer;
   }
   .radio-pill-label input { display: none; }
   .radio-pill-label.checked {
@@ -441,6 +439,7 @@
     font-weight: bold;
     margin-top: 6px;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    cursor: pointer;
   }
   .btn-submit:active { background: var(--accent-hover); }
 
@@ -591,6 +590,7 @@
     font-size: 11px;
     font-weight: bold;
     border-radius: 6px;
+    cursor: pointer;
     text-align: center;
     white-space: nowrap;
   }
@@ -706,6 +706,10 @@
     flex-wrap: wrap;
     gap: 4px;
   }
+  .carpool-item-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
   .btn-merge-car {
     background: rgba(16, 185, 129, 0.2);
     border: 1px solid rgba(16, 185, 129, 0.4);
@@ -714,6 +718,7 @@
     padding: 2px 6px;
     border-radius: 4px;
     white-space: nowrap;
+    cursor: pointer;
   }
   .btn-unmerge-car {
     background: rgba(239, 68, 68, 0.2);
@@ -723,6 +728,7 @@
     padding: 2px 6px;
     border-radius: 4px;
     margin-left: 4px;
+    cursor: pointer;
   }
 
   .btn-del-single {
@@ -732,6 +738,7 @@
     font-size: 11px;
     padding: 2px 7px;
     border-radius: 4px;
+    cursor: pointer;
   }
 
   .admin-clear-all-wrap {
@@ -748,6 +755,7 @@
     border-radius: 6px;
     font-size: 12px;
     font-weight: bold;
+    cursor: pointer;
   }
 
   .admin-edit-card {
@@ -789,6 +797,7 @@
     padding: 2px 7px;
     font-size: 11px;
     border-radius: 4px;
+    cursor: pointer;
   }
 
   .hidden { display: none !important; }
@@ -796,8 +805,8 @@
 </head>
 <body>
 
-<!-- 個別認証ゲートモーダル（インラインでpointer-events: noneを明記し初期ブロックを完全阻止） -->
-<div id="gate-modal" class="modal-overlay" style="pointer-events: none;">
+<!-- 個別認証ゲートモーダル -->
+<div id="gate-modal" class="modal-overlay">
   <div class="modal-content" style="text-align:center;">
     <div style="font-size:28px; margin-bottom:8px;">🔒</div>
     <h3 style="margin:0 0 6px 0; font-size:16px;">関係者限定アクセス</h3>
@@ -835,13 +844,11 @@
     <div class="card">
       <form id="attendance-form" onsubmit="submitAttendance(event)">
         
-        <!-- 参加者（プレイヤー）氏名 -->
         <div class="form-group">
           <label>参加者（プレイヤー）氏名<span class="required">*</span></label>
           <input type="text" id="field-name" placeholder="例：内宮修造" required>
         </div>
 
-        <!-- 他参加者（プレイヤー）氏名 ＋ 移動手段 -->
         <div class="form-group">
           <label>他参加者（プレイヤー）氏名</label>
           <div id="other-players-container"></div>
@@ -850,7 +857,6 @@
           </button>
         </div>
 
-        <!-- 日程選択 -->
         <div class="form-group">
           <label>参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" onclick="openCalendarPopup()">
@@ -861,9 +867,8 @@
 
         <div id="days-config-container"></div>
 
-        <!-- お連れ様・同伴者（見学等の非プレイヤー） ＋ 移動手段 -->
         <div class="form-group">
-          <label>お連れ様・同伴者（見学・補助等の非プレイヤー）</label>
+          <label>お連れ様・同伴者（見学等の非プレイヤー）</label>
           <p style="font-size:11px; color:var(--text-sub); margin:0 0 6px 0;">お連れ様がいる場合は追加し、役割・人数・交通手段を選択してください。</p>
           <div id="companions-container"></div>
           <button type="button" class="btn-add-entry-cyan" onclick="addCompanionCard()">
@@ -871,7 +876,6 @@
           </button>
         </div>
 
-        <!-- 備考 -->
         <div class="form-group">
           <label>備考・その他ご要望</label>
           <textarea id="field-note" rows="2" placeholder="その他ご要望があればご記入ください。"></textarea>
@@ -907,7 +911,6 @@
         <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット稼働状況編集</button>
       </div>
 
-      <!-- サブタブ1: 参加集計 -->
       <div id="admin-subview-attendance">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
@@ -922,7 +925,6 @@
         </div>
       </div>
 
-      <!-- サブタブ2: 注意事項編集 -->
       <div id="admin-subview-rules" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">📜 注意事項の編集</h2>
@@ -950,7 +952,6 @@
         </div>
       </div>
 
-      <!-- サブタブ3: セット稼働状況編集 -->
       <div id="admin-subview-obstacles" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">⚙️ セット稼働状況の編集</h2>
@@ -1113,7 +1114,8 @@ let stageData = [
   }
 ];
 
-let calYear, calMonth;
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
 const selectedDates = new Set();
 let registeredRecords = [];
 
@@ -1126,15 +1128,19 @@ try {
 const adminDateExistingCars = {};
 
 window.addEventListener('DOMContentLoaded', () => {
-  const now = new Date();
-  calYear = now.getFullYear();
-  calMonth = now.getMonth();
+  try {
+    updateTriggerDisplay();
+    renderRulesDisplay();
+    renderStageGroups();
+  } catch(e) {
+    console.error("DOM初期化エラー", e);
+  }
 
-  updateTriggerDisplay();
-  renderRulesDisplay();
-  renderStageGroups();
-
-  checkGateAccess();
+  try {
+    checkGateAccess();
+  } catch(e) {
+    console.error("ゲート認証エラー", e);
+  }
 
   setTimeout(() => {
     loadRemoteObstacles().catch(() => {});
@@ -1143,20 +1149,13 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 100);
 });
 
-// モーダル開閉制御：style.display と pointer-events を同期
 function showModal(id) {
   const el = document.getElementById(id);
-  if (el) {
-    el.style.display = 'flex';
-    el.style.pointerEvents = 'auto';
-  }
+  if (el) el.style.display = 'flex';
 }
 function hideModal(id) {
   const el = document.getElementById(id);
-  if (el) {
-    el.style.display = 'none';
-    el.style.pointerEvents = 'none';
-  }
+  if (el) el.style.display = 'none';
 }
 
 function checkGateAccess() {
@@ -1183,8 +1182,10 @@ async function verifyGateCode() {
     return;
   }
 
-  btn.disabled = true;
-  btn.innerText = "認証中...";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "認証中...";
+  }
 
   try {
     const res = await fetch(`${GAS_URL}?type=verify_code&code=${encodeURIComponent(code)}&t=${Date.now()}`);
@@ -1201,8 +1202,10 @@ async function verifyGateCode() {
   } catch(e) {
     alert("通信エラーが発生しました。電波の良い場所でお試しください。");
   } finally {
-    btn.disabled = false;
-    btn.innerText = "認証して入場 ↵";
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "認証して入場 ↵";
+    }
   }
 }
 
@@ -1495,8 +1498,10 @@ async function loadRemoteRules() {
 async function saveRuleSettings(e) {
   e.preventDefault();
   const btn = document.getElementById('btn-save-rules');
-  btn.disabled = true;
-  btn.innerText = "保存中...";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "保存中...";
+  }
 
   syncAndPreviewRules();
 
@@ -1516,8 +1521,10 @@ async function saveRuleSettings(e) {
   } catch(err) {
     alert("保存に失敗しました。電波環境を確認してください。");
   } finally {
-    btn.disabled = false;
-    btn.innerText = "💾 注意事項を保存する";
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "💾 注意事項を保存する";
+    }
   }
 }
 
@@ -1643,8 +1650,10 @@ function toggleAdminNoteInput(inputId, status) {
 async function saveObstacleSettings(e) {
   e.preventDefault();
   const btn = document.getElementById('btn-save-obs');
-  btn.disabled = true;
-  btn.innerText = "保存中...";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "保存中...";
+  }
 
   stageData.forEach((group, gIdx) => {
     group.items.forEach((item, iIdx) => {
@@ -1671,8 +1680,10 @@ async function saveObstacleSettings(e) {
   } catch(err) {
     alert("保存に失敗しました。電波環境を確認してください。");
   } finally {
-    btn.disabled = false;
-    btn.innerText = "💾 セット稼働状況を保存する";
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "💾 セット稼働状況を保存する";
+    }
   }
 }
 
@@ -1724,8 +1735,10 @@ function nextMonth() {
 }
 
 function renderCalendar() {
-  document.getElementById('cal-month-year').innerText = `${calYear}年 ${calMonth + 1}月`;
+  const title = document.getElementById('cal-month-year');
+  if (title) title.innerText = `${calYear}年 ${calMonth + 1}月`;
   const grid = document.getElementById('cal-days-grid');
+  if (!grid) return;
   grid.innerHTML = '';
 
   const firstDayIndex = new Date(calYear, calMonth, 1).getDay();
@@ -1765,7 +1778,8 @@ function renderCalendar() {
     grid.appendChild(cell);
   }
 
-  document.getElementById('cal-popup-count').innerText = `${selectedDates.size}日選択中`;
+  const countEl = document.getElementById('cal-popup-count');
+  if (countEl) countEl.innerText = `${selectedDates.size}日選択中`;
 }
 
 function toggleDateSelection(dateStr, cellEl) {
@@ -1776,11 +1790,13 @@ function toggleDateSelection(dateStr, cellEl) {
     selectedDates.add(dateStr);
     cellEl.classList.add('selected');
   }
-  document.getElementById('cal-popup-count').innerText = `${selectedDates.size}日選択中`;
+  const countEl = document.getElementById('cal-popup-count');
+  if (countEl) countEl.innerText = `${selectedDates.size}日選択中`;
 }
 
 function updateTriggerDisplay() {
   const display = document.getElementById('date-picker-display');
+  if (!display) return;
   const arr = Array.from(selectedDates).sort();
   if (arr.length === 0) {
     display.className = "date-bar-text";
@@ -1793,6 +1809,7 @@ function updateTriggerDisplay() {
 
 function renderDaysConfigCards() {
   const container = document.getElementById('days-config-container');
+  if (!container) return;
   const arr = Array.from(selectedDates).sort();
 
   if (arr.length === 0) {
@@ -1883,30 +1900,41 @@ function getTimeOptions(selectedVal) {
 
 function toggleDayCustomTime(date, val) {
   const customRow = document.getElementById(`custom-time-row-${date}`);
-  customRow.classList.toggle('hidden', val !== 'custom');
+  if (customRow) customRow.classList.toggle('hidden', val !== 'custom');
 }
 
 function selectDayTransport(labelEl, date, type) {
   const parent = labelEl.closest('.form-group');
-  parent.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
+  if (parent) {
+    parent.querySelectorAll('.radio-pill-label').forEach(el => el.classList.remove('checked'));
+  }
   labelEl.classList.add('checked');
 
   const carBox = document.getElementById(`car-box-${date}`);
   const shareBox = document.getElementById(`share-box-${date}`);
 
-  carBox.classList.toggle('hidden', type !== '自車');
-  shareBox.classList.toggle('hidden', type !== '乗り合い');
+  if (carBox) carBox.classList.toggle('hidden', type !== '自車');
+  if (shareBox) shareBox.classList.toggle('hidden', type !== '乗り合い');
 }
 
 function switchTab(tab) {
-  document.getElementById('view-form').classList.toggle('hidden', tab !== 'form');
-  document.getElementById('view-column').classList.toggle('hidden', tab !== 'column');
-  document.getElementById('view-status').classList.toggle('hidden', tab !== 'status');
-  document.getElementById('view-admin').classList.add('hidden');
+  const vf = document.getElementById('view-form');
+  const vc = document.getElementById('view-column');
+  const vs = document.getElementById('view-status');
+  const va = document.getElementById('view-admin');
 
-  document.getElementById('tab-btn-form').classList.toggle('active', tab === 'form');
-  document.getElementById('tab-btn-column').classList.toggle('active', tab === 'column');
-  document.getElementById('tab-btn-status').classList.toggle('active', tab === 'status');
+  if (vf) vf.classList.toggle('hidden', tab !== 'form');
+  if (vc) vc.classList.toggle('hidden', tab !== 'column');
+  if (vs) vs.classList.toggle('hidden', tab !== 'status');
+  if (va) va.classList.add('hidden');
+
+  const tbf = document.getElementById('tab-btn-form');
+  const tbc = document.getElementById('tab-btn-column');
+  const tbs = document.getElementById('tab-btn-status');
+
+  if (tbf) tbf.classList.toggle('active', tab === 'form');
+  if (tbc) tbc.classList.toggle('active', tab === 'column');
+  if (tbs) tbs.classList.toggle('active', tab === 'status');
 }
 
 async function submitAttendance(e) {
@@ -1919,7 +1947,8 @@ async function submitAttendance(e) {
     return;
   }
 
-  const primaryName = document.getElementById('field-name').value.trim();
+  const nameEl = document.getElementById('field-name');
+  const primaryName = nameEl ? nameEl.value.trim() : '';
   if (!primaryName) {
     alert("参加者（プレイヤー）氏名を入力してください。");
     return;
@@ -1986,7 +2015,7 @@ async function submitAttendance(e) {
         }
       }
     }
-  } catch(e) {}
+  } catch(err) {}
 
   const companionCountStr = totalCompanionHeadcount > 0 ? `${totalCompanionHeadcount}名` : "0名";
   const companionNamesStr = companionList.length > 0 
@@ -1996,7 +2025,8 @@ async function submitAttendance(e) {
       }).join('、')
     : "なし";
 
-  const note = document.getElementById('field-note').value.trim();
+  const noteEl = document.getElementById('field-note');
+  const note = noteEl ? noteEl.value.trim() : '';
 
   const primaryDayConfigs = [];
   for (const d of arr) {
@@ -2042,8 +2072,10 @@ async function submitAttendance(e) {
   }
 
   const btn = document.getElementById('btn-submit-form');
-  btn.disabled = true;
-  btn.innerText = "送信中...";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "送信中...";
+  }
 
   const payloads = [
     {
@@ -2121,10 +2153,14 @@ async function submitAttendance(e) {
       });
     }));
 
-    document.getElementById('success-msg').style.display = 'block';
-    document.getElementById('attendance-form').reset();
-    document.getElementById('other-players-container').innerHTML = '';
-    document.getElementById('companions-container').innerHTML = '';
+    const sMsg = document.getElementById('success-msg');
+    if (sMsg) sMsg.style.display = 'block';
+    const aForm = document.getElementById('attendance-form');
+    if (aForm) aForm.reset();
+    const opc = document.getElementById('other-players-container');
+    if (opc) opc.innerHTML = '';
+    const cc = document.getElementById('companions-container');
+    if (cc) cc.innerHTML = '';
     
     const authUser = localStorage.getItem('uchimiya_auth_user');
     if (authUser) applyAuthenticatedUser(authUser);
@@ -2137,8 +2173,10 @@ async function submitAttendance(e) {
   } catch (err) {
     alert("送信に失敗しました。電波環境を確認してください。");
   } finally {
-    btn.disabled = false;
-    btn.innerText = "参加情報を送信する ↵";
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "参加情報を送信する ↵";
+    }
   }
 }
 
@@ -2171,8 +2209,10 @@ async function logAdminAccess(status, attemptedPin) {
 }
 
 async function verifyAdminPin() {
-  const pinInput = document.getElementById('admin-pin-input').value.trim();
-  if (pinInput === ADMIN_PIN) {
+  const pinInput = document.getElementById('admin-pin-input');
+  const val = pinInput ? pinInput.value.trim() : '';
+
+  if (val === ADMIN_PIN) {
     logAdminAccess("成功", "******");
     closeLoginModal();
     document.getElementById('view-form').classList.add('hidden');
@@ -2184,7 +2224,7 @@ async function verifyAdminPin() {
     document.getElementById('tab-btn-status').classList.remove('active');
     fetchAdminData();
   } else {
-    logAdminAccess("失敗(不正試行)", pinInput);
+    logAdminAccess("失敗(不正試行)", val);
     alert("パスワードが正しくありません。");
     closeLoginModal();
   }
@@ -2248,22 +2288,25 @@ let currentMergeTarget = { date: '', rawLeader: '' };
 
 function openMergeCarModalByDate(date, rawLeader) {
   currentMergeTarget = { date, rawLeader };
-  document.getElementById('merge-target-original-name').innerText = `${rawLeader}号`;
+  const title = document.getElementById('merge-target-original-name');
+  if (title) title.innerText = `${rawLeader}号`;
 
   const existingOptions = adminDateExistingCars[date] || [];
   const sel = document.getElementById('merge-select-existing');
-  sel.innerHTML = '<option value="">-- 新しい名前を直接入力 --</option>';
+  if (sel) {
+    sel.innerHTML = '<option value="">-- 新しい名前を直接入力 --</option>';
+    existingOptions.forEach(opt => {
+      if (opt !== rawLeader) {
+        const el = document.createElement('option');
+        el.value = opt;
+        el.innerText = `${opt}号 に合流`;
+        sel.appendChild(el);
+      }
+    });
+  }
 
-  existingOptions.forEach(opt => {
-    if (opt !== rawLeader) {
-      const el = document.createElement('option');
-      el.value = opt;
-      el.innerText = `${opt}号 に合流`;
-      sel.appendChild(el);
-    }
-  });
-
-  document.getElementById('merge-new-name-input').value = rawLeader;
+  const nameInput = document.getElementById('merge-new-name-input');
+  if (nameInput) nameInput.value = rawLeader;
   showModal('merge-car-modal');
 }
 
@@ -2272,13 +2315,15 @@ function closeMergeModal() {
 }
 
 function handleMergeSelectChange(val) {
-  if (val) {
-    document.getElementById('merge-new-name-input').value = val;
+  const nameInput = document.getElementById('merge-new-name-input');
+  if (val && nameInput) {
+    nameInput.value = val;
   }
 }
 
 function executeMergeCar() {
-  const newName = document.getElementById('merge-new-name-input').value.trim().replace(/(号車|号|車)$/g, '');
+  const nameInput = document.getElementById('merge-new-name-input');
+  const newName = nameInput ? nameInput.value.trim().replace(/(号車|号|車)$/g, '') : '';
   if (!newName) {
     alert("統合先の号車名を入力してください。");
     return;
@@ -2303,6 +2348,7 @@ function unmergeCar(date, rawLeader) {
 
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
+  if (!container) return;
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
 
   try {
