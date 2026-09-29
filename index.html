@@ -953,6 +953,7 @@
     cursor: pointer;
   }
 
+  /* 写真サムネイル */
   .photo-thumbs-wrap {
     display: flex;
     gap: 6px;
@@ -1062,10 +1063,10 @@
 
         <div class="form-group">
           <label>お連れ様・同伴者（見学等の非プレイヤー）</label>
-          <p style="font-size:11px; color:var(--text-sub); margin:0 0 6px 0; line-height:1.5;">
+          <p id="companion-instruction-text" style="display:none; font-size:11px; color:var(--text-sub); margin:0 0 8px 0; line-height:1.5;">
             お連れ様がいる場合は追加し、続柄・人数・交通手段を選択してください。<br>
-            ※ご家族が複数名の場合は代表者をご記入ください（例：内宮花子）<br>
-            ※スタッフやトレーナーの方をお呼びする場合は会社名等は省き、お名前をご入力ください（例：山本さん、田中様／苗字のみも可能です）。
+            ※ご家族が複数名の場合は代表者をご記入ください。（例：内宮花子）<br>
+            ※スタッフやトレーナーの方をお呼びする場合か会社名等は省き、お名前をご入力ください。（例：山本さん、田中様／苗字のみも可能）
           </p>
           <div id="companions-container"></div>
           <button type="button" class="btn-add-entry-cyan" id="btn-add-companion">
@@ -1726,7 +1727,7 @@ function normalizeCarpoolKey(str) {
   return lastName.replace(/(号車|号|車)$/g, '').trim();
 }
 
-// 同伴者が自車の場合の号車表記抽出（内宮（花子）号車、山本号車など「さん」は除去）
+// 同伴者が自車の場合の号車表記抽出（内宮（花子）号車、田中号車、山本号車など）
 function formatCompanionCarName(rawName) {
   if (!rawName) return "同伴号車";
   var s = String(rawName).trim();
@@ -1737,6 +1738,7 @@ function formatCompanionCarName(rawName) {
   var compOnly = s.replace(/（同伴:.*?行）/g, '').replace(/\(同伴:.*?行\)/g, '').trim();
   compOnly = compOnly.replace(/(号車|号|車)$/g, '').trim();
 
+  // 空白で区切られている場合
   var parts = compOnly.split(/[\s ]+/);
   if (parts.length > 1) {
     var cLast = parts[0];
@@ -1747,14 +1749,15 @@ function formatCompanionCarName(rawName) {
     return cLast + "号車";
   }
 
+  // 「内宮花子」のようにスペースなしで代表者苗字から始まる場合
   if (hostLastName && compOnly.indexOf(hostLastName) === 0 && compOnly.length > hostLastName.length) {
     var cFirst = compOnly.substring(hostLastName.length).replace(/(くん|さん|君|様|ちゃん)$/g, '').trim();
     return hostLastName + "（" + cFirst + "）号車";
   }
 
-  // 「山本さん」「田中様」などの敬称を削って「山本号車」「田中号車」にする
-  var cleanName = compOnly.replace(/(くん|さん|君|様|ちゃん)$/g, '').trim();
-  return cleanName + "号車";
+  // 代表者と異なる姓の場合（田中花子、山本さん、田中様など）
+  var cleanLastName = extractLastName(compOnly);
+  return cleanLastName + "号車";
 }
 
 function parseCompanionCount(str) {
@@ -1856,6 +1859,7 @@ function renderDaysConfigCards() {
   });
 }
 
+// 他参加者（プレイヤー）の「姓」「名」分割入力
 function addOtherPlayerCard(lastName, firstName, transport, carType) {
   lastName = lastName || '';
   firstName = firstName || '';
@@ -1902,6 +1906,15 @@ function addOtherPlayerCard(lastName, firstName, transport, carType) {
     var wrap = document.getElementById(cardId + '-car-wrap');
     if (wrap) wrap.classList.toggle('hidden', this.value !== '自車');
   };
+}
+
+function updateCompanionInstructionVisibility() {
+  var container = document.getElementById('companions-container');
+  var textEl = document.getElementById('companion-instruction-text');
+  if (container && textEl) {
+    var count = container.querySelectorAll('.companion-card').length;
+    textEl.style.display = count > 0 ? 'block' : 'none';
+  }
 }
 
 function addCompanionCard(name, role, count, transport, carType) {
@@ -1968,7 +1981,12 @@ function addCompanionCard(name, role, count, transport, carType) {
   card.innerHTML = html;
   container.appendChild(card);
 
-  card.querySelector('.btn-remove-entry').onclick = function() { card.remove(); };
+  updateCompanionInstructionVisibility();
+
+  card.querySelector('.btn-remove-entry').onclick = function() { 
+    card.remove(); 
+    updateCompanionInstructionVisibility();
+  };
   card.querySelector('.field-companion-item-transport').onchange = function() {
     var wrap = document.getElementById(cardId + '-car-wrap');
     if (wrap) wrap.classList.toggle('hidden', this.value !== '自車');
@@ -2706,6 +2724,7 @@ function renderAdminAttendanceHTML(list) {
 
   container.innerHTML = html;
 
+  // チェックボックス・一括削除のイベント結びつけ
   container.querySelectorAll('.batch-select-all').forEach(function(allCb) {
     allCb.onchange = function() {
       var d = this.getAttribute('data-date');
@@ -2743,15 +2762,24 @@ function renderAdminAttendanceHTML(list) {
         return;
       }
 
+      // ★重要：行の繰り上がりズレを防ぐため、大きい行番号から降順で削除を実行
+      rows.sort(function(a, b) { return b - a; });
+
       showProgressModal("一括削除中...");
-      Promise.all(rows.map(function(r) {
-        return fetch(GAS_URL + "?type=delete_single&rowIndex=" + r + "&t=" + Date.now()).then(function(res){ return res.json(); });
-      })).then(function() {
-        finishProgressModal("削除完了！", function() {
+
+      // 順次実行（直列実行でスプレッドシートの行ズレを完全防止）
+      var deleteSequence = rows.reduce(function(prevPromise, r) {
+        return prevPromise.then(function() {
+          return fetch(GAS_URL + "?type=delete_single&rowIndex=" + r + "&t=" + Date.now()).then(function(res){ return res.json(); });
+        });
+      }, Promise.resolve());
+
+      deleteSequence.then(function() {
+        finishProgressModal("全件削除完了！", function() {
           fetchAdminData(true);
         });
       }).catch(function() {
-        finishProgressModal("通信エラーが発生しました", function() {
+        finishProgressModal("一部削除に失敗しました", function() {
           fetchAdminData(true);
         });
       });
@@ -3355,6 +3383,7 @@ function submitAttendance(e) {
       if (opc) opc.innerHTML = '';
       var cc = document.getElementById('companions-container');
       if (cc) cc.innerHTML = '';
+      updateCompanionInstructionVisibility();
 
       var authUser = localStorage.getItem('uchimiya_auth_user');
       if (authUser) applyAuthenticatedUser(authUser);
