@@ -15,6 +15,7 @@
     --accent-hover: #dc2626;
     --success: #10b981;
     --warning: #f59e0b;
+    --cyan: #06b6d4;
   }
   * { box-sizing: border-box; }
   
@@ -169,14 +170,16 @@
     flex-direction: column;
     gap: 6px;
   }
+  .entry-card.companion-card {
+    border-color: rgba(6, 182, 212, 0.35);
+  }
   .entry-card-top {
     display: flex;
     gap: 6px;
     align-items: center;
   }
   .entry-card-top-companion {
-    display: grid;
-    grid-template-columns: 1fr 110px auto;
+    display: flex;
     gap: 6px;
     align-items: center;
   }
@@ -197,6 +200,8 @@
     gap: 6px;
     margin-top: 2px;
   }
+
+  /* 追加ボタン（プレイヤー用: アクセントカラー / 同伴者用: シアン色） */
   .btn-add-entry {
     background: rgba(30, 41, 59, 0.8);
     border: 1px dashed var(--accent);
@@ -212,6 +217,26 @@
     align-items: center;
     gap: 4px;
     margin-top: 4px;
+  }
+  .btn-add-entry-cyan {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px dashed var(--cyan);
+    color: #67e8f9;
+    width: 100%;
+    padding: 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    transition: background 0.2s;
+  }
+  .btn-add-entry-cyan:hover, .btn-add-entry-cyan:active {
+    background: rgba(6, 182, 212, 0.15);
   }
 
   .date-bar-input {
@@ -826,9 +851,10 @@
         <!-- お連れ様・同伴者（見学等の非プレイヤー） ＋ 移動手段 -->
         <div class="form-group">
           <label>お連れ様・同伴者（見学・補助等の非プレイヤー）</label>
-          <p style="font-size:11px; color:var(--text-sub); margin:0 0 6px 0;">お連れ様がいる場合は追加し、役割・交通手段を選択してください。</p>
+          <p style="font-size:11px; color:var(--text-sub); margin:0 0 6px 0;">お連れ様がいる場合は追加し、役割・人数・交通手段を選択してください。</p>
           <div id="companions-container"></div>
-          <button type="button" class="btn-add-entry" onclick="addCompanionCard()">
+          <!-- ★シアン色（チカチカ防止）の追加ボタン -->
+          <button type="button" class="btn-add-entry-cyan" onclick="addCompanionCard()">
             <span>＋ 同伴者を追加する</span>
           </button>
         </div>
@@ -1168,23 +1194,34 @@ function addOtherPlayerCard(name = '', transport = '同乗', carType = '普通�
   container.appendChild(card);
 }
 
-// 同伴者（非プレイヤー）カードの追加
-function addCompanionCard(name = '', role = '家族', transport = '同乗', carType = '普通車') {
+// 同伴者（非プレイヤー）カードの追加（家族人数の可変選択に対応）
+function addCompanionCard(name = '', role = '家族', familyCount = '1名', transport = '同乗', carType = '普通車') {
   const container = document.getElementById('companions-container');
   const cardId = 'companion-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
   const card = document.createElement('div');
   card.className = 'entry-card companion-card';
   card.id = cardId;
+  const isFamily = role === '家族';
+
   card.innerHTML = `
     <div class="entry-card-top-companion">
-      <input type="text" class="field-companion-item-name" placeholder="同伴者のお名前" value="${escapeHtml(name)}" required style="margin:0;">
-      <select class="field-companion-item-role" style="padding:10px 8px; font-size:13px; margin:0;">
+      <input type="text" class="field-companion-item-name" placeholder="代表のお名前（例：山田花子）" value="${escapeHtml(name)}" required style="margin:0; flex:1;">
+      <select class="field-companion-item-role" onchange="toggleCompanionRoleCount('${cardId}', this.value)" style="padding:10px 8px; font-size:12px; margin:0; width:95px; flex-shrink:0;">
         <option value="家族" ${role === '家族' ? 'selected' : ''}>家族</option>
         <option value="カメラマン" ${role === 'カメラマン' ? 'selected' : ''}>カメラマン</option>
         <option value="トレーナー" ${role === 'トレーナー' ? 'selected' : ''}>トレーナー</option>
         <option value="友人・知人" ${role === '友人・知人' ? 'selected' : ''}>友人・知人</option>
         <option value="その他" ${role === 'その他' ? 'selected' : ''}>その他</option>
       </select>
+      <div id="${cardId}-family-count-wrap" class="${isFamily ? '' : 'hidden'}" style="width:75px; flex-shrink:0;">
+        <select class="field-companion-item-count" style="padding:10px 6px; font-size:12px; margin:0; border-color:var(--cyan); color:#67e8f9;">
+          <option value="1名" ${familyCount === '1名' ? 'selected' : ''}>1名</option>
+          <option value="2名" ${familyCount === '2名' ? 'selected' : ''}>2名</option>
+          <option value="3名" ${familyCount === '3名' ? 'selected' : ''}>3名</option>
+          <option value="4名" ${familyCount === '4名' ? 'selected' : ''}>4名</option>
+          <option value="5名以上" ${familyCount === '5名以上' ? 'selected' : ''}>5名以上</option>
+        </select>
+      </div>
       <button type="button" class="btn-remove-entry" onclick="document.getElementById('${cardId}').remove()" title="削除">✕</button>
     </div>
     <div class="entry-transport-row">
@@ -1207,6 +1244,11 @@ function addCompanionCard(name = '', role = '家族', transport = '同乗', carT
     </div>
   `;
   container.appendChild(card);
+}
+
+function toggleCompanionRoleCount(cardId, roleVal) {
+  const wrap = document.getElementById(`${cardId}-family-count-wrap`);
+  if (wrap) wrap.classList.toggle('hidden', roleVal !== '家族');
 }
 
 function toggleCardCarType(cardId, val) {
@@ -1801,7 +1843,7 @@ function switchTab(tab) {
   document.getElementById('tab-btn-status').classList.toggle('active', tab === 'status');
 }
 
-// 参加送信処理（他プレイヤー・同伴者交通手段の完全反映）
+// 参加送信処理（家族人数および交通手段を正確に集約）
 async function submitAttendance(e) {
   e.preventDefault();
 
@@ -1835,16 +1877,34 @@ async function submitAttendance(e) {
     }
   });
 
-  // 同伴者リスト取得
+  // 同伴者リスト取得（家族人数を取得して合算）
   const companionCards = document.querySelectorAll('.companion-card');
   const companionList = [];
+  let totalCompanionHeadcount = 0;
+
   companionCards.forEach(c => {
     const n = c.querySelector('.field-companion-item-name').value.trim();
     const role = c.querySelector('.field-companion-item-role').value;
     const t = c.querySelector('.field-companion-item-transport').value;
     const ct = t === '自車' ? c.querySelector('.field-companion-item-car-type').value : '';
+    
+    // 家族の場合は人数セレクトの値、それ以外は1名
+    let headcount = 1;
+    if (role === '家族') {
+      const cntVal = c.querySelector('.field-companion-item-count').value;
+      const numMatch = cntVal.match(/(\d+)/);
+      headcount = numMatch ? parseInt(numMatch[1], 10) : 1;
+    }
+    totalCompanionHeadcount += headcount;
+
     if (n) {
-      companionList.push({ name: n, role: role, transportMode: t, carType: ct });
+      companionList.push({
+        name: n,
+        role: role,
+        count: headcount,
+        transportMode: t,
+        carType: ct
+      });
     }
   });
 
@@ -1869,11 +1929,12 @@ async function submitAttendance(e) {
   }
 
   // 同伴者の人数・詳細テキスト作成
-  const companionCountStr = companionList.length > 0 ? `${companionList.length}名` : "0名";
+  const companionCountStr = totalCompanionHeadcount > 0 ? `${totalCompanionHeadcount}名` : "0名";
   const companionNamesStr = companionList.length > 0 
     ? companionList.map(c => {
         const transStr = c.transportMode === '自車' ? `[自車:${c.carType}]` : `[${c.transportMode}]`;
-        return `${c.name}(${c.role}${transStr})`;
+        const countStr = c.role === '家族' ? `${c.count}名` : '';
+        return `${c.name}(${c.role}${countStr ? ' ' + countStr : ''}${transStr})`;
       }).join('、')
     : "なし";
 
@@ -1976,7 +2037,7 @@ async function submitAttendance(e) {
     });
   });
 
-  // 同伴者で「自車」で来る人がいる場合、駐車場確保用に車両カウントレコードを自動登録
+  // 同伴者で「自車」で来る人の車両枠確保
   companionList.filter(c => c.transportMode === '自車').forEach(comp => {
     const compCarDayConfigs = primaryDayConfigs.map(cfg => ({
       date: cfg.date,
@@ -2127,7 +2188,7 @@ function normalizeCarpoolKey(str) {
   return s;
 }
 
-// 参加集計データの取得（同伴者自車も含めて正確に台数・人数集計）
+// 参加集計データの取得
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
@@ -2185,7 +2246,6 @@ async function fetchAdminData() {
           companionTotal += parseCompanionCount(m.companionCount);
         }
 
-        // 自車の場合（同伴者自車枠も車両台数に正確加算）
         if (m.transport === "自車") {
           const ownerKey = normalizeCarpoolKey(m.name);
           countedCarsMap.set(ownerKey, {
@@ -2194,7 +2254,6 @@ async function fetchAdminData() {
           });
         }
 
-        // 乗り合いの場合
         if (m.transport.includes("乗り合い") && m.carLeader) {
           const leaderRaw = String(m.carLeader).trim();
           const leaderKey = normalizeCarpoolKey(leaderRaw);
@@ -2254,7 +2313,6 @@ async function fetchAdminData() {
       `;
 
       members.forEach(m => {
-        // 同伴者用の自車ダミー行はカードとして冗長表示せず集計のみ反映（または備考明記カード）
         const isCompanionVehicleEntry = String(m.name).includes('（同伴:');
 
         let badgeCls = 'transport-other';
