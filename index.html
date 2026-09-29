@@ -623,7 +623,7 @@
     border: 1px solid rgba(16, 185, 129, 0.25);
     border-radius: 8px;
     padding: 8px 10px;
-    margin: 6px 0;
+    margin: 8px 0 6px 0;
     font-size: 12px;
   }
   .carpool-title { font-weight: bold; color: #34d399; margin-bottom: 4px; }
@@ -1820,26 +1820,34 @@ async function verifyAdminPin() {
   }
 }
 
-// 日付ラベルの整形（NaNが出ない頑丈な処理）
+// 日付ラベルの整形（UTC変換による1日ズレを完全に防ぐセーフパーサー）
 function formatDateLabel(dateStr) {
   if (!dateStr) return "日程未指定";
   
+  // 1. "YYYY-MM-DD" や "YYYY/MM/DD"、"YYYY.MM.DD" から直接年・月・日を抽出
   const match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
   if (match) {
     const y = parseInt(match[1], 10);
     const m = parseInt(match[2], 10);
     const d = parseInt(match[3], 10);
+    // ローカルタイムでDateオブジェクトを初期化
     const dt = new Date(y, m - 1, d);
     const w = isNaN(dt.getDay()) ? "" : `(${weekDays[dt.getDay()]})`;
     return `${m}月${d}日${w}`;
   }
 
-  const fallbackDate = new Date(dateStr);
-  if (!isNaN(fallbackDate.getTime())) {
-    const m = fallbackDate.getMonth() + 1;
-    const d = fallbackDate.getDate();
-    const w = `(${weekDays[fallbackDate.getDay()]})`;
-    return `${m}月${d}日${w}`;
+  // 2. ISO文字列などのフォールバック（Tで分割して日付部分のみ抽出）
+  if (String(dateStr).includes('T')) {
+    const isoDatePart = String(dateStr).split('T')[0];
+    const isoMatch = isoDatePart.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+    if (isoMatch) {
+      const y = parseInt(isoMatch[1], 10);
+      const m = parseInt(isoMatch[2], 10);
+      const d = parseInt(isoMatch[3], 10);
+      const dt = new Date(y, m - 1, d);
+      const w = isNaN(dt.getDay()) ? "" : `(${weekDays[dt.getDay()]})`;
+      return `${m}月${d}日${w}`;
+    }
   }
 
   return String(dateStr);
@@ -1852,7 +1860,7 @@ function parseCompanionCount(str) {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-// 参加集計データの取得（自車・乗り合い車両の重複なし正確な台数カウント）
+// 参加集計データの取得（参加者一覧を日付直下に配置、その下に相乗りグループを表示）
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
@@ -1883,9 +1891,8 @@ async function fetchAdminData() {
       
       let companionTotal = 0;
       const carpoolMap = {};
-      const carpoolCarTypes = {}; // 代表者ごとの車種を保持
+      const carpoolCarTypes = {};
 
-      // 車両リスト（自車 ＋ 乗り合い車両を代表者単位でまとめる）
       const countedCars = [];
 
       members.forEach(m => {
@@ -1907,9 +1914,8 @@ async function fetchAdminData() {
         }
       });
 
-      // 乗り合い代表者の車両を1台としてカウント（複数人が乗っていても1台）
+      // 乗り合い代表者の車両カウント
       Object.keys(carpoolMap).forEach(leader => {
-        // 自車ですでに本人が登録していなければ追加
         const alreadyCountedAsOwnCar = countedCars.some(c => c.owner === leader);
         if (!alreadyCountedAsOwnCar) {
           countedCars.push({
@@ -1935,6 +1941,7 @@ async function fetchAdminData() {
 
       html += `
         <div class="admin-date-group">
+          <!-- 1. 日付ヘッダー ＆ 集計サマリー -->
           <div class="admin-date-header">
             <span>📅 ${formatDateLabel(date)}</span>
             <div class="admin-head-badges">
@@ -1949,16 +1956,7 @@ async function fetchAdminData() {
             <span>🚗 <b>車両計: <span class="car-stat-badge">${totalCars}台</span></b> (普通: ${carsStandard}台 / 軽: ${carsLight}台${carsOther > 0 ? ` / 他: ${carsOther}台` : ''})</span>
           </div>
 
-          ${Object.keys(carpoolMap).length > 0 ? `
-            <div class="carpool-group">
-              <div class="carpool-title">🤝 相乗り車両・同乗者リスト</div>
-              ${Object.keys(carpoolMap).map(leader => `
-                <div style="margin-bottom:3px;">
-                  ・<b>${escapeHtml(leader)}号車</b> [${escapeHtml(carpoolCarTypes[leader] || '普通車')}] (${carpoolMap[leader].length}名同乗): ${escapeHtml(carpoolMap[leader].join(', '))}
-                </div>
-              `).join('')}
-            </div>
-          ` : ''}
+          <!-- 2. 日付直下：参加者カード一覧（氏名・時間・手段） -->
       `;
 
       members.forEach(m => {
@@ -1992,6 +1990,20 @@ async function fetchAdminData() {
           </div>
         `;
       });
+
+      // 3. 参加者一覧の下：相乗り同乗者グループ・号車リスト
+      if (Object.keys(carpoolMap).length > 0) {
+        html += `
+          <div class="carpool-group">
+            <div class="carpool-title">🤝 相乗り車両・同乗者リスト</div>
+            ${Object.keys(carpoolMap).map(leader => `
+              <div style="margin-bottom:3px;">
+                ・<b>${escapeHtml(leader)}号車</b> [${escapeHtml(carpoolCarTypes[leader] || '普通車')}] (${carpoolMap[leader].length}名同乗): ${escapeHtml(carpoolMap[leader].join(', '))}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
 
       html += `</div>`;
     });
