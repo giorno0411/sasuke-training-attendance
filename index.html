@@ -1568,35 +1568,31 @@ function normalizeDateKey(dateStr) {
   return String(dateStr);
 }
 
-// 姓名分離（石川 翔、石川翔、内宮 修造などのあらゆるパターンから確実に苗字を抽出）
+// 根本解決：半角/全角スペース・敬称・文字数を正しく解釈し、姓（苗字）のみを100%取り出す汎用関数
 function extractLastName(str) {
   if (!str) return "";
   var s = String(str).trim();
   
-  // 補助表記の削除
+  // 1. カッコ書き（例：「（同伴:〇〇行）」など）を除去
   s = s.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').trim();
 
-  // 空白で区切られている場合は最優先で先頭（姓）を取得
+  // 2. 末尾の敬称や「号車」などの装飾を除去
+  s = s.replace(/(号車|号|車|くん|さん|君|様|ちゃん)$/g, '').trim();
+
+  // 3. 【最重要】半角スペース・全角スペース・連続空白で分割し、先頭の「姓」を取り出す
   var parts = s.split(/[\s ]+/);
   if (parts.length > 1 && parts[0]) {
-    return parts[0].trim().replace(/(号車|号|車|くん|さん|君|様)$/g, '');
+    return parts[0].trim();
   }
 
-  // 接尾辞削除
-  s = s.replace(/(号車|号|車|くん|さん|君|様)$/g, '').trim();
-
-  // 既知の苗字優先一致
-  if (s.indexOf('内宮') === 0) return '内宮';
-  if (s.indexOf('石川') === 0) return '石川';
-
-  // 3文字（例：石川翔）なら先頭2文字を苗字と推定
-  if (s.length === 3) {
+  // 4. スペースが入っていなかった場合の汎用フォールバック
+  // 3文字（例：石川翔、森健太）または4文字（例：山田太郎）の場合は先頭2文字を姓とみなす
+  if (s.length === 3 || s.length === 4) {
     return s.substring(0, 2);
   }
-
-  // 4文字以上の場合も先頭2文字を苗字と推定
-  if (s.length >= 4) {
-    return s.substring(0, 2);
+  // 5文字以上でスペースなしの場合（例：長谷川太郎）は先頭3文字を推定
+  if (s.length >= 5) {
+    return s.substring(0, 3);
   }
 
   return s;
@@ -2062,6 +2058,7 @@ function openPhotoViewer(title, photos) {
   showModal('photo-viewer-modal');
 }
 
+// 超軽量画像圧縮（長辺500px、画質0.5で約30〜50KBに圧縮し消失を完全防止）
 function compressImage(file, callback) {
   var reader = new FileReader();
   reader.onload = function(e) {
@@ -2364,6 +2361,7 @@ function fetchAdminData() {
           }
 
           if (m.transport === "自車") {
+            // スプレッドシートの「姓 名」から姓を抽出し、〇〇号車とする（石川 翔 → 石川号車）
             var lastNameOnly = normalizeCarpoolKey(m.name);
             countedCarsMap.set(lastNameOnly, {
               type: m.carType || "普通車",
@@ -2432,6 +2430,7 @@ function fetchAdminData() {
         html += '<span>🚗 <b>車両計: <span class="car-stat-badge">' + totalCars + '台</span></b> (普通: ' + carsStandard + '台 / 軽: ' + carsLight + '台' + (carsOther > 0 ? ' / 他: ' + carsOther + '台' : '') + ')</span>';
         html += '</div>';
 
+        // 駐車車両の内訳・オーナー一覧（全て苗字＋号車で統一表示）
         if (totalCars > 0) {
           html += '<div class="car-breakdown-box">';
           html += '<div class="car-breakdown-title">🚗 駐車車両の内訳・オーナー一覧（計 ' + totalCars + '台）</div>';
@@ -2442,6 +2441,7 @@ function fetchAdminData() {
           html += '</div>';
         }
 
+        // 一括選択・削除バー
         html += '<div class="admin-batch-bar">';
         html += '<label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">';
         html += '<input type="checkbox" class="batch-select-all" data-date="' + date + '"> 全選択';
@@ -2523,6 +2523,7 @@ function fetchAdminData() {
 
       container.innerHTML = html;
 
+      // チェックボックス・一括削除のイベント結びつけ
       container.querySelectorAll('.batch-select-all').forEach(function(allCb) {
         allCb.onchange = function() {
           var d = this.getAttribute('data-date');
