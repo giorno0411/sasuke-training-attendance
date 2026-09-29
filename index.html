@@ -290,8 +290,6 @@
     width: 100%;
     max-width: 340px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-    max-height: 90vh;
-    overflow-y: auto;
   }
 
   .mini-cal-box {
@@ -1108,7 +1106,7 @@
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
-        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️️ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
@@ -1125,14 +1123,10 @@
       </div>
 
       <div id="admin-subview-attendance">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
-          <div style="display:flex; gap:6px;">
-            <button type="button" class="tab-btn" id="btn-open-admin-add" style="flex:none; padding:5px 10px; border:1px solid var(--accent); color:#fca5a5; background:rgba(239,68,68,0.15);">＋ 口頭・LINE受付追加</button>
-            <button type="button" class="tab-btn" id="btn-refresh-admin" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 最新化</button>
-          </div>
+          <button type="button" class="tab-btn" id="btn-refresh-admin" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 最新化</button>
         </div>
-
         <div id="admin-data-container">
           <div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>
         </div>
@@ -1235,68 +1229,6 @@
       <button type="button" class="tab-btn" id="btn-admin-cancel" style="border:1px solid var(--border);">キャンセル</button>
       <button type="button" class="btn-submit" id="btn-admin-login" style="margin:0; padding:8px;">ログイン</button>
     </div>
-  </div>
-</div>
-
-<!-- ★新設：管理者手動追加モーダル（LINE・口頭受付分） -->
-<div id="admin-add-modal" class="modal-overlay">
-  <div class="modal-content">
-    <h3 style="margin-top:0; font-size:15px; color:#fca5a5;">＋ 手動代理追加（LINE・口頭受付）</h3>
-    <form id="admin-manual-add-form">
-      <label style="font-size:11px; color:#cbd5e1; margin-top:8px;">区分（種別）<span class="required">*</span></label>
-      <select id="m-add-category" style="margin-bottom:8px;">
-        <option value="プレイヤー">参加者（プレイヤー）</option>
-        <option value="番組スタッフ">番組スタッフ（ロケハン・撮影等）</option>
-        <option value="同伴者">同伴者（見学・保護者等）</option>
-      </select>
-
-      <label style="font-size:11px; color:#cbd5e1;">お名前<span class="required">*</span></label>
-      <input type="text" id="m-add-name" placeholder="例：山田 太郎、TBSスタッフA" required style="margin-bottom:8px;">
-
-      <label style="font-size:11px; color:#cbd5e1;">参加日（YYYY-MM-DD）<span class="required">*</span></label>
-      <input type="text" id="m-add-date" placeholder="例：2026-10-04" required style="margin-bottom:8px;">
-
-      <label style="font-size:11px; color:#cbd5e1;">参加時間</label>
-      <select id="m-add-time" style="margin-bottom:8px;">
-        <option value="終日">終日</option>
-        <option value="午前のみ">午前のみ</option>
-        <option value="午後のみ">午後のみ</option>
-        <option value="9:00〜17:00">9:00〜17:00</option>
-      </select>
-
-      <label style="font-size:11px; color:#cbd5e1;">交通手段・車両<span class="required">*</span></label>
-      <select id="m-add-transport" style="margin-bottom:8px;">
-        <option value="自車">🚗 自車（車を持ち込み）</option>
-        <option value="乗り合い（同乗）">🤝 相乗り（同乗）</option>
-        <option value="現地までバス">🚌 バス</option>
-        <option value="タクシー">🚕 タクシー</option>
-        <option value="その他">🚲 その他・送迎等</option>
-      </select>
-
-      <div id="m-add-car-settings" style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-bottom:8px;">
-        <label style="font-size:11px; color:#cbd5e1;">車種（駐車台数カウント用）</label>
-        <select id="m-add-car-type" style="margin-bottom:6px;">
-          <option value="普通車">普通車</option>
-          <option value="軽自動車">軽自動車</option>
-          <option value="その他">その他（ロケバス・バイク等）</option>
-        </select>
-        <label style="font-size:11px; color:#cbd5e1;">指定号車名（任意・空欄時は苗字自動）</label>
-        <input type="text" id="m-add-car-custom-name" placeholder="例：山田号車、ロケバス1号" style="font-size:12px;">
-      </div>
-
-      <div id="m-add-share-settings" class="hidden" style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-bottom:8px;">
-        <label style="font-size:11px; color:#cbd5e1;">同乗先の号車（運転者名）</label>
-        <input type="text" id="m-add-share-leader" placeholder="例：内宮 修造" style="font-size:12px;">
-      </div>
-
-      <label style="font-size:11px; color:#cbd5e1;">備考</label>
-      <input type="text" id="m-add-note" placeholder="例：LINEで受付済み、機材搬入あり等" style="margin-bottom:12px; font-size:12px;">
-
-      <div style="display:flex; gap:8px;">
-        <button type="button" class="tab-btn" id="btn-admin-add-cancel" style="border:1px solid var(--border);">閉じる</button>
-        <button type="submit" class="btn-submit" style="margin:0; padding:8px;">追加して保存</button>
-      </div>
-    </form>
   </div>
 </div>
 
@@ -2620,7 +2552,6 @@ function renderAdminAttendanceHTML(list) {
     var members = groups[date];
     var companionTotal = 0;
     var playerTotal = 0;
-    var staffTotal = 0;
     var carpoolMap = {};
     var carpoolCarTypes = {};
     var carpoolDisplayNames = {};
@@ -2630,27 +2561,14 @@ function renderAdminAttendanceHTML(list) {
     var isDateCanceled = dateStatusMap[date] === 'canceled';
 
     members.forEach(function(m) {
-      var isCompanionVehicle = String(m.name).includes('（同伴:') || String(m.name).includes('（同伴）');
-      var isStaff = String(m.name).includes('（番組スタッフ）') || String(m.note).includes('番組スタッフ');
-
-      if (isStaff) {
-        staffTotal++;
-      } else if (!isCompanionVehicle) {
+      var isCompanionVehicle = String(m.name).includes('（同伴:');
+      if (!isCompanionVehicle) {
         playerTotal++;
         companionTotal += parseCompanionCount(m.companionCount);
-      } else {
-        companionTotal++;
       }
 
       if (m.transport === "自車") {
-        if (m.carLeader && m.carLeader.trim() !== "") {
-          // 管理者手動等で特別に指定された号車名
-          countedCarsMap.set("CUSTOM_" + m.carLeader, {
-            type: m.carType || "普通車",
-            owner: m.carLeader.includes('号車') ? m.carLeader : m.carLeader + "号車",
-            isCompanion: isCompanionVehicle
-          });
-        } else if (isCompanionVehicle) {
+        if (isCompanionVehicle) {
           var compCarTitle = formatCompanionCarName(m.name);
           countedCarsMap.set("COMPANION_" + m.name, {
             type: m.carType || "普通車",
@@ -2709,14 +2627,14 @@ function renderAdminAttendanceHTML(list) {
     });
 
     var totalCars = countedCarsMap.size;
-    var grandTotalPeople = playerTotal + companionTotal + staffTotal;
+    var grandTotalPeople = playerTotal + companionTotal;
 
     html += '<div class="admin-date-group ' + (isDateCanceled ? 'is-canceled' : '') + '" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
     html += '<div style="display:flex; align-items:center; gap:8px;">';
     html += '<span>📅 ' + formatDateLabel(date) + '</span>';
     
-    // 開催・中止トグル
+    // 開催・中止トグル（完全センター合わせ）
     html += '<div class="status-toggle-box">';
     html += '<label class="status-toggle-label" style="color:#34d399;">';
     html += '<input type="radio" name="exec-status-' + date + '" value="active" ' + (!isDateCanceled ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'active\')"> 開催';
@@ -2728,10 +2646,7 @@ function renderAdminAttendanceHTML(list) {
 
     html += '</div>';
     html += '<div class="admin-head-badges">';
-    html += '<span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">プレイヤー: ' + playerTotal + '名</span>';
-    if (staffTotal > 0) {
-      html += '<span style="font-size:10px; background:#eab308; color:#000; padding:2px 6px; border-radius:10px; font-weight:bold; white-space:nowrap;">番組スタッフ: ' + staffTotal + '名</span>';
-    }
+    html += '<span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">参加(プレイヤー): ' + playerTotal + '名</span>';
     if (companionTotal > 0) {
       html += '<span style="font-size:10px; background:#475569; color:#f1f5f9; padding:2px 6px; border-radius:10px; white-space:nowrap;">同伴: ' + companionTotal + '名</span>';
     }
@@ -2739,7 +2654,7 @@ function renderAdminAttendanceHTML(list) {
     html += '</div></div>';
 
     html += '<div class="admin-card-stats">';
-    html += '<span>👥 <b>人数計: <span class="people-stat-badge">' + grandTotalPeople + '名</span></b> (選手: ' + playerTotal + ' / スタッフ: ' + staffTotal + ' / 同伴: ' + companionTotal + ')</span>';
+    html += '<span>👥 <b>人数計: <span class="people-stat-badge">' + grandTotalPeople + '名</span></b> (プレイヤー: ' + playerTotal + '名 / 同伴者: ' + companionTotal + '名)</span>';
     html += '<span>🚗 <b>車両計: <span class="car-stat-badge">' + totalCars + '台</span></b> (普通: ' + carsStandard + '台 / 軽: ' + carsLight + '台' + (carsOther > 0 ? ' / 他: ' + carsOther + '台' : '') + ')</span>';
     html += '</div>';
 
@@ -2757,7 +2672,7 @@ function renderAdminAttendanceHTML(list) {
     html += '<label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">';
     html += '<input type="checkbox" class="batch-select-all" data-date="' + date + '"> 全選択';
     html += '</label>';
-    html += '<button type="button" class="btn-batch-del" data-date="' + date + '" style="display:none;">🗑️ 選択した回答を一括削除</button>';
+    html += '<button type="button" class="btn-batch-del" data-date="' + date + '" style="display:none;">🗑️️ 選択した回答を一括削除</button>';
     html += '</div>';
 
     members.forEach(function(m) {
@@ -3072,90 +2987,6 @@ window.addEventListener('DOMContentLoaded', function() {
       hideModal('admin-modal');
     }
   };
-
-  // 手動追加モーダル
-  var btnOpenAdminAdd = document.getElementById('btn-open-admin-add');
-  if (btnOpenAdminAdd) {
-    btnOpenAdminAdd.onclick = function() {
-      var todayStr = new Date().toISOString().split('T')[0];
-      document.getElementById('m-add-date').value = todayStr;
-      showModal('admin-add-modal');
-    };
-  }
-  var btnAdminAddCancel = document.getElementById('btn-admin-add-cancel');
-  if (btnAdminAddCancel) {
-    btnAdminAddCancel.onclick = function() { hideModal('admin-add-modal'); };
-  }
-
-  var mAddTransport = document.getElementById('m-add-transport');
-  if (mAddTransport) {
-    mAddTransport.onchange = function() {
-      var isCar = this.value === '自車';
-      var isShare = this.value.includes('乗り合い');
-      document.getElementById('m-add-car-settings').classList.toggle('hidden', !isCar);
-      document.getElementById('m-add-share-settings').classList.toggle('hidden', !isShare);
-    };
-  }
-
-  var mAddForm = document.getElementById('admin-manual-add-form');
-  if (mAddForm) {
-    mAddForm.onsubmit = function(e) {
-      e.preventDefault();
-      var cat = document.getElementById('m-add-category').value;
-      var rawName = document.getElementById('m-add-name').value.trim();
-      var dateVal = document.getElementById('m-add-date').value.trim();
-      var timeVal = document.getElementById('m-add-time').value;
-      var transVal = document.getElementById('m-add-transport').value;
-      var carTypeVal = document.getElementById('m-add-car-type').value;
-      var customCarName = document.getElementById('m-add-car-custom-name').value.trim();
-      var shareLeader = document.getElementById('m-add-share-leader').value.trim();
-      var noteVal = document.getElementById('m-add-note').value.trim();
-
-      if (!rawName || !dateVal) {
-        alert("名前と日付を入力してください。");
-        return;
-      }
-
-      var finalName = rawName;
-      if (cat === "番組スタッフ") finalName += "（番組スタッフ）";
-      if (cat === "同伴者") finalName += "（同伴）";
-
-      var finalLeader = "";
-      if (transVal === "自車") {
-        finalLeader = customCarName; // 指定があれば号車名として保存
-      } else if (transVal.includes("乗り合い")) {
-        finalLeader = shareLeader;
-      }
-
-      hideModal('admin-add-modal');
-      showProgressModal("データを追加中...");
-
-      fetch(GAS_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({
-          name: finalName,
-          days: [{
-            date: dateVal,
-            time: timeVal,
-            transport: transVal,
-            carType: transVal === "自車" ? carTypeVal : "",
-            carLeader: finalLeader
-          }],
-          companionCount: "0名",
-          companionNames: "なし",
-          note: noteVal ? "（管理者登録: " + noteVal + "）" : "（管理者登録）"
-        })
-      }).then(function() {
-        finishProgressModal("追加完了！", function() {
-          fetchAdminData(true);
-        });
-      }).catch(function() {
-        finishProgressModal("追加に失敗しました");
-      });
-    };
-  }
 
   var btnRefresh = document.getElementById('btn-refresh-admin');
   if (btnRefresh) btnRefresh.onclick = function() { fetchAdminData(true); };
