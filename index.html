@@ -35,7 +35,7 @@
     -webkit-text-size-adjust: 100%;
   }
   
-  .container { width: 100%; max-width: 580px; position: relative; z-index: 10; }
+  .container { width: 100%; max-width: 580px; position: relative; z-index: 1; }
 
   header {
     display: flex;
@@ -260,6 +260,7 @@
     font-weight: 600;
   }
 
+  /* モーダル：初期状態は完全非表示 */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -973,7 +974,7 @@
 </div>
 
 <!-- ミニカレンダーポップアップ -->
-<div id="cal-popup-modal" class="modal-overlay" onclick="handleCalOverlayClick(event)">
+<div id="cal-popup-modal" class="modal-overlay" onclick="closeCalendarPopup()">
   <div class="mini-cal-box" onclick="event.stopPropagation()">
     <div class="mini-cal-header">
       <button type="button" class="mini-cal-nav-btn" onclick="prevMonth()">‹ 前月</button>
@@ -1127,28 +1128,7 @@ try {
 
 const adminDateExistingCars = {};
 
-window.addEventListener('DOMContentLoaded', () => {
-  try {
-    updateTriggerDisplay();
-    renderRulesDisplay();
-    renderStageGroups();
-  } catch(e) {
-    console.error("DOM初期化エラー", e);
-  }
-
-  try {
-    checkGateAccess();
-  } catch(e) {
-    console.error("ゲート認証エラー", e);
-  }
-
-  setTimeout(() => {
-    loadRemoteObstacles().catch(() => {});
-    loadRemoteRules().catch(() => {});
-    fetchRegisteredAttendance().catch(() => {});
-  }, 100);
-});
-
+// モーダル表示切替
 function showModal(id) {
   const el = document.getElementById(id);
   if (el) el.style.display = 'flex';
@@ -1158,6 +1138,7 @@ function hideModal(id) {
   if (el) el.style.display = 'none';
 }
 
+// 認証チェック
 function checkGateAccess() {
   const savedName = localStorage.getItem('uchimiya_auth_user');
   if (savedName) {
@@ -1688,13 +1669,21 @@ async function saveObstacleSettings(e) {
 }
 
 function switchAdminSubTab(sub) {
-  document.getElementById('admin-subview-attendance').classList.toggle('hidden', sub !== 'attendance');
-  document.getElementById('admin-subview-rules').classList.toggle('hidden', sub !== 'rules');
-  document.getElementById('admin-subview-obstacles').classList.toggle('hidden', sub !== 'obstacles');
+  const subAtt = document.getElementById('admin-subview-attendance');
+  const subRules = document.getElementById('admin-subview-rules');
+  const subObs = document.getElementById('admin-subview-obstacles');
 
-  document.getElementById('admin-sub-btn-att').classList.toggle('active', sub === 'attendance');
-  document.getElementById('admin-sub-btn-rules').classList.toggle('active', sub === 'rules');
-  document.getElementById('admin-sub-btn-obs').classList.toggle('active', sub === 'obstacles');
+  if (subAtt) subAtt.classList.toggle('hidden', sub !== 'attendance');
+  if (subRules) subRules.classList.toggle('hidden', sub !== 'rules');
+  if (subObs) subObs.classList.toggle('hidden', sub !== 'obstacles');
+
+  const btnAtt = document.getElementById('admin-sub-btn-att');
+  const btnRules = document.getElementById('admin-sub-btn-rules');
+  const btnObs = document.getElementById('admin-sub-btn-obs');
+
+  if (btnAtt) btnAtt.classList.toggle('active', sub === 'attendance');
+  if (btnRules) btnRules.classList.toggle('active', sub === 'rules');
+  if (btnObs) btnObs.classList.toggle('active', sub === 'obstacles');
 
   if (sub === 'rules') {
     renderAdminRulesEditor();
@@ -1711,9 +1700,6 @@ function closeCalendarPopup() {
   hideModal('cal-popup-modal');
   updateTriggerDisplay();
   renderDaysConfigCards();
-}
-function handleCalOverlayClick(e) {
-  closeCalendarPopup();
 }
 
 function prevMonth() {
@@ -1978,7 +1964,7 @@ async function submitAttendance(e) {
     const n = c.querySelector('.field-companion-item-name').value.trim();
     const role = c.querySelector('.field-companion-item-role').value;
     const cntVal = c.querySelector('.field-companion-item-count').value;
-    const numMatch = cntVal.match(/(\d+)/);
+    const numMatch = cntVal ? cntVal.match(/(\d+)/) : null;
     const headcount = numMatch ? parseInt(numMatch[1], 10) : 1;
     const t = c.querySelector('.field-companion-item-transport').value;
     const ct = t === '自車' ? c.querySelector('.field-companion-item-car-type').value : '';
