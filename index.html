@@ -1015,9 +1015,9 @@
     <div id="merge-target-original-name" style="color:#f8fafc; font-weight:bold; font-size:14px; margin-bottom:12px; padding:6px 10px; background:rgba(0,0,0,0.3); border-radius:6px;"></div>
     
     <label style="font-size:11px; color:#cbd5e1;">既存号車を選択して統一</label>
-    <select id="merge-select-existing" style="margin-bottom:10px; font-size:13px;"></select>
+    <select id="merge-select-existing" style="margin-bottom:14px; font-size:13px;"></select>
 
-    <div style="display:flex; gap:8px; margin-top:10px;">
+    <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" id="btn-merge-cancel" style="border:1px solid var(--border);">キャンセル</button>
       <button type="button" class="btn-submit" id="btn-merge-submit" style="margin:0; padding:8px;">統合する</button>
     </div>
@@ -2052,9 +2052,9 @@ function fetchAdminData() {
           var existingOptions = adminDateExistingCars[date] || [];
           var sel = document.getElementById('merge-select-existing');
           if (sel) {
-            var optsHtml = '';
+            var optsHtml = '<option value="">-- 統一先を選択してください --</option>';
             existingOptions.forEach(function(opt) {
-              optsHtml += '<option value="' + opt + '" ' + (opt === leader ? 'selected' : '') + '>' + opt + '号車</option>';
+              optsHtml += '<option value="' + opt + '">' + opt + '号車</option>';
             });
             optsHtml += '<option value="__ADD_CUSTOM__">＋ 任意で新しい号車名を追加…</option>';
             sel.innerHTML = optsHtml;
@@ -2064,7 +2064,8 @@ function fetchAdminData() {
       });
 
       container.querySelectorAll('.btn-do-unmerge').forEach(function(btn) {
-        btn.onclick = function() {
+        btn.onclick = function(e) {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
           var date = this.getAttribute('data-date');
           var leader = this.getAttribute('data-leader');
           if (confirm("「" + leader + "号車」の統合を解除し、元の入力に戻しますか？")) {
@@ -2208,7 +2209,7 @@ window.addEventListener('DOMContentLoaded', function() {
   if (mergeSel) {
     mergeSel.onchange = function() {
       if (this.value === '__ADD_CUSTOM__') {
-        var inputName = prompt("追加したい号車名を入力してください（例：高須）");
+        var inputName = prompt("追加したい号車名を入力してください\n（例：内宮号）");
         if (inputName && inputName.trim()) {
           var cleanName = normalizeCarpoolKey(inputName.trim());
           var newOpt = document.createElement('option');
@@ -2224,11 +2225,15 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   var btnMergeCancel = document.getElementById('btn-merge-cancel');
-  if (btnMergeCancel) btnMergeCancel.onclick = function() { hideModal('merge-car-modal'); };
+  if (btnMergeCancel) btnMergeCancel.onclick = function(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    hideModal('merge-car-modal');
+  };
   
   var btnMergeSubmit = document.getElementById('btn-merge-submit');
   if (btnMergeSubmit) {
-    btnMergeSubmit.onclick = function() {
+    btnMergeSubmit.onclick = function(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       var sel = document.getElementById('merge-select-existing');
       var chosenName = sel ? sel.value : '';
       if (!chosenName || chosenName === '__ADD_CUSTOM__') {
