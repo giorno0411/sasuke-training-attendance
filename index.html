@@ -809,7 +809,7 @@
     cursor: pointer;
   }
 
-  /* セット編集カード：横幅はみ出し防止のレスポンシブ配置 */
+  /* セット編集カード */
   .admin-edit-card {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
@@ -1295,7 +1295,21 @@ function hideModal(id) {
 }
 
 function checkGateAccess() {
+  var savedCode = localStorage.getItem('uchimiya_auth_code');
   var savedName = localStorage.getItem('uchimiya_auth_user');
+
+  if (savedCode) {
+    // 起動時にスプレッドシートの最新名（半角スペース入り）をバックグラウンドで再照合
+    fetch(GAS_URL + "?type=verify_code&code=" + encodeURIComponent(savedCode) + "&t=" + Date.now())
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if (data && data.valid && data.name) {
+          localStorage.setItem('uchimiya_auth_user', data.name);
+          applyAuthenticatedUser(data.name);
+        }
+      }).catch(function(){});
+  }
+
   if (savedName) {
     applyAuthenticatedUser(savedName);
     hideModal('gate-modal');
@@ -1540,22 +1554,25 @@ function normalizeDateKey(dateStr) {
   return String(dateStr);
 }
 
-// 姓名分離（スプレッドシート上の半角/全角スペース区切りから「姓」のみを抽出）
+// 姓名分離（スプレッドシートの半角/全角スペースから姓を確実に抽出、スペースなしの場合も「内宮」等を正確に切り出し）
 function extractLastName(str) {
   if (!str) return "";
   var s = String(str).trim();
   
-  // 「〜（同伴:〇〇行）」などの補助表記があれば削除
+  // 補助表記の削除
   s = s.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').trim();
 
   // 半角スペースまたは全角スペースで区切られている場合は最初の単語（姓）を抽出
   var parts = s.split(/[\s ]+/);
   if (parts.length > 1 && parts[0]) {
-    s = parts[0].trim();
+    return parts[0].trim().replace(/(号車|号|車|くん|さん|君|様)$/g, '');
   }
 
-  // 「〜号車」「〜号」「〜車」「〜くん」「〜さん」「〜様」等の末尾を削除
+  // スペースなしで入っている場合の自動判定（内宮など）
   s = s.replace(/(号車|号|車|くん|さん|君|様)$/g, '').trim();
+  if (s.indexOf('内宮') === 0) return '内宮';
+  if (s.length >= 4) return s.substring(0, 2);
+
   return s;
 }
 
@@ -2484,6 +2501,7 @@ function fetchAdminData() {
 
       container.innerHTML = html;
 
+      // チェックボックス・一括削除のイベント結びつけ
       container.querySelectorAll('.batch-select-all').forEach(function(allCb) {
         allCb.onchange = function() {
           var d = this.getAttribute('data-date');
@@ -2795,7 +2813,7 @@ window.addEventListener('DOMContentLoaded', function() {
           var cleanName = normalizeCarpoolKey(inputName.trim());
           if (!customCreatedCars.includes(cleanName)) {
             customCreatedCars.push(cleanName);
-            localStorage.setItem('uchimiya_custom_cars', JSON.stringify(customCreatedCars));
+            try { localStorage.setItem('uchimiya_custom_cars', JSON.stringify(customCreatedCars)); } catch(e){}
           }
           var newOpt = document.createElement('option');
           newOpt.value = cleanName;
@@ -2831,7 +2849,7 @@ window.addEventListener('DOMContentLoaded', function() {
       var cleanTarget = normalizeCarpoolKey(chosenName);
       var key = currentMergeTarget.date + ":::" + currentMergeTarget.rawLeader;
       carpoolMergeMap[key] = cleanTarget;
-      localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap));
+      try { localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap)); } catch(e){}
       hideModal('merge-car-modal');
       fetchAdminData();
       return false;
@@ -2865,7 +2883,6 @@ window.addEventListener('DOMContentLoaded', function() {
               }
             });
           });
-          try { localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData)); } catch(e){}
           renderStageGroups();
         }
       }).catch(function() {});
