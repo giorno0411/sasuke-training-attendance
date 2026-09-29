@@ -158,28 +158,45 @@
     font-size: 11px;
   }
 
-  /* 他プレイヤー追加用スタイル */
-  .player-input-row {
+  /* 他プレイヤー追加用カードUI */
+  .other-player-card {
+    background: rgba(11, 15, 25, 0.65);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .other-player-top {
     display: flex;
     gap: 6px;
-    margin-bottom: 6px;
+    align-items: center;
   }
   .btn-remove-player {
     background: rgba(239, 68, 68, 0.2);
     border: 1px solid rgba(239, 68, 68, 0.4);
     color: #f87171;
     border-radius: 6px;
-    padding: 0 12px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 13px;
     font-weight: bold;
     cursor: pointer;
+    flex-shrink: 0;
+  }
+  .other-player-transport-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 2px;
   }
   .btn-add-player {
     background: rgba(30, 41, 59, 0.8);
     border: 1px dashed var(--accent);
     color: #fca5a5;
     width: 100%;
-    padding: 8px;
+    padding: 9px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: bold;
@@ -417,6 +434,7 @@
     display: none;
   }
 
+  /* 注意事項（・のサイズを3pxに縮小） */
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -449,10 +467,10 @@
   .column-body li::before {
     content: "";
     position: absolute;
-    left: 2px;
-    top: 9px;
-    width: 4px;
-    height: 4px;
+    left: 3px;
+    top: 10px;
+    width: 3px; /* 3pxに縮小 */
+    height: 3px;
     border-radius: 50%;
     background-color: var(--text-sub);
   }
@@ -464,6 +482,7 @@
     text-underline-offset: 3px;
   }
 
+  /* セット稼働状況 */
   .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
@@ -538,6 +557,7 @@
     border-left-color: #ef4444;
   }
 
+  /* 管理者画面 */
   .admin-subnav {
     display: flex;
     gap: 4px;
@@ -567,9 +587,9 @@
     justify-content: space-between;
     align-items: center;
     background: rgba(30, 41, 59, 0.95);
-    padding: 8px 12px;
+    padding: 8px 10px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
     border-left: 4px solid var(--accent);
     margin-bottom: 8px;
@@ -586,7 +606,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px 12px;
-    font-size: 12px;
+    font-size: 11px;
     margin-bottom: 8px;
     background: rgba(15, 23, 42, 0.5);
     padding: 7px 10px;
@@ -611,11 +631,11 @@
     justify-content: space-between;
     align-items: center;
   }
-  .member-name { font-size: 15px; font-weight: bold; }
+  .member-name { font-size: 14px; font-weight: bold; }
   
   .badge-transport {
     font-size: 11px;
-    padding: 3px 8px;
+    padding: 2px 7px;
     border-radius: 4px;
     font-weight: 600;
   }
@@ -699,6 +719,20 @@
     width: auto;
   }
 
+  .order-btn-group {
+    display: flex;
+    gap: 4px;
+  }
+  .btn-order-move {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+    padding: 2px 7px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -763,17 +797,17 @@
     <div class="card">
       <form id="attendance-form" onsubmit="submitAttendance(event)">
         
-        <!-- 代表プレイヤー氏名 -->
+        <!-- 参加者（プレイヤー）氏名 -->
         <div class="form-group">
           <label>参加者（プレイヤー）氏名<span class="required">*</span></label>
           <input type="text" id="field-name" placeholder="例：内宮修造" required>
         </div>
 
-        <!-- 他参加者（プレイヤー）動的追加 -->
+        <!-- 他参加者（プレイヤー）氏名 ＋ 移動手段 -->
         <div class="form-group">
-          <label>他参加者（プレイヤー）</label>
+          <label>他参加者（プレイヤー）氏名</label>
           <div id="other-players-container"></div>
-          <button type="button" class="btn-add-player" onclick="addOtherPlayerInput()">
+          <button type="button" class="btn-add-player" onclick="addOtherPlayerCard()">
             <span>＋ 他の参加者を追加する</span>
           </button>
         </div>
@@ -789,7 +823,7 @@
 
         <div id="days-config-container"></div>
 
-        <!-- お連れ様・同伴者（見学等） -->
+        <!-- お連れ様・同伴者（見学等の非プレイヤー） -->
         <div class="form-group">
           <label>お連れ様・同伴者（見学・補助等の非プレイヤー）</label>
           <div class="companion-row">
@@ -835,10 +869,11 @@
   <!-- 4. 管理者専用画面 -->
   <div id="view-admin" class="hidden">
     <div class="card">
+      <!-- サブナビ順序：参加状況 ➔ 注意事項 ➔ セット設定 -->
       <div class="admin-subnav">
         <button class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 参加状況</button>
-        <button class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット設定</button>
         <button class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
+        <button class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット設定</button>
       </div>
 
       <!-- サブタブ1: 参加集計 -->
@@ -856,7 +891,36 @@
         </div>
       </div>
 
-      <!-- サブタブ2: セット稼働設定 -->
+      <!-- サブタブ2: 注意事項編集（並び替え・追加・プレビュー対応） -->
+      <div id="admin-subview-rules" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="font-size:15px; margin:0;">📜 注意事項の編集</h2>
+          <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="loadRemoteRules()">🔄 再読込</button>
+        </div>
+        <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
+          文字を選択して装飾ボタンを押せます。改行で箇条書きになります。順序は「▲」「▼」で入れ替えられます。
+        </p>
+
+        <form onsubmit="saveRuleSettings(event)">
+          <div id="admin-rules-edit-list"></div>
+          
+          <button type="button" class="btn-add-player" style="margin: 10px 0 16px 0; padding:10px;" onclick="addNewRuleSection()">
+            <span>＋ 新しい注意事項項目を追加する</span>
+          </button>
+
+          <button type="submit" class="btn-submit" id="btn-save-rules">💾 注意事項を保存する</button>
+        </form>
+
+        <!-- リアルタイム公開プレビュー -->
+        <div style="margin-top:24px; padding-top:16px; border-top:1px dashed var(--border);">
+          <div style="font-size:13px; font-weight:bold; color:#93c5fd; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <span>👁️ 公開プレビュー（ユーザー画面と同じ表示）</span>
+          </div>
+          <div id="rules-live-preview-container"></div>
+        </div>
+      </div>
+
+      <!-- サブタブ3: セット稼働設定 -->
       <div id="admin-subview-obstacles" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">⚙️ セット稼働状況の編集</h2>
@@ -872,26 +936,6 @@
         </form>
       </div>
 
-      <!-- サブタブ3: 注意事項編集（項目追加対応） -->
-      <div id="admin-subview-rules" class="hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h2 style="font-size:15px; margin:0;">📜 注意事項の編集</h2>
-          <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="loadRemoteRules()">🔄 再読込</button>
-        </div>
-        <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
-          文字を選択して装飾ボタンを押せます。改行で箇条書きになります。
-        </p>
-
-        <form onsubmit="saveRuleSettings(event)">
-          <div id="admin-rules-edit-list"></div>
-          
-          <button type="button" class="btn-add-player" style="margin: 10px 0 16px 0; padding:10px;" onclick="addNewRuleSection()">
-            <span>＋ 新しい注意事項項目を追加する</span>
-          </button>
-
-          <button type="submit" class="btn-submit" id="btn-save-rules">💾 注意事項を保存する</button>
-        </form>
-      </div>
     </div>
   </div>
 
@@ -937,10 +981,7 @@
 
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
-
-// ★管理者パスワードを「okpl」に変更
 const ADMIN_PIN = "okpl";
-
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 
 let ruleSections = [
@@ -1020,7 +1061,7 @@ let stageData = [
 
 let calYear, calMonth;
 const selectedDates = new Set();
-let registeredRecords = []; // 重複回答判定用キャッシュ
+let registeredRecords = [];
 
 window.addEventListener('DOMContentLoaded', () => {
   checkGateAccess();
@@ -1101,32 +1142,55 @@ function resetUserAuth() {
   }
 }
 
-// 他プレイヤーの動的追加
-function addOtherPlayerInput(val = '') {
+// 他参加者（プレイヤー）カードの追加
+function addOtherPlayerCard(name = '', transport = '同乗', carType = '普通車') {
   const container = document.getElementById('other-players-container');
-  const row = document.createElement('div');
-  row.className = 'player-input-row';
-  row.innerHTML = `
-    <input type="text" class="field-other-player-name" placeholder="他参加者のお名前" value="${escapeHtml(val)}">
-    <button type="button" class="btn-remove-player" onclick="this.parentElement.remove()" title="削除">✕</button>
+  const cardId = 'other-player-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+  const card = document.createElement('div');
+  card.className = 'other-player-card';
+  card.id = cardId;
+  card.innerHTML = `
+    <div class="other-player-top">
+      <input type="text" class="field-other-player-name" placeholder="他参加者（プレイヤー）のお名前" value="${escapeHtml(name)}" required style="margin:0;">
+      <button type="button" class="btn-remove-player" onclick="document.getElementById('${cardId}').remove()" title="削除">✕</button>
+    </div>
+    <div class="other-player-transport-row">
+      <div>
+        <label style="font-size:10px; margin-bottom:2px;">移動手段</label>
+        <select class="field-other-player-transport" onchange="toggleOtherPlayerCarType('${cardId}', this.value)" style="padding:6px 8px; font-size:12px;">
+          <option value="同乗" ${transport === '同乗' ? 'selected' : ''}>🤝 代表者と同乗</option>
+          <option value="自車" ${transport === '自車' ? 'selected' : ''}>🚗 自車（別車）</option>
+          <option value="その他" ${transport === 'その他' ? 'selected' : ''}>🚌 その他（公共等）</option>
+        </select>
+      </div>
+      <div id="${cardId}-car-wrap" class="${transport === '自車' ? '' : 'hidden'}">
+        <label style="font-size:10px; margin-bottom:2px;">車種</label>
+        <select class="field-other-player-car-type" style="padding:6px 8px; font-size:12px;">
+          <option value="普通車" ${carType === '普通車' ? 'selected' : ''}>普通車</option>
+          <option value="軽自動車" ${carType === '軽自動車' ? 'selected' : ''}>軽自動車</option>
+          <option value="その他" ${carType === 'その他' ? 'selected' : ''}>その他</option>
+        </select>
+      </div>
+    </div>
   `;
-  container.appendChild(row);
+  container.appendChild(card);
 }
 
-// 重複回答チェック用の既存データ取得
+function toggleOtherPlayerCarType(cardId, val) {
+  const wrap = document.getElementById(`${cardId}-car-wrap`);
+  if (wrap) wrap.classList.toggle('hidden', val !== '自車');
+}
+
 async function fetchRegisteredAttendance() {
   try {
     const res = await fetch(GAS_URL + "?type=attendance&t=" + Date.now(), { cache: "no-store" });
     const list = await res.json();
-    if (Array.isArray(list)) {
-      registeredRecords = list;
-    }
+    if (Array.isArray(list)) registeredRecords = list;
   } catch(e) {}
 }
 
 function formatRuleItem(text, title) {
   let str = escapeHtml(text);
-
   str = str.replace(/&lt;span class=&quot;urgent-highlight&quot;&gt;(.*?)&lt;\/span&gt;/g, '<span class="urgent-highlight">$1</span>');
   str = str.replace(/&lt;b&gt;(.*?)&lt;\/b&gt;/g, '<b>$1</b>');
   str = str.replace(/&lt;u&gt;(.*?)&lt;\/u&gt;/g, '<u>$1</u>');
@@ -1153,7 +1217,6 @@ function formatRuleItem(text, title) {
       </div>
     `;
   }
-
   return str;
 }
 
@@ -1176,9 +1239,13 @@ function renderRulesDisplay() {
     `;
   });
   container.innerHTML = html;
+
+  // リアルタイムプレビュー枠も連動更新
+  const preview = document.getElementById('rules-live-preview-container');
+  if (preview) preview.innerHTML = html;
 }
 
-// 管理者注意事項エディタ（項目の動的追加・削除に対応）
+// 管理者注意事項エディタ（順序入れ替え・追加・削除・即時プレビュー）
 function renderAdminRulesEditor() {
   const container = document.getElementById('admin-rules-edit-list');
   if (!container) return;
@@ -1187,11 +1254,18 @@ function renderAdminRulesEditor() {
   ruleSections.forEach((sec, idx) => {
     html += `
       <div class="admin-edit-card" id="rule-card-${idx}">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <label style="font-size:12px; color:#93c5fd; margin:0;">項目見出し #${idx + 1}</label>
-          <button type="button" class="btn-del-single" onclick="removeRuleSection(${idx})">🗑️ 項目削除</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <label style="font-size:12px; color:#93c5fd; margin:0;">項目 #${idx + 1}</label>
+            <div class="order-btn-group">
+              <button type="button" class="btn-order-move" onclick="moveRuleSection(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="上へ移動">▲</button>
+              <button type="button" class="btn-order-move" onclick="moveRuleSection(${idx}, 1)" ${idx === ruleSections.length - 1 ? 'disabled' : ''} title="下へ移動">▼</button>
+            </div>
+          </div>
+          <button type="button" class="btn-del-single" onclick="removeRuleSection(${idx})">🗑️ 削除</button>
         </div>
-        <input type="text" id="rule-title-${idx}" value="${escapeHtml(sec.title)}" style="margin-bottom:8px; font-weight:bold;">
+
+        <input type="text" id="rule-title-${idx}" value="${escapeHtml(sec.title)}" oninput="syncAndPreviewRules()" style="margin-bottom:8px; font-weight:bold;">
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <label style="font-size:11px; color:#cbd5e1; margin:0;">本文（選択して装飾ボタン）</label>
@@ -1201,15 +1275,36 @@ function renderAdminRulesEditor() {
             <button type="button" class="tab-btn" style="padding:3px 8px; font-size:11px; text-decoration:underline; border:1px solid var(--border);" onclick="applyTextFormat(${idx}, 'u')">U</button>
           </div>
         </div>
-        <textarea id="rule-content-${idx}" rows="4" style="font-size:12px; line-height:1.5;">${escapeHtml(sec.content)}</textarea>
+        <textarea id="rule-content-${idx}" rows="4" oninput="syncAndPreviewRules()" style="font-size:12px; line-height:1.5;">${escapeHtml(sec.content)}</textarea>
       </div>
     `;
   });
   container.innerHTML = html;
+  renderRulesDisplay();
+}
+
+function syncAndPreviewRules() {
+  ruleSections.forEach((sec, idx) => {
+    const titleEl = document.getElementById(`rule-title-${idx}`);
+    const contentEl = document.getElementById(`rule-content-${idx}`);
+    if (titleEl) sec.title = titleEl.value;
+    if (contentEl) sec.content = contentEl.value;
+  });
+  renderRulesDisplay();
+}
+
+function moveRuleSection(idx, dir) {
+  syncAndPreviewRules();
+  const target = idx + dir;
+  if (target < 0 || target >= ruleSections.length) return;
+  const temp = ruleSections[idx];
+  ruleSections[idx] = ruleSections[target];
+  ruleSections[target] = temp;
+  renderAdminRulesEditor();
 }
 
 function addNewRuleSection() {
-  syncCurrentRuleInputs();
+  syncAndPreviewRules();
   ruleSections.push({
     title: "新しい項目",
     content: "注意事項の内容をここに入力してください。"
@@ -1219,19 +1314,10 @@ function addNewRuleSection() {
 
 function removeRuleSection(idx) {
   if (confirm("この注意事項項目を削除しますか？")) {
-    syncCurrentRuleInputs();
+    syncAndPreviewRules();
     ruleSections.splice(idx, 1);
     renderAdminRulesEditor();
   }
-}
-
-function syncCurrentRuleInputs() {
-  ruleSections.forEach((sec, idx) => {
-    const titleEl = document.getElementById(`rule-title-${idx}`);
-    const contentEl = document.getElementById(`rule-content-${idx}`);
-    if (titleEl) sec.title = titleEl.value;
-    if (contentEl) sec.content = contentEl.value;
-  });
 }
 
 function applyTextFormat(idx, type) {
@@ -1252,6 +1338,7 @@ function applyTextFormat(idx, type) {
   else if (type === 'u') tagged = `<u>${sel}</u>`;
 
   ta.setRangeText(tagged, start, end, 'select');
+  syncAndPreviewRules();
 }
 
 async function loadRemoteRules() {
@@ -1272,7 +1359,7 @@ async function saveRuleSettings(e) {
   btn.disabled = true;
   btn.innerText = "保存中...";
 
-  syncCurrentRuleInputs();
+  syncAndPreviewRules();
 
   try {
     await fetch(GAS_URL, {
@@ -1450,19 +1537,20 @@ async function saveObstacleSettings(e) {
   }
 }
 
+// サブタブ切り替え（参加状況 ➔ 注意事項 ➔ セット設定）
 function switchAdminSubTab(sub) {
   document.getElementById('admin-subview-attendance').classList.toggle('hidden', sub !== 'attendance');
-  document.getElementById('admin-subview-obstacles').classList.toggle('hidden', sub !== 'obstacles');
   document.getElementById('admin-subview-rules').classList.toggle('hidden', sub !== 'rules');
+  document.getElementById('admin-subview-obstacles').classList.toggle('hidden', sub !== 'obstacles');
 
   document.getElementById('admin-sub-btn-att').classList.toggle('active', sub === 'attendance');
-  document.getElementById('admin-sub-btn-obs').classList.toggle('active', sub === 'obstacles');
   document.getElementById('admin-sub-btn-rules').classList.toggle('active', sub === 'rules');
+  document.getElementById('admin-sub-btn-obs').classList.toggle('active', sub === 'obstacles');
 
-  if (sub === 'obstacles') {
-    renderAdminObstacleEditor();
-  } else if (sub === 'rules') {
+  if (sub === 'rules') {
     renderAdminRulesEditor();
+  } else if (sub === 'obstacles') {
+    renderAdminObstacleEditor();
   }
 }
 
@@ -1598,7 +1686,7 @@ function renderDaysConfigCards() {
         </div>
 
         <div class="form-group" style="margin-bottom:0;">
-          <label style="font-size:11px;">交通機関<span class="required">*</span></label>
+          <label style="font-size:11px;">交通機関（代表者）<span class="required">*</span></label>
           <div class="radio-pill-group">
             <label class="radio-pill-label" onclick="selectDayTransport(this, '${d}', '自車')">
               <input type="radio" name="transport-${d}" value="自車" required> 🚗 自車
@@ -1683,7 +1771,7 @@ function switchTab(tab) {
   document.getElementById('tab-btn-status').classList.toggle('active', tab === 'status');
 }
 
-// 参加送信処理（他プレイヤーの展開 ＆ 同一日程重複チェック）
+// 参加送信処理（他参加者の移動手段反映・重複チェック）
 async function submitAttendance(e) {
   e.preventDefault();
 
@@ -1700,22 +1788,35 @@ async function submitAttendance(e) {
     return;
   }
 
-  // 他プレイヤーのリスト取得
-  const otherInputs = document.querySelectorAll('.field-other-player-name');
-  const allPlayers = [primaryName];
-  otherInputs.forEach(inp => {
-    const val = inp.value.trim();
-    if (val && !allPlayers.includes(val)) allPlayers.push(val);
+  // 他プレイヤーリスト取得
+  const otherPlayerCards = document.querySelectorAll('.other-player-card');
+  const otherPlayers = [];
+  let nameDuplicateAlert = false;
+
+  otherPlayerCards.forEach(c => {
+    const n = c.querySelector('.field-other-player-name').value.trim();
+    const t = c.querySelector('.field-other-player-transport').value;
+    const ct = t === '自車' ? c.querySelector('.field-other-player-car-type').value : '';
+    if (n) {
+      if (n === primaryName || otherPlayers.some(p => p.name === n)) {
+        nameDuplicateAlert = true;
+      }
+      otherPlayers.push({ name: n, transportMode: t, carType: ct });
+    }
   });
 
-  // 重複回答チェック（最新回答を取得して照合）
+  if (nameDuplicateAlert) {
+    alert("参加者名に同一のお名前が重複して入力されています。確認してください。");
+    return;
+  }
+
+  // 重複回答チェック
   await fetchRegisteredAttendance();
-  for (const pName of allPlayers) {
+  const allNamesToCheck = [primaryName, ...otherPlayers.map(p => p.name)];
+  for (const pName of allNamesToCheck) {
     for (const d of arr) {
       const isAlready = registeredRecords.some(r => {
-        const rName = String(r.name || '').trim();
-        const rDate = normalizeDateKey(r.date);
-        return rName === pName && rDate === normalizeDateKey(d);
+        return String(r.name || '').trim() === pName && normalizeDateKey(r.date) === normalizeDateKey(d);
       });
       if (isAlready) {
         alert(`【重複回答エラー】\n「${pName}」さんは既に ${formatDateLabel(d)} の回答を送信済みです。\n同じ日程に二重で回答することはできません。`);
@@ -1728,7 +1829,8 @@ async function submitAttendance(e) {
   const companionNames = document.getElementById('field-companion-names').value.trim() || "なし";
   const note = document.getElementById('field-note').value.trim();
 
-  const dayConfigs = [];
+  // 代表者の日程ごとの設定
+  const primaryDayConfigs = [];
   for (const d of arr) {
     const card = document.querySelector(`.day-config-card[data-date="${d}"]`);
     if (!card) continue;
@@ -1762,7 +1864,7 @@ async function submitAttendance(e) {
       finalTime = `${s}〜${end}`;
     }
 
-    dayConfigs.push({
+    primaryDayConfigs.push({
       date: d,
       time: finalTime,
       transport: transportVal,
@@ -1775,33 +1877,69 @@ async function submitAttendance(e) {
   btn.disabled = true;
   btn.innerText = "送信中...";
 
-  // プレイヤー全員分を送信（複数人いる場合はまとめて登録）
-  const submitPromises = allPlayers.map(playerName => {
-    const payload = {
-      name: playerName,
-      proxyName: "", // 代理回答廃止のため空文字
-      days: dayConfigs,
-      companionCount: playerName === primaryName ? companionCount : "0名", // 同伴者は代表者にのみ紐付け
-      companionNames: playerName === primaryName ? companionNames : "なし",
-      note: playerName === primaryName ? note : `（${primaryName} 様と同時申込）`
-    };
+  // 代表者ペイロード
+  const payloads = [
+    {
+      name: primaryName,
+      proxyName: "",
+      days: primaryDayConfigs,
+      companionCount: companionCount,
+      companionNames: companionNames,
+      note: note
+    }
+  ];
 
-    return fetch(GAS_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(payload)
+  // 他参加者ペイロード（各プレイヤーとして独立登録。同伴には含めない）
+  otherPlayers.forEach(op => {
+    const opDayConfigs = primaryDayConfigs.map(cfg => {
+      let tVal = cfg.transport;
+      let cType = "";
+      let cLeader = "";
+
+      if (op.transportMode === '同乗') {
+        tVal = "乗り合い（同乗）";
+        cLeader = cfg.transport === "自車" ? primaryName : (cfg.carLeader || primaryName);
+        cType = cfg.carType || "普通車";
+      } else if (op.transportMode === '自車') {
+        tVal = "自車";
+        cType = op.carType || "普通車";
+      } else {
+        tVal = "その他";
+      }
+
+      return {
+        date: cfg.date,
+        time: cfg.time,
+        transport: tVal,
+        carType: cType,
+        carLeader: cLeader
+      };
+    });
+
+    payloads.push({
+      name: op.name,
+      proxyName: "",
+      days: opDayConfigs,
+      companionCount: "0名", // 他プレイヤーは同伴人数0名
+      companionNames: "なし",
+      note: `（${primaryName} 様と同時申込）`
     });
   });
 
   try {
-    await Promise.all(submitPromises);
+    await Promise.all(payloads.map(p => {
+      return fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(p)
+      });
+    }));
 
     document.getElementById('success-msg').style.display = 'block';
     document.getElementById('attendance-form').reset();
-    document.getElementById('other-players-container').innerHTML = ''; // 他参加者入力枠クリア
+    document.getElementById('other-players-container').innerHTML = '';
     
-    // ログイン中の名前を再適用
     const authUser = localStorage.getItem('uchimiya_auth_user');
     if (authUser) applyAuthenticatedUser(authUser);
 
@@ -1911,7 +2049,7 @@ function parseCompanionCount(str) {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-// 参加集計データの取得（日付 ➔ 参加者一覧 ➔ 相乗りリスト の順に描画）
+// 参加集計データの取得（同一人物・同一日の重複回答自動排除 & 参加（プレイヤー）計上）
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
@@ -1929,8 +2067,18 @@ async function fetchAdminData() {
 
     registeredRecords = list;
 
-    const groups = {};
+    // 同一人物・同一日付の重複回答を自動排除（最新のrowIndexを優先採用）
+    const deduplicatedMap = new Map();
     list.forEach(item => {
+      const pKey = `${normalizeDateKey(item.date)}___${String(item.name || '').trim()}`;
+      if (!deduplicatedMap.has(pKey) || (item.rowIndex > deduplicatedMap.get(pKey).rowIndex)) {
+        deduplicatedMap.set(pKey, item);
+      }
+    });
+    const cleanList = Array.from(deduplicatedMap.values());
+
+    const groups = {};
+    cleanList.forEach(item => {
       const key = normalizeDateKey(item.date);
       if (!groups[key]) groups[key] = [];
       groups[key].push(item);
@@ -1988,7 +2136,7 @@ async function fetchAdminData() {
       });
 
       const totalCars = countedCars.length;
-      const participantTotal = members.length;
+      const participantTotal = members.length; // プレイヤー全員がここに計上される
       const grandTotalPeople = participantTotal + companionTotal;
 
       html += `
@@ -1997,14 +2145,14 @@ async function fetchAdminData() {
           <div class="admin-date-header">
             <span>📅 ${formatDateLabel(date)}</span>
             <div class="admin-head-badges">
-              <span style="font-size:11px; background:var(--accent); color:#fff; padding:2px 7px; border-radius:10px;">参加: ${participantTotal}名</span>
-              ${companionTotal > 0 ? `<span style="font-size:11px; background:#475569; color:#f1f5f9; padding:2px 7px; border-radius:10px;">同伴: ${companionTotal}名</span>` : ''}
-              <span style="font-size:11px; background:#10b981; color:#fff; padding:2px 8px; border-radius:10px; font-weight:bold;">計: ${grandTotalPeople}名</span>
+              <span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">参加(プレイヤー): ${participantTotal}名</span>
+              ${companionTotal > 0 ? `<span style="font-size:10px; background:#475569; color:#f1f5f9; padding:2px 6px; border-radius:10px; white-space:nowrap;">同伴: ${companionTotal}名</span>` : ''}
+              <span style="font-size:10px; background:#10b981; color:#fff; padding:2px 7px; border-radius:10px; font-weight:bold; white-space:nowrap;">計: ${grandTotalPeople}名</span>
             </div>
           </div>
 
           <div class="admin-card-stats">
-            <span>👥 <b>人数計: <span class="people-stat-badge">${grandTotalPeople}名</span></b> (参加者: ${participantTotal}名 / 同伴者: ${companionTotal}名)</span>
+            <span>👥 <b>人数計: <span class="people-stat-badge">${grandTotalPeople}名</span></b> (参加: ${participantTotal}名 / 同伴: ${companionTotal}名)</span>
             <span>🚗 <b>車両計: <span class="car-stat-badge">${totalCars}台</span></b> (普通: ${carsStandard}台 / 軽: ${carsLight}台${carsOther > 0 ? ` / 他: ${carsOther}台` : ''})</span>
           </div>
 
@@ -2033,7 +2181,7 @@ async function fetchAdminData() {
                 <button type="button" class="btn-del-single" onclick="deleteSingleAttendance('${escapeHtml(m.name)}', '${escapeHtml(m.date)}', ${m.rowIndex || 0})">🗑️ 削除</button>
               </div>
             </div>
-            <div style="font-size:13px; color:#38bdf8;">⏰ ${escapeHtml(m.time || '時間指定なし')}</div>
+            <div style="font-size:12px; color:#38bdf8;">⏰ ${escapeHtml(m.time || '時間指定なし')}</div>
             ${m.carLeader ? `<div style="font-size:12px; color:#34d399;">🤝 相乗り代表: ${escapeHtml(m.carLeader)}</div>` : ''}
             ${hasCompanion ? `<div style="font-size:12px; color:#cbd5e1;">👥 同伴: ${escapeHtml(m.companionCount)} (${escapeHtml(m.companionNames)})</div>` : ''}
             ${hasNote ? `<div style="font-size:12px; color:#cbd5e1; border-top:1px dashed rgba(255,255,255,0.08); padding-top:4px; margin-top:2px;">💬 備考: ${escapeHtml(m.note)}</div>` : ''}
