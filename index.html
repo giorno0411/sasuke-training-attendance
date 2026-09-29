@@ -503,6 +503,7 @@
     text-underline-offset: 3px;
   }
 
+  /* セット稼働状況 */
   .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
@@ -518,7 +519,7 @@
   .obstacle-grid {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
   .obstacle-card {
     background: rgba(15, 23, 42, 0.7);
@@ -574,6 +575,29 @@
   }
   .obstacle-note-box.pause {
     border-left-color: #ef4444;
+  }
+
+  .obstacle-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  .btn-obs-action {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid var(--border);
+    color: #cbd5e1;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-obs-action:hover {
+    background: rgba(51, 65, 85, 0.9);
+    color: #fff;
   }
 
   .admin-subnav {
@@ -796,6 +820,44 @@
     cursor: pointer;
   }
 
+  /* 写真サムネイル */
+  .photo-thumbs-wrap {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .photo-thumb-item {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .photo-thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+  }
+  .photo-thumb-del {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(0,0,0,0.7);
+    color: #f87171;
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    cursor: pointer;
+    line-height: 18px;
+    text-align: center;
+    padding: 0;
+  }
+
   .hidden { display: none !important; }
 </style>
 </head>
@@ -892,7 +954,7 @@
     <div class="card">
       <div style="margin-bottom: 14px;">
         <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
-        <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。</p>
+        <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
     </div>
@@ -954,13 +1016,25 @@
           <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
         </div>
         <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
-          ステータスや停止時の理由を入力し、一番下の「保存」を押してください。
+          ステータスや停止理由、エリア写真の登録・削除が可能です。
         </p>
 
         <form id="admin-obs-form">
           <div id="admin-obstacle-edit-list"></div>
           <button type="submit" class="btn-submit" id="btn-save-obs" style="margin-top:14px;">💾 セット稼働状況を保存する</button>
         </form>
+
+        <!-- 管理者のみ閲覧可能な要望一覧 -->
+        <div style="margin-top:24px; padding-top:16px; border-top:1px dashed var(--border);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="font-size:14px; font-weight:bold; color:#38bdf8;">📥 参加者から届いたセットへの要望（管理者限定）</div>
+            <button type="button" class="tab-btn" id="btn-refresh-feedbacks" style="flex:none; padding:4px 8px; border:1px solid var(--border); font-size:11px;">🔄 要望更新</button>
+          </div>
+          <div id="admin-feedbacks-container" style="display:flex; flex-direction:column; gap:6px;">
+            <div style="color:var(--text-sub); font-size:12px; padding:10px; text-align:center;">要望データを読み込み中...</div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -1024,6 +1098,37 @@
   </div>
 </div>
 
+<!-- 写真拡大プレビューモーダル -->
+<div id="photo-viewer-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width:480px; padding:14px; text-align:center;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <b id="viewer-title" style="font-size:14px; color:#f8fafc;">セット写真</b>
+      <button type="button" class="tab-btn" id="btn-viewer-close" style="flex:none; padding:2px 8px; border:1px solid var(--border);">✕ 閉じる</button>
+    </div>
+    <div id="viewer-img-container" style="max-height:60vh; overflow-y:auto; display:flex; flex-direction:column; gap:10px;"></div>
+  </div>
+</div>
+
+<!-- セット要望送信モーダル（参加者用） -->
+<div id="feedback-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width:340px;">
+    <h3 style="margin-top:0; font-size:15px;">💬 セットへの要望・意見</h3>
+    <p style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
+      対象セット：<b id="feedback-target-name" style="color:#f8fafc;"></b><br>
+      ※管理者のみが確認できます。
+    </p>
+    <label style="font-size:11px; color:#cbd5e1;">お名前</label>
+    <input type="text" id="feedback-user-name" placeholder="お名前を入力" style="margin-bottom:8px;">
+    <label style="font-size:11px; color:#cbd5e1;">ご要望・ご意見</label>
+    <textarea id="feedback-content" rows="3" placeholder="例：高さの調整をお願いしたいです、マットの増設など" style="margin-bottom:12px;"></textarea>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="tab-btn" id="btn-feedback-cancel" style="border:1px solid var(--border);">キャンセル</button>
+      <button type="button" class="btn-submit" id="btn-feedback-submit" style="margin:0; padding:8px;">送信する</button>
+    </div>
+  </div>
+</div>
+
 <script>
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwyvwhsl3etA7LRqq1DBeHmGMEHMWuTNsJXKTasj8FXBSrZ2Zx1LfMijHMQzZub6Zsk/exec";
 var ADMIN_PIN = "okpl";
@@ -1060,46 +1165,46 @@ var stageData = [
   {
     stage: "1st STAGE",
     items: [
-      { name: "新プリズムシーソー", status: "active", note: "" },
-      { name: "ローリングヒル上り", status: "active", note: "" },
-      { name: "ローリングヒル下り", status: "active", note: "" },
-      { name: "フィッシュボーンリバース", status: "active", note: "" },
-      { name: "ドラゴングライダー", status: "active", note: "" },
-      { name: "タックル", status: "active", note: "" },
-      { name: "そり立つ壁", status: "active", note: "" }
+      { name: "新プリズムシーソー", status: "active", note: "", photos: [] },
+      { name: "ローリングヒル上り", status: "active", note: "", photos: [] },
+      { name: "ローリングヒル下り", status: "active", note: "", photos: [] },
+      { name: "フィッシュボーンリバース", status: "active", note: "", photos: [] },
+      { name: "ドラゴングライダー", status: "active", note: "", photos: [] },
+      { name: "タックル", status: "active", note: "", photos: [] },
+      { name: "そり立つ壁", status: "active", note: "", photos: [] }
     ]
   },
   {
     stage: "2nd STAGE",
     items: [
-      { name: "2nd用サーモンラダー", status: "active", note: "" },
-      { name: "スパイダーラン～ドロップ", status: "active", note: "" },
-      { name: "ウォールリフティング", status: "active", note: "" }
+      { name: "2nd用サーモンラダー", status: "active", note: "", photos: [] },
+      { name: "スパイダーラン～ドロップ", status: "active", note: "", photos: [] },
+      { name: "ウォールリフティング", status: "active", note: "", photos: [] }
     ]
   },
   {
     stage: "3rd STAGE",
     items: [
-      { name: "フライングバー", status: "active", note: "" },
-      { name: "サイドワインダー（回転）", status: "active", note: "" },
-      { name: "サイドワインダー（落下）", status: "active", note: "" },
-      { name: "スイングエッジ", status: "active", note: "" },
-      { name: "クリフディメンション", status: "active", note: "" },
-      { name: "バーティカルリミット.BURST", status: "active", note: "" },
-      { name: "パイプスライダー", status: "active", note: "" }
+      { name: "フライングバー", status: "active", note: "", photos: [] },
+      { name: "サイドワインダー（回転）", status: "active", note: "", photos: [] },
+      { name: "サイドワインダー（落下）", status: "active", note: "", photos: [] },
+      { name: "スイングエッジ", status: "active", note: "", photos: [] },
+      { name: "クリフディメンション", status: "active", note: "", photos: [] },
+      { name: "バーティカルリミット.BURST", status: "active", note: "", photos: [] },
+      { name: "パイプスライダー", status: "active", note: "", photos: [] }
     ]
   },
   {
     stage: "FINAL STAGE",
     items: [
-      { name: "final用サーモンラダー", status: "active", note: "" }
+      { name: "final用サーモンラダー", status: "active", note: "", photos: [] }
     ]
   },
   {
     stage: "その他",
     items: [
-      { name: "休憩場", status: "active", note: "" },
-      { name: "アップ用器具（旧クリフ、ブランコ）", status: "active", note: "" }
+      { name: "休憩場", status: "active", note: "", photos: [] },
+      { name: "アップ用器具（旧クリフ、ブランコ）", status: "active", note: "", photos: [] }
     ]
   }
 ];
@@ -1115,8 +1220,15 @@ try {
   if (savedMap) carpoolMergeMap = JSON.parse(savedMap);
 } catch(e) {}
 
-var adminDateExistingCars = {};
+// 管理者が手動作成した号車の永続リスト
+var customCreatedCars = [];
+try {
+  var savedCustom = localStorage.getItem('uchimiya_custom_cars');
+  if (savedCustom) customCreatedCars = JSON.parse(savedCustom);
+} catch(e) {}
+
 var currentMergeTarget = { date: '', rawLeader: '' };
+var currentFeedbackTarget = '';
 
 function escapeHtml(str) {
   if (!str) return "";
@@ -1245,6 +1357,7 @@ function switchAdminSubTab(sub) {
     renderAdminRulesEditor();
   } else if (sub === 'obstacles') {
     renderAdminObstacleEditor();
+    loadRemoteFeedbacks();
   }
 }
 
@@ -1441,7 +1554,7 @@ function renderDaysConfigCards() {
 
     html += '<div id="share-box-' + d + '" class="conditional-box hidden">';
     html += '<label style="font-size:11px; margin-bottom:4px;">相乗り代表者（運転者）のお名前<span class="required">*</span></label>';
-    html += '<input type="text" class="field-car-leader" placeholder="例：内宮号" style="margin-bottom:8px;">';
+    html += '<input type="text" class="field-car-leader" placeholder="例：内宮号車" style="margin-bottom:8px;">';
     html += '<label style="font-size:11px; margin-bottom:4px;">相乗り車両の車種<span class="required">*</span></label>';
     html += '<select class="field-carpool-type"><option value="普通車">普通車</option><option value="軽自動車">軽自動車</option><option value="その他">その他（バイク等）</option></select>';
     html += '</div>';
@@ -1750,11 +1863,11 @@ function renderStageGroups() {
   if (!container) return;
 
   var html = '';
-  stageData.forEach(function(group) {
+  stageData.forEach(function(group, gIdx) {
     html += '<div class="stage-section">';
     html += '<div class="stage-header">' + escapeHtml(group.stage) + '</div>';
     html += '<div class="obstacle-grid">';
-    group.items.forEach(function(item) {
+    group.items.forEach(function(item, iIdx) {
       var badgeClass = 'status-active';
       var icon = '🟢';
       var statusText = '稼働中';
@@ -1769,6 +1882,7 @@ function renderStageGroups() {
       }
       var hasNote = (item.status !== 'active') && item.note && item.note.trim() !== '';
       var noteClass = item.status === 'pause' ? 'obstacle-note-box pause' : 'obstacle-note-box';
+      var photoCount = item.photos ? item.photos.length : 0;
 
       html += '<div class="obstacle-card">';
       html += '<div class="obstacle-top-row">';
@@ -1778,11 +1892,59 @@ function renderStageGroups() {
       if (hasNote) {
         html += '<div class="' + noteClass + '">理由：' + escapeHtml(item.note) + '</div>';
       }
+
+      html += '<div class="obstacle-actions">';
+      if (photoCount > 0) {
+        html += '<button type="button" class="btn-obs-action btn-view-photo" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '">📷 写真を見る (' + photoCount + '枚)</button>';
+      }
+      html += '<button type="button" class="btn-obs-action btn-open-feedback" data-name="' + escapeHtml(item.name) + '">💬 このセットへの要望・意見</button>';
+      html += '</div>';
+
       html += '</div>';
     });
     html += '</div></div>';
   });
   container.innerHTML = html;
+
+  container.querySelectorAll('.btn-view-photo').forEach(function(btn) {
+    btn.onclick = function() {
+      var g = Number(this.getAttribute('data-gidx'));
+      var i = Number(this.getAttribute('data-iidx'));
+      var item = stageData[g].items[i];
+      openPhotoViewer(item.name, item.photos || []);
+    };
+  });
+
+  container.querySelectorAll('.btn-open-feedback').forEach(function(btn) {
+    btn.onclick = function() {
+      var name = this.getAttribute('data-name');
+      currentFeedbackTarget = name;
+      document.getElementById('feedback-target-name').innerText = name;
+      var authUser = localStorage.getItem('uchimiya_auth_user') || '';
+      document.getElementById('feedback-user-name').value = authUser;
+      document.getElementById('feedback-content').value = '';
+      showModal('feedback-modal');
+    };
+  });
+}
+
+function openPhotoViewer(title, photos) {
+  document.getElementById('viewer-title').innerText = title + ' の写真 (' + photos.length + '枚)';
+  var container = document.getElementById('viewer-img-container');
+  container.innerHTML = '';
+  if (photos.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-sub); padding:20px;">登録されている写真はありません</div>';
+  } else {
+    photos.forEach(function(src) {
+      var img = document.createElement('img');
+      img.src = src;
+      img.style.maxWidth = '100%';
+      img.style.borderRadius = '8px';
+      img.style.border = '1px solid var(--border)';
+      container.appendChild(img);
+    });
+  }
+  showModal('photo-viewer-modal');
 }
 
 function renderAdminObstacleEditor() {
@@ -1794,6 +1956,8 @@ function renderAdminObstacleEditor() {
     html += '<div style="font-weight:bold; font-size:13px; color:#93c5fd; margin:12px 0 6px 0; border-left:3px solid #3b82f6; padding-left:6px;">' + escapeHtml(group.stage) + '</div>';
     group.items.forEach(function(item, iIdx) {
       var isHalted = item.status !== 'active';
+      var photos = item.photos || [];
+
       html += '<div class="admin-edit-card">';
       html += '<div class="admin-obs-header">';
       html += '<span class="admin-obs-name">' + escapeHtml(item.name) + '</span>';
@@ -1803,9 +1967,34 @@ function renderAdminObstacleEditor() {
       html += '<option value="pause" ' + (item.status === 'pause' ? 'selected' : '') + '>🔴 休止中</option>';
       html += '</select>';
       html += '</div>';
-      html += '<div id="obs-wrap-' + gIdx + '-' + iIdx + '" class="' + (isHalted ? '' : 'hidden') + '">';
-      html += '<input type="text" class="obs-note-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" value="' + escapeHtml(item.note || '') + '" placeholder="理由を入力" style="font-size:12px; padding:6px 10px;">';
-      html += '</div></div>';
+      
+      html += '<div id="obs-wrap-' + gIdx + '-' + iIdx + '" class="' + (isHalted ? '' : 'hidden') + '" style="margin-bottom:8px;">';
+      html += '<input type="text" class="obs-note-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" value="' + escapeHtml(item.note || '') + '" placeholder="停止理由を入力" style="font-size:12px; padding:6px 10px;">';
+      html += '</div>';
+
+      // 写真追加エリア
+      html += '<div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.08);">';
+      html += '<div style="display:flex; justify-content:space-between; align-items:center;">';
+      html += '<label style="font-size:11px; color:#94a3b8; margin:0;">📷 エリア写真 (' + photos.length + '枚)</label>';
+      html += '<label class="btn-obs-action" style="margin:0; cursor:pointer;">';
+      html += '<span>＋ 写真を追加</span>';
+      html += '<input type="file" accept="image/*" multiple class="admin-photo-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" style="display:none;">';
+      html += '</label>';
+      html += '</div>';
+
+      if (photos.length > 0) {
+        html += '<div class="photo-thumbs-wrap">';
+        photos.forEach(function(pSrc, pIdx) {
+          html += '<div class="photo-thumb-item">';
+          html += '<img src="' + pSrc + '" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" data-pidx="' + pIdx + '" class="preview-thumb-img">';
+          html += '<button type="button" class="photo-thumb-del" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" data-pidx="' + pIdx + '">✕</button>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+
+      html += '</div>';
     });
   });
   container.innerHTML = html;
@@ -1826,6 +2015,74 @@ function renderAdminObstacleEditor() {
       stageData[g].items[i].note = this.value.trim();
     };
   });
+
+  // 写真追加イベント
+  container.querySelectorAll('.admin-photo-input').forEach(function(inp) {
+    inp.onchange = function(e) {
+      var g = Number(this.getAttribute('data-gidx'));
+      var i = Number(this.getAttribute('data-iidx'));
+      var files = e.target.files;
+      if (!files || files.length === 0) return;
+
+      if (!stageData[g].items[i].photos) stageData[g].items[i].photos = [];
+
+      var readCount = 0;
+      for (var f = 0; f < files.length; f++) {
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+          stageData[g].items[i].photos.push(evt.target.result);
+          readCount++;
+          if (readCount === files.length) {
+            renderAdminObstacleEditor();
+            renderStageGroups();
+          }
+        };
+        reader.readAsDataURL(files[f]);
+      }
+    };
+  });
+
+  // サムネイル削除
+  container.querySelectorAll('.photo-thumb-del').forEach(function(btn) {
+    btn.onclick = function() {
+      var g = Number(this.getAttribute('data-gidx'));
+      var i = Number(this.getAttribute('data-iidx'));
+      var p = Number(this.getAttribute('data-pidx'));
+      if (confirm("この写真を削除しますか？")) {
+        stageData[g].items[i].photos.splice(p, 1);
+        renderAdminObstacleEditor();
+        renderStageGroups();
+      }
+    };
+  });
+}
+
+function loadRemoteFeedbacks() {
+  var container = document.getElementById('admin-feedbacks-container');
+  if (!container) return;
+
+  fetch(GAS_URL + "?type=feedbacks&t=" + Date.now())
+    .then(function(res) { return res.json(); })
+    .then(function(list) {
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-sub); font-size:12px; padding:10px; text-align:center;">まだ要望はありません</div>';
+        return;
+      }
+      var html = '';
+      list.forEach(function(f) {
+        html += '<div style="background:rgba(15,23,42,0.7); border:1px solid var(--border); padding:8px 10px; border-radius:6px; font-size:12px;">';
+        html += '<div style="display:flex; justify-content:space-between; margin-bottom:4px;">';
+        html += '<b style="color:#93c5fd;">' + escapeHtml(f.target) + '</b>';
+        html += '<span style="color:var(--text-sub); font-size:10px;">' + escapeHtml(f.date || '') + ' (' + escapeHtml(f.name || '匿名') + ')</span>';
+        html += '</div>';
+        html += '<div style="color:#f8fafc; line-height:1.4;">' + escapeHtml(f.content) + '</div>';
+        html += '</div>';
+      });
+      container.innerHTML = html;
+    })
+    .catch(function() {
+      container.innerHTML = '<div style="color:var(--text-sub); font-size:12px; padding:10px; text-align:center;">要望はありません</div>';
+    });
 }
 
 function fetchAdminData() {
@@ -1930,8 +2187,6 @@ function fetchAdminData() {
 
         var totalCars = countedCarsMap.size;
         var grandTotalPeople = playerTotal + companionTotal;
-
-        adminDateExistingCars[date] = Object.keys(carpoolMap);
 
         html += '<div class="admin-date-group">';
         html += '<div class="admin-date-header">';
@@ -2042,24 +2297,28 @@ function fetchAdminData() {
       });
 
       container.querySelectorAll('.btn-do-merge').forEach(function(btn) {
-        btn.onclick = function() {
+        btn.onclick = function(e) {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
           var date = this.getAttribute('data-date');
           var leader = this.getAttribute('data-leader');
           currentMergeTarget = { date: date, rawLeader: leader };
+          
           var title = document.getElementById('merge-target-original-name');
           if (title) title.innerText = leader + "号車";
 
-          var existingOptions = adminDateExistingCars[date] || [];
           var sel = document.getElementById('merge-select-existing');
           if (sel) {
             var optsHtml = '<option value="">-- 統一先を選択してください --</option>';
-            existingOptions.forEach(function(opt) {
-              optsHtml += '<option value="' + opt + '">' + opt + '号車</option>';
+            // 参加者の入力した元の回答は出さず、管理者が追加した号車のみを選択肢にする
+            customCreatedCars.forEach(function(car) {
+              optsHtml += '<option value="' + car + '">' + car + '号車</option>';
             });
             optsHtml += '<option value="__ADD_CUSTOM__">＋ 任意で新しい号車名を追加…</option>';
             sel.innerHTML = optsHtml;
+            sel.value = "";
           }
           showModal('merge-car-modal');
+          return false;
         };
       });
 
@@ -2073,6 +2332,7 @@ function fetchAdminData() {
             localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap));
             fetchAdminData();
           }
+          return false;
         };
       });
     })
@@ -2205,30 +2465,84 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   };
 
+  // 要望更新ボタン
+  var btnRefFeedbacks = document.getElementById('btn-refresh-feedbacks');
+  if (btnRefFeedbacks) btnRefFeedbacks.onclick = loadRemoteFeedbacks;
+
+  // 写真プレビュー閉じる
+  var btnCloseViewer = document.getElementById('btn-viewer-close');
+  if (btnCloseViewer) btnCloseViewer.onclick = function() { hideModal('photo-viewer-modal'); };
+  var photoModal = document.getElementById('photo-viewer-modal');
+  if (photoModal) photoModal.onclick = function() { hideModal('photo-viewer-modal'); };
+
+  // 要望モーダル操作
+  var btnFbCancel = document.getElementById('btn-feedback-cancel');
+  if (btnFbCancel) btnFbCancel.onclick = function() { hideModal('feedback-modal'); };
+  var btnFbSubmit = document.getElementById('btn-feedback-submit');
+  if (btnFbSubmit) {
+    btnFbSubmit.onclick = function() {
+      var name = (document.getElementById('feedback-user-name').value || '').trim();
+      var content = (document.getElementById('feedback-content').value || '').trim();
+      if (!content) {
+        alert("ご要望・ご意見を入力してください。");
+        return;
+      }
+      this.disabled = true;
+      this.innerText = "送信中...";
+      var self = this;
+      fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          action: "submit_feedback",
+          target: currentFeedbackTarget,
+          name: name,
+          content: content,
+          date: new Date().toLocaleDateString('ja-JP')
+        })
+      }).then(function() {
+        alert("ご要望を送信しました！管理者が確認いたします。");
+        hideModal('feedback-modal');
+      }).finally(function() {
+        self.disabled = false;
+        self.innerText = "送信する";
+      });
+    };
+  }
+
+  // 号車統合モーダル選択変更
   var mergeSel = document.getElementById('merge-select-existing');
   if (mergeSel) {
     mergeSel.onchange = function() {
       if (this.value === '__ADD_CUSTOM__') {
-        var inputName = prompt("追加したい号車名を入力してください\n（例：内宮号）");
+        var inputName = prompt("追加したい号車名を入力してください\n（例：内宮号車）");
         if (inputName && inputName.trim()) {
           var cleanName = normalizeCarpoolKey(inputName.trim());
+          if (!customCreatedCars.includes(cleanName)) {
+            customCreatedCars.push(cleanName);
+            localStorage.setItem('uchimiya_custom_cars', JSON.stringify(customCreatedCars));
+          }
           var newOpt = document.createElement('option');
           newOpt.value = cleanName;
           newOpt.innerText = cleanName + "号車";
           this.insertBefore(newOpt, this.lastElementChild);
           this.value = cleanName;
         } else {
-          this.selectedIndex = 0;
+          this.value = "";
         }
       }
     };
   }
 
   var btnMergeCancel = document.getElementById('btn-merge-cancel');
-  if (btnMergeCancel) btnMergeCancel.onclick = function(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    hideModal('merge-car-modal');
-  };
+  if (btnMergeCancel) {
+    btnMergeCancel.onclick = function(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      hideModal('merge-car-modal');
+      return false;
+    };
+  }
   
   var btnMergeSubmit = document.getElementById('btn-merge-submit');
   if (btnMergeSubmit) {
@@ -2238,7 +2552,7 @@ window.addEventListener('DOMContentLoaded', function() {
       var chosenName = sel ? sel.value : '';
       if (!chosenName || chosenName === '__ADD_CUSTOM__') {
         alert("統一先の号車名を選択してください。");
-        return;
+        return false;
       }
       var cleanTarget = normalizeCarpoolKey(chosenName);
       var key = currentMergeTarget.date + ":::" + currentMergeTarget.rawLeader;
@@ -2246,6 +2560,7 @@ window.addEventListener('DOMContentLoaded', function() {
       localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap));
       hideModal('merge-car-modal');
       fetchAdminData();
+      return false;
     };
   }
 
@@ -2258,10 +2573,20 @@ window.addEventListener('DOMContentLoaded', function() {
       .then(function(remoteList) {
         if (remoteList && Array.isArray(remoteList) && remoteList.length > 0) {
           var map = {};
-          remoteList.forEach(function(r) { map[r.name] = { status: r.status, note: r.note || "" }; });
+          remoteList.forEach(function(r) { 
+            map[r.name] = { 
+              status: r.status, 
+              note: r.note || "",
+              photos: r.photos || []
+            }; 
+          });
           stageData.forEach(function(g) {
             g.items.forEach(function(it) {
-              if (map[it.name]) { it.status = map[it.name].status; it.note = map[it.name].note; }
+              if (map[it.name]) { 
+                it.status = map[it.name].status; 
+                it.note = map[it.name].note; 
+                it.photos = map[it.name].photos;
+              }
             });
           });
           renderStageGroups();
@@ -2441,7 +2766,7 @@ function submitAttendance(e) {
     });
   });
 
-  companionList.filter(function(c) { return c.transportMode === '自車'; }).forEach(function(comp) {
+  companionList.filter(function(c) { return c.transportMode === '自車'; }).forEach(comp => {
     var compCarDayConfigs = primaryDayConfigs.map(function(cfg) {
       return {
         date: cfg.date,
