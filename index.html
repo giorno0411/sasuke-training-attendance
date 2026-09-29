@@ -448,9 +448,10 @@
     backdrop-filter: blur(8px);
     border: 1px solid #10b981;
     color: #a7f3d0;
-    padding: 12px;
+    padding: 14px 12px;
     border-radius: 8px;
     font-size: 13px;
+    line-height: 1.6;
     text-align: center;
     margin-bottom: 14px;
     display: none;
@@ -808,6 +809,7 @@
     cursor: pointer;
   }
 
+  /* セット編集カード：横幅はみ出し防止のレスポンシブ配置 */
   .admin-edit-card {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
@@ -864,6 +866,7 @@
     cursor: pointer;
   }
 
+  /* 写真サムネイル */
   .photo-thumbs-wrap {
     display: flex;
     gap: 6px;
@@ -934,7 +937,8 @@
   <!-- 1. 参加送信フォーム -->
   <div id="view-form">
     <div class="submit-success-box" id="success-msg">
-      ✓ 参加情報を送信しました！回答ありがとうございます。
+      <div style="font-weight:bold; font-size:14px; margin-bottom:4px;">✓ 参加情報を送信しました！回答ありがとうございます。</div>
+      <div style="font-size:11px; opacity:0.9;">※万一回答の変更や取り消し（キャンセル）を希望される場合は、直接内宮までご連絡をお願いいたします。</div>
     </div>
 
     <div class="auth-user-bar" id="auth-banner" style="display:none;">
@@ -1536,24 +1540,29 @@ function normalizeDateKey(dateStr) {
   return String(dateStr);
 }
 
-// 姓名分離（半角または全角スペース区切りの最初の部分を姓とする）
+// 姓名分離（スプレッドシート上の半角/全角スペース区切りから「姓」のみを抽出）
 function extractLastName(str) {
   if (!str) return "";
   var s = String(str).trim();
-  // 半角スペースまたは全角スペースで区切られている場合は最初の単語を姓とする
+  
+  // 「〜（同伴:〇〇行）」などの補助表記があれば削除
+  s = s.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').trim();
+
+  // 半角スペースまたは全角スペースで区切られている場合は最初の単語（姓）を抽出
   var parts = s.split(/[\s ]+/);
   if (parts.length > 1 && parts[0]) {
-    s = parts[0];
+    s = parts[0].trim();
   }
-  // 「〜号車」「〜号」「〜車」「〜くん」「〜さん」等の語尾を削除
-  s = s.replace(/(号車|号|車|くん|さん|君|様)$/g, '');
+
+  // 「〜号車」「〜号」「〜車」「〜くん」「〜さん」「〜様」等の末尾を削除
+  s = s.replace(/(号車|号|車|くん|さん|君|様)$/g, '').trim();
   return s;
 }
 
 function normalizeCarpoolKey(str) {
   if (!str) return "";
   var lastName = extractLastName(str);
-  return lastName.replace(/(号車|号|車)$/g, '');
+  return lastName.replace(/(号車|号|車)$/g, '').trim();
 }
 
 function parseCompanionCount(str) {
@@ -2010,13 +2019,14 @@ function openPhotoViewer(title, photos) {
   showModal('photo-viewer-modal');
 }
 
+// 超軽量画像圧縮（長辺500px、画質0.5で約30〜50KBに圧縮し消失を完全防止）
 function compressImage(file, callback) {
   var reader = new FileReader();
   reader.onload = function(e) {
     var img = new Image();
     img.onload = function() {
       var canvas = document.createElement('canvas');
-      var maxSide = 800;
+      var maxSide = 500;
       var w = img.width;
       var h = img.height;
       if (w > maxSide || h > maxSide) {
@@ -2032,7 +2042,7 @@ function compressImage(file, callback) {
       canvas.height = h;
       var ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
-      var compressedData = canvas.toDataURL('image/jpeg', 0.7);
+      var compressedData = canvas.toDataURL('image/jpeg', 0.5);
       callback(compressedData);
     };
     img.src = e.target.result;
@@ -2055,6 +2065,7 @@ function renderAdminObstacleEditor() {
       var photos = item.photos || [];
 
       html += '<div class="admin-edit-card">';
+      
       html += '<div class="admin-obs-header">';
       html += '<div class="admin-obs-header-left">';
       html += '<input type="text" class="obs-name-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" value="' + escapeHtml(item.name) + '" style="flex:1; min-width:120px; font-size:12px; padding:4px 6px; font-weight:bold; background:rgba(0,0,0,0.3);">';
@@ -2147,6 +2158,7 @@ function renderAdminObstacleEditor() {
       var i = Number(this.getAttribute('data-iidx'));
       if (confirm("セット「" + stageData[g].items[i].name + "」を削除しますか？")) {
         stageData[g].items.splice(i, 1);
+        try { localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData)); } catch(e){}
         renderAdminObstacleEditor();
         renderStageGroups();
       }
@@ -2164,6 +2176,7 @@ function renderAdminObstacleEditor() {
           note: "",
           photos: []
         });
+        try { localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData)); } catch(e){}
         renderAdminObstacleEditor();
         renderStageGroups();
       }
@@ -2205,7 +2218,7 @@ function renderAdminObstacleEditor() {
           stageData[g].items[i].photos.push(compBase64);
           count++;
           if (count === files.length) {
-            localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData));
+            try { localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData)); } catch(e){}
             renderAdminObstacleEditor();
             renderStageGroups();
           }
@@ -2221,7 +2234,7 @@ function renderAdminObstacleEditor() {
       var p = Number(this.getAttribute('data-pidx'));
       if (confirm("この写真を削除しますか？")) {
         stageData[g].items[i].photos.splice(p, 1);
-        localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData));
+        try { localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData)); } catch(e){}
         renderAdminObstacleEditor();
         renderStageGroups();
       }
@@ -2471,7 +2484,6 @@ function fetchAdminData() {
 
       container.innerHTML = html;
 
-      // チェックボックス・一括削除のイベント結びつけ
       container.querySelectorAll('.batch-select-all').forEach(function(allCb) {
         allCb.onchange = function() {
           var d = this.getAttribute('data-date');
@@ -2716,7 +2728,7 @@ window.addEventListener('DOMContentLoaded', function() {
     var btn = document.getElementById('btn-save-obs');
     if (btn) { btn.disabled = true; btn.innerText = "保存中..."; }
     
-    localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData));
+    try { localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData)); } catch(e){}
 
     fetch(GAS_URL, {
       method: "POST",
@@ -2853,6 +2865,7 @@ window.addEventListener('DOMContentLoaded', function() {
               }
             });
           });
+          try { localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData)); } catch(e){}
           renderStageGroups();
         }
       }).catch(function() {});
