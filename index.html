@@ -1016,7 +1016,7 @@
           <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
         </div>
         <p style="font-size:12px; color:var(--text-sub); margin-top:0; margin-bottom:12px;">
-          ステータスや停止理由、エリア写真の登録・削除が可能です。
+          ステータスや停止理由、エリア写真の登録・削除、セット自体の追加・削除・順序変更が可能です。
         </p>
 
         <form id="admin-obs-form">
@@ -1120,7 +1120,7 @@
     <label style="font-size:11px; color:#cbd5e1;">お名前</label>
     <input type="text" id="feedback-user-name" placeholder="お名前を入力" style="margin-bottom:8px;">
     <label style="font-size:11px; color:#cbd5e1;">ご要望・ご意見</label>
-    <textarea id="feedback-content" rows="3" placeholder="例：高さの調整をお願いしたいです、マットの増設など" style="margin-bottom:12px;"></textarea>
+    <textarea id="feedback-content" rows="3" placeholder="例：突起の部分を面取りしてください。" style="margin-bottom:12px;"></textarea>
 
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" id="btn-feedback-cancel" style="border:1px solid var(--border);">キャンセル</button>
@@ -1220,7 +1220,6 @@ try {
   if (savedMap) carpoolMergeMap = JSON.parse(savedMap);
 } catch(e) {}
 
-// 管理者が手動作成した号車の永続リスト
 var customCreatedCars = [];
 try {
   var savedCustom = localStorage.getItem('uchimiya_custom_cars');
@@ -1371,7 +1370,8 @@ function closeCalendarPopup() {
   renderDaysConfigCards();
 }
 
-function prevMonth() {
+function prevMonth(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
   calMonth--;
   if (calMonth < 0) {
     calMonth = 11;
@@ -1380,7 +1380,8 @@ function prevMonth() {
   renderCalendar();
 }
 
-function nextMonth() {
+function nextMonth(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
   calMonth++;
   if (calMonth > 11) {
     calMonth = 0;
@@ -1429,7 +1430,8 @@ function renderCalendar() {
         if (selectedDates.has(dateStr)) {
           cell.classList.add('selected');
         }
-        cell.onclick = function() {
+        cell.onclick = function(e) {
+          if (e) e.stopPropagation();
           if (selectedDates.has(dateStr)) {
             selectedDates.delete(dateStr);
             cell.classList.remove('selected');
@@ -1953,20 +1955,31 @@ function renderAdminObstacleEditor() {
 
   var html = '';
   stageData.forEach(function(group, gIdx) {
-    html += '<div style="font-weight:bold; font-size:13px; color:#93c5fd; margin:12px 0 6px 0; border-left:3px solid #3b82f6; padding-left:6px;">' + escapeHtml(group.stage) + '</div>';
+    html += '<div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 6px 0; border-left:3px solid #3b82f6; padding-left:6px;">';
+    html += '<span style="font-weight:bold; font-size:13px; color:#93c5fd;">' + escapeHtml(group.stage) + '</span>';
+    html += '</div>';
+
     group.items.forEach(function(item, iIdx) {
       var isHalted = item.status !== 'active';
       var photos = item.photos || [];
 
       html += '<div class="admin-edit-card">';
       html += '<div class="admin-obs-header">';
-      html += '<span class="admin-obs-name">' + escapeHtml(item.name) + '</span>';
+      html += '<div style="display:flex; align-items:center; gap:6px;">';
+      html += '<input type="text" class="obs-name-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" value="' + escapeHtml(item.name) + '" style="width:140px; font-size:12px; padding:3px 6px; font-weight:bold; background:rgba(0,0,0,0.3);">';
+      html += '<div class="order-btn-group">';
+      html += '<button type="button" class="btn-order-move btn-obs-up" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" ' + (iIdx === 0 ? 'disabled' : '') + '>▲</button>';
+      html += '<button type="button" class="btn-order-move btn-obs-down" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" ' + (iIdx === group.items.length - 1 ? 'disabled' : '') + '>▼</button>';
+      html += '</div></div>';
+
+      html += '<div style="display:flex; align-items:center; gap:6px;">';
       html += '<select class="admin-obs-select" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '">';
       html += '<option value="active" ' + (item.status === 'active' ? 'selected' : '') + '>🟢 稼働中</option>';
       html += '<option value="tuning" ' + (item.status === 'tuning' ? 'selected' : '') + '>🟡 調整中</option>';
       html += '<option value="pause" ' + (item.status === 'pause' ? 'selected' : '') + '>🔴 休止中</option>';
       html += '</select>';
-      html += '</div>';
+      html += '<button type="button" class="btn-del-single btn-del-obs" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '">🗑️ 削除</button>';
+      html += '</div></div>';
       
       html += '<div id="obs-wrap-' + gIdx + '-' + iIdx + '" class="' + (isHalted ? '' : 'hidden') + '" style="margin-bottom:8px;">';
       html += '<input type="text" class="obs-note-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" value="' + escapeHtml(item.note || '') + '" placeholder="停止理由を入力" style="font-size:12px; padding:6px 10px;">';
@@ -1996,8 +2009,77 @@ function renderAdminObstacleEditor() {
 
       html += '</div>';
     });
+
+    html += '<button type="button" class="btn-add-entry btn-add-obs-item" data-gidx="' + gIdx + '" style="padding:6px; margin:4px 0 12px 0; font-size:11px;">＋ ' + escapeHtml(group.stage) + ' にセットを追加する</button>';
   });
   container.innerHTML = html;
+
+  // 各種イベントハンドラ
+  container.querySelectorAll('.obs-name-input').forEach(function(inp) {
+    inp.oninput = function() {
+      var g = this.getAttribute('data-gidx');
+      var i = this.getAttribute('data-iidx');
+      stageData[g].items[i].name = this.value.trim();
+      renderStageGroups();
+    };
+  });
+
+  container.querySelectorAll('.btn-obs-up').forEach(function(btn) {
+    btn.onclick = function() {
+      var g = Number(this.getAttribute('data-gidx'));
+      var i = Number(this.getAttribute('data-iidx'));
+      if (i > 0) {
+        var tmp = stageData[g].items[i];
+        stageData[g].items[i] = stageData[g].items[i - 1];
+        stageData[g].items[i - 1] = tmp;
+        renderAdminObstacleEditor();
+        renderStageGroups();
+      }
+    };
+  });
+
+  container.querySelectorAll('.btn-obs-down').forEach(function(btn) {
+    btn.onclick = function() {
+      var g = Number(this.getAttribute('data-gidx'));
+      var i = Number(this.getAttribute('data-iidx'));
+      if (i < stageData[g].items.length - 1) {
+        var tmp = stageData[g].items[i];
+        stageData[g].items[i] = stageData[g].items[i + 1];
+        stageData[g].items[i + 1] = tmp;
+        renderAdminObstacleEditor();
+        renderStageGroups();
+      }
+    };
+  });
+
+  container.querySelectorAll('.btn-del-obs').forEach(function(btn) {
+    btn.onclick = function() {
+      var g = Number(this.getAttribute('data-gidx'));
+      var i = Number(this.getAttribute('data-iidx'));
+      if (confirm("セット「" + stageData[g].items[i].name + "」を削除しますか？")) {
+        stageData[g].items.splice(i, 1);
+        renderAdminObstacleEditor();
+        renderStageGroups();
+      }
+    };
+  });
+
+  container.querySelectorAll('.btn-add-obs-item').forEach(function(btn) {
+    btn.onclick = function() {
+      var g = Number(this.getAttribute('data-gidx'));
+      var name = prompt("追加するセット・器具の名称を入力してください：");
+      if (name && name.trim()) {
+        stageData[g].items.push({
+          name: name.trim(),
+          status: "active",
+          note: "",
+          photos: []
+        });
+        renderAdminObstacleEditor();
+        renderStageGroups();
+      }
+    };
+  });
 
   container.querySelectorAll('.admin-obs-select').forEach(function(sel) {
     sel.onchange = function() {
@@ -2006,17 +2088,19 @@ function renderAdminObstacleEditor() {
       var wrap = document.getElementById('obs-wrap-' + g + '-' + i);
       if (wrap) wrap.classList.toggle('hidden', this.value === 'active');
       stageData[g].items[i].status = this.value;
+      renderStageGroups();
     };
   });
+
   container.querySelectorAll('.obs-note-input').forEach(function(inp) {
     inp.oninput = function() {
       var g = this.getAttribute('data-gidx');
       var i = this.getAttribute('data-iidx');
       stageData[g].items[i].note = this.value.trim();
+      renderStageGroups();
     };
   });
 
-  // 写真追加イベント
   container.querySelectorAll('.admin-photo-input').forEach(function(inp) {
     inp.onchange = function(e) {
       var g = Number(this.getAttribute('data-gidx'));
@@ -2042,7 +2126,6 @@ function renderAdminObstacleEditor() {
     };
   });
 
-  // サムネイル削除
   container.querySelectorAll('.photo-thumb-del').forEach(function(btn) {
     btn.onclick = function() {
       var g = Number(this.getAttribute('data-gidx'));
@@ -2099,9 +2182,11 @@ function fetchAdminData() {
       }
       registeredRecords = list;
 
+      // 相互入力重複抑止（AがBを書き、BがAを書いた場合の自動名寄せ）
       var deduplicatedMap = new Map();
       list.forEach(function(item) {
-        var pKey = normalizeDateKey(item.date) + "___" + String(item.name || '').trim();
+        var cleanName = String(item.name || '').trim();
+        var pKey = normalizeDateKey(item.date) + "___" + cleanName;
         if (!deduplicatedMap.has(pKey) || (item.rowIndex > deduplicatedMap.get(pKey).rowIndex)) {
           deduplicatedMap.set(pKey, item);
         }
@@ -2309,7 +2394,6 @@ function fetchAdminData() {
           var sel = document.getElementById('merge-select-existing');
           if (sel) {
             var optsHtml = '<option value="">-- 統一先を選択してください --</option>';
-            // 参加者の入力した元の回答は出さず、管理者が追加した号車のみを選択肢にする
             customCreatedCars.forEach(function(car) {
               optsHtml += '<option value="' + car + '">' + car + '号車</option>';
             });
@@ -2370,12 +2454,22 @@ window.addEventListener('DOMContentLoaded', function() {
   if (bar) bar.onclick = openCalendarPopup;
   var calDone = document.getElementById('btn-cal-done');
   if (calDone) calDone.onclick = closeCalendarPopup;
+  
+  // カレンダー前月・翌月ボタン（ポップアップ維持）
   var calPrev = document.getElementById('btn-cal-prev');
   if (calPrev) calPrev.onclick = prevMonth;
   var calNext = document.getElementById('btn-cal-next');
   if (calNext) calNext.onclick = nextMonth;
+  
+  // カレンダーボックス内部のクリック伝播を遮断
+  var calBoxInner = document.getElementById('cal-box-inner');
+  if (calBoxInner) {
+    calBoxInner.onclick = function(e) { e.stopPropagation(); };
+  }
   var calModal = document.getElementById('cal-popup-modal');
-  if (calModal) calModal.onclick = closeCalendarPopup;
+  if (calModal) {
+    calModal.onclick = closeCalendarPopup;
+  }
 
   var btnAddP = document.getElementById('btn-add-player');
   if (btnAddP) btnAddP.onclick = function() { addOtherPlayerCard(); };
@@ -2465,17 +2559,14 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   };
 
-  // 要望更新ボタン
   var btnRefFeedbacks = document.getElementById('btn-refresh-feedbacks');
   if (btnRefFeedbacks) btnRefFeedbacks.onclick = loadRemoteFeedbacks;
 
-  // 写真プレビュー閉じる
   var btnCloseViewer = document.getElementById('btn-viewer-close');
   if (btnCloseViewer) btnCloseViewer.onclick = function() { hideModal('photo-viewer-modal'); };
   var photoModal = document.getElementById('photo-viewer-modal');
   if (photoModal) photoModal.onclick = function() { hideModal('photo-viewer-modal'); };
 
-  // 要望モーダル操作
   var btnFbCancel = document.getElementById('btn-feedback-cancel');
   if (btnFbCancel) btnFbCancel.onclick = function() { hideModal('feedback-modal'); };
   var btnFbSubmit = document.getElementById('btn-feedback-submit');
@@ -2511,7 +2602,6 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // 号車統合モーダル選択変更
   var mergeSel = document.getElementById('merge-select-existing');
   if (mergeSel) {
     mergeSel.onchange = function() {
@@ -2660,6 +2750,26 @@ function submitAttendance(e) {
     return;
   }
 
+  // AがBを書き、BがAを書いた場合の重複・二重送信チェック
+  var allSubmittedNames = [primaryName];
+  otherPlayers.forEach(function(op) { allSubmittedNames.push(op.name); });
+
+  for (var k = 0; k < allSubmittedNames.length; k++) {
+    var curName = allSubmittedNames[k];
+    for (var aIdx = 0; aIdx < arr.length; aIdx++) {
+      var dStr = arr[aIdx];
+      var isDup = registeredRecords.some(function(r) {
+        var rName = String(r.name || '').trim();
+        var rDate = normalizeDateKey(r.date);
+        return rName === curName && rDate === normalizeDateKey(dStr);
+      });
+      if (isDup) {
+        alert("【重複回答アラート】\n「" + curName + "」さんは既に " + formatDateLabel(dStr) + " に回答登録されています。\n同じ日程で二重に登録することはできません。");
+        return;
+      }
+    }
+  }
+
   var companionCountStr = totalCompanionHeadcount > 0 ? totalCompanionHeadcount + "名" : "0名";
   var companionNamesStr = companionList.length > 0 
     ? companionList.map(function(c) {
@@ -2766,7 +2876,7 @@ function submitAttendance(e) {
     });
   });
 
-  companionList.filter(function(c) { return c.transportMode === '自車'; }).forEach(comp => {
+  companionList.filter(function(c) { return c.transportMode === '自車'; }).forEach(function(comp) {
     var compCarDayConfigs = primaryDayConfigs.map(function(cfg) {
       return {
         date: cfg.date,
