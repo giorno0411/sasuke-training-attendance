@@ -17,7 +17,7 @@
     --warning: #f59e0b;
     --cyan: #06b6d4;
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif;
@@ -28,7 +28,6 @@
     background-attachment: fixed;
     background-repeat: no-repeat;
     color: var(--text);
-    margin: 0;
     padding: 12px;
     display: flex;
     justify-content: center;
@@ -230,10 +229,6 @@
     align-items: center;
     gap: 4px;
     margin-top: 4px;
-    transition: background 0.2s;
-  }
-  .btn-add-entry-cyan:hover, .btn-add-entry-cyan:active {
-    background: rgba(6, 182, 212, 0.15);
   }
 
   .date-bar-input {
@@ -246,10 +241,6 @@
     justify-content: space-between;
     align-items: center;
     min-height: 42px;
-    transition: border-color 0.2s;
-  }
-  .date-bar-input:hover, .date-bar-input:active {
-    border-color: var(--accent);
   }
   .date-bar-text {
     font-size: 13px;
@@ -270,7 +261,6 @@
     font-weight: 600;
   }
 
-  /* モーダル基本スタイル：デフォルトは display: none */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -349,7 +339,6 @@
     user-select: none;
     background: rgba(30, 41, 59, 0.5);
     border: 1px solid transparent;
-    transition: all 0.1s;
   }
   .mini-cal-day.disabled {
     opacity: 0.18;
@@ -468,7 +457,6 @@
     display: none;
   }
 
-  /* 注意事項（・サイズ3px） */
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -516,7 +504,6 @@
     text-underline-offset: 3px;
   }
 
-  /* セット稼働状況 */
   .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
@@ -542,7 +529,6 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    transition: all 0.2s;
   }
   .obstacle-top-row {
     display: flex;
@@ -591,7 +577,6 @@
     border-left-color: #ef4444;
   }
 
-  /* 管理者画面 */
   .admin-subnav {
     display: flex;
     gap: 4px;
@@ -722,10 +707,6 @@
     flex-wrap: wrap;
     gap: 4px;
   }
-  .carpool-item-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-  }
   .btn-merge-car {
     background: rgba(16, 185, 129, 0.2);
     border: 1px solid rgba(16, 185, 129, 0.4);
@@ -756,10 +737,6 @@
     border-radius: 4px;
     cursor: pointer;
   }
-  .btn-del-single:hover {
-    background: var(--accent);
-    color: #fff;
-  }
 
   .admin-clear-all-wrap {
     margin-top: 24px;
@@ -777,10 +754,6 @@
     font-weight: bold;
     cursor: pointer;
   }
-  .btn-clear-all:active {
-    background: var(--accent);
-    color: #fff;
-  }
 
   .admin-edit-card {
     background: rgba(15, 23, 42, 0.85);
@@ -788,7 +761,6 @@
     border-radius: 8px;
     padding: 10px 12px;
     margin-bottom: 10px;
-    position: relative;
   }
   .admin-obs-header {
     display: flex;
@@ -1159,7 +1131,6 @@ try {
 
 const adminDateExistingCars = {};
 
-// ★起動処理：画面描画を最優先し、外部通信は完全に切り離して実行
 window.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   calYear = now.getFullYear();
@@ -1169,10 +1140,8 @@ window.addEventListener('DOMContentLoaded', () => {
   renderRulesDisplay();
   renderStageGroups();
 
-  // 認証チェック
   checkGateAccess();
 
-  // バックグラウンドで非同期通信（失敗しても画面を止めない）
   setTimeout(() => {
     loadRemoteObstacles().catch(() => {});
     loadRemoteRules().catch(() => {});
@@ -1180,7 +1149,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 100);
 });
 
-// モーダル直接制御（displayプロパティを直接操作して透明な壁を完全排除）
 function showModal(id) {
   const el = document.getElementById(id);
   if (el) el.style.display = 'flex';
