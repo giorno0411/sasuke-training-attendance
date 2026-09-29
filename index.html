@@ -276,23 +276,21 @@
     font-weight: 600;
   }
 
-  /* モーダルオーバーレイ（非表示時はクリック判定を完全に消去） */
+  /* モーダル：デフォルト完全非表示、.active時のみ画面全体に展開 */
   .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    display: none !important;
+    position: fixed !important;
+    top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(0,0,0,0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 99999;
+    z-index: 100000;
     padding: 16px;
-    pointer-events: none;
   }
   .modal-overlay.active {
     display: flex !important;
-    pointer-events: auto !important;
   }
 
   .modal-content {
@@ -303,7 +301,6 @@
     width: 100%;
     max-width: 320px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-    pointer-events: auto;
   }
 
   .mini-cal-box {
@@ -313,7 +310,6 @@
     padding: 14px;
     width: 290px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-    pointer-events: auto;
   }
   .mini-cal-header {
     display: flex;
@@ -481,6 +477,7 @@
     display: none;
   }
 
+  /* 注意事項 */
   .column-section { margin-bottom: 18px; }
   .column-title {
     font-size: 14px;
@@ -528,6 +525,7 @@
     text-underline-offset: 3px;
   }
 
+  /* セット稼働状況 */
   .stage-section { margin-bottom: 18px; }
   .stage-header {
     font-size: 13px;
@@ -841,7 +839,7 @@
 </head>
 <body>
 
-<!-- 個別認証ゲートモーダル（非アクティブ時は pointer-events: none / display: none） -->
+<!-- 個別認証ゲートモーダル -->
 <div id="gate-modal" class="modal-overlay">
   <div class="modal-content" style="text-align:center;">
     <div style="font-size:28px; margin-bottom:8px;">🔒</div>
@@ -1170,20 +1168,34 @@ try {
 
 const adminDateExistingCars = {};
 
+// ★完全に独立した初期化処理（エラーで他が止まらないよう保護）
 window.addEventListener('DOMContentLoaded', () => {
-  checkGateAccess();
-  const now = new Date();
-  calYear = now.getFullYear();
-  calMonth = now.getMonth();
-  updateTriggerDisplay();
-  renderRulesDisplay();
-  renderStageGroups();
-  loadRemoteObstacles();
-  loadRemoteRules();
-  fetchRegisteredAttendance();
+  try {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    updateTriggerDisplay();
+    renderRulesDisplay();
+    renderStageGroups();
+  } catch(e) {
+    console.error("ローカル描画エラー:", e);
+  }
+
+  // 認証チェック
+  try {
+    checkGateAccess();
+  } catch(e) {
+    console.error("ゲートチェックエラー:", e);
+  }
+
+  // 外部通信処理は安全にバックグラウンド実行
+  setTimeout(() => {
+    loadRemoteObstacles().catch(() => {});
+    loadRemoteRules().catch(() => {});
+    fetchRegisteredAttendance().catch(() => {});
+  }, 100);
 });
 
-// 個別コードアクセスチェック（モーダルを明示的に .active で制御）
 function checkGateAccess() {
   const savedName = localStorage.getItem('uchimiya_auth_user');
   const gateEl = document.getElementById('gate-modal');
@@ -1204,7 +1216,7 @@ function checkGateAccess() {
 async function verifyGateCode() {
   const inputEl = document.getElementById('gate-code-input');
   const btn = document.getElementById('btn-gate-verify');
-  const code = inputEl.value.trim();
+  const code = inputEl ? inputEl.value.trim() : '';
 
   if (!code) {
     alert("コードを入力してください。");
@@ -1222,7 +1234,8 @@ async function verifyGateCode() {
       localStorage.setItem('uchimiya_auth_user', data.name);
       localStorage.setItem('uchimiya_auth_code', code);
       applyAuthenticatedUser(data.name);
-      document.getElementById('gate-modal').classList.remove('active');
+      const gateEl = document.getElementById('gate-modal');
+      if (gateEl) gateEl.classList.remove('active');
     } else {
       alert(data.message || "認証に失敗しました。正しいコードを入力してください。");
     }
@@ -1256,6 +1269,7 @@ function resetUserAuth() {
 
 function addOtherPlayerCard(name = '', transport = '同乗', carType = '普通車') {
   const container = document.getElementById('other-players-container');
+  if (!container) return;
   const cardId = 'other-player-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
   const card = document.createElement('div');
   card.className = 'entry-card other-player-card';
@@ -1289,6 +1303,7 @@ function addOtherPlayerCard(name = '', transport = '同乗', carType = '普通�
 
 function addCompanionCard(name = '', role = '家族', count = '1名', transport = '同乗', carType = '普通車') {
   const container = document.getElementById('companions-container');
+  if (!container) return;
   const cardId = 'companion-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
   const card = document.createElement('div');
   card.className = 'entry-card companion-card';
@@ -1353,7 +1368,9 @@ async function fetchRegisteredAttendance() {
     const res = await fetch(GAS_URL + "?type=attendance&t=" + Date.now(), { cache: "no-store" });
     const list = await res.json();
     if (Array.isArray(list)) registeredRecords = list;
-  } catch(e) {}
+  } catch(e) {
+    console.log("過去回答取得スキップ（通信状況）");
+  }
 }
 
 function formatRuleItem(text, title) {
@@ -2000,19 +2017,22 @@ async function submitAttendance(e) {
     return;
   }
 
-  await fetchRegisteredAttendance();
-  const allNamesToCheck = [primaryName, ...otherPlayers.map(p => p.name)];
-  for (const pName of allNamesToCheck) {
-    for (const d of arr) {
-      const isAlready = registeredRecords.some(r => {
-        return String(r.name || '').trim() === pName && normalizeDateKey(r.date) === normalizeDateKey(d);
-      });
-      if (isAlready) {
-        alert(`【重複回答エラー】\n「${pName}」さんは既に ${formatDateLabel(d)} の回答を送信済みです。\n同じ日程に二重で回答することはできません。`);
-        return;
+  // 重複回答チェック（通信可能時のみ）
+  try {
+    await fetchRegisteredAttendance();
+    const allNamesToCheck = [primaryName, ...otherPlayers.map(p => p.name)];
+    for (const pName of allNamesToCheck) {
+      for (const d of arr) {
+        const isAlready = registeredRecords.some(r => {
+          return String(r.name || '').trim() === pName && normalizeDateKey(r.date) === normalizeDateKey(d);
+        });
+        if (isAlready) {
+          alert(`【重複回答エラー】\n「${pName}」さんは既に ${formatDateLabel(d)} の回答を送信済みです。\n同じ日程に二重で回答することはできません。`);
+          return;
+        }
       }
     }
-  }
+  } catch(e) {}
 
   const companionCountStr = totalCompanionHeadcount > 0 ? `${totalCompanionHeadcount}名` : "0名";
   const companionNamesStr = companionList.length > 0 
@@ -2159,7 +2179,7 @@ async function submitAttendance(e) {
     updateTriggerDisplay();
     renderDaysConfigCards();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    fetchRegisteredAttendance();
+    fetchRegisteredAttendance().catch(() => {});
   } catch (err) {
     alert("送信に失敗しました。電波環境を確認してください。");
   } finally {
@@ -2272,7 +2292,6 @@ function normalizeCarpoolKey(str) {
   return s;
 }
 
-// 号車統合モーダル処理
 let currentMergeTarget = { date: '', rawLeader: '' };
 
 function openMergeCarModalByDate(date, rawLeader) {
@@ -2332,7 +2351,6 @@ function unmergeCar(date, rawLeader) {
   }
 }
 
-// 参加集計データの取得
 async function fetchAdminData() {
   const container = document.getElementById('admin-data-container');
   container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
@@ -2350,7 +2368,6 @@ async function fetchAdminData() {
 
     registeredRecords = list;
 
-    // 重複排除
     const deduplicatedMap = new Map();
     list.forEach(item => {
       const pKey = `${normalizeDateKey(item.date)}___${String(item.name || '').trim()}`;
@@ -2553,7 +2570,6 @@ async function fetchAdminData() {
   }
 }
 
-// 安全なイベント委譲ハンドラー
 function handleDelClick(el) {
   const name = el.getAttribute('data-del-name');
   const date = el.getAttribute('data-del-date');
