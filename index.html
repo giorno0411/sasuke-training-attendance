@@ -1280,6 +1280,12 @@ var calMonth = new Date().getMonth();
 var selectedDates = new Set();
 var registeredRecords = [];
 
+// 前回の集計結果を高速描画するためのキャッシュ復元
+try {
+  var savedRecords = localStorage.getItem('uchimiya_cached_records');
+  if (savedRecords) registeredRecords = JSON.parse(savedRecords);
+} catch(e) {}
+
 var carpoolMergeMap = {};
 try {
   var savedMap = localStorage.getItem('uchimiya_carpool_merge_map');
@@ -1568,7 +1574,7 @@ function normalizeDateKey(dateStr) {
   return String(dateStr);
 }
 
-// 根本解決：半角/全角スペース・敬称・文字数を正しく解釈し、姓（苗字）のみを100%取り出す汎用関数
+// 汎用姓名分離（半角/全角スペース・敬称・文字数を正しく解釈し、姓のみを100%取り出す）
 function extractLastName(str) {
   if (!str) return "";
   var s = String(str).trim();
@@ -1579,18 +1585,16 @@ function extractLastName(str) {
   // 2. 末尾の敬称や「号車」などの装飾を除去
   s = s.replace(/(号車|号|車|くん|さん|君|様|ちゃん)$/g, '').trim();
 
-  // 3. 【最重要】半角スペース・全角スペース・連続空白で分割し、先頭の「姓」を取り出す
+  // 3. 半角スペース・全角スペース・連続空白で分割し、先頭の「姓」を取り出す
   var parts = s.split(/[\s ]+/);
   if (parts.length > 1 && parts[0]) {
     return parts[0].trim();
   }
 
   // 4. スペースが入っていなかった場合の汎用フォールバック
-  // 3文字（例：石川翔、森健太）または4文字（例：山田太郎）の場合は先頭2文字を姓とみなす
   if (s.length === 3 || s.length === 4) {
     return s.substring(0, 2);
   }
-  // 5文字以上でスペースなしの場合（例：長谷川太郎）は先頭3文字を推定
   if (s.length >= 5) {
     return s.substring(0, 3);
   }
@@ -1765,7 +1769,7 @@ function addCompanionCard(name, role, count, transport, carType) {
 
   var html = '';
   html += '<div class="entry-card-top">';
-  html += '<input type="text" class="field-companion-item-name" placeholder="同伴者代表名（例：内宮 花子）" value="' + escapeHtml(name) + '" required style="margin:0; flex:1;">';
+  html += '<input type="text" class="field-companion-item-name" placeholder="例：内宮 花子、田中さん、山本くん" value="' + escapeHtml(name) + '" required style="margin:0; flex:1;">';
   html += '<button type="button" class="btn-remove-entry">✕</button>';
   html += '</div>';
   html += '<div class="entry-card-sub-row">';
@@ -2058,7 +2062,6 @@ function openPhotoViewer(title, photos) {
   showModal('photo-viewer-modal');
 }
 
-// 超軽量画像圧縮（長辺500px、画質0.5で約30〜50KBに圧縮し消失を完全防止）
 function compressImage(file, callback) {
   var reader = new FileReader();
   reader.onload = function(e) {
@@ -2309,342 +2312,359 @@ function loadRemoteFeedbacks() {
     });
 }
 
-function fetchAdminData() {
+// 参加状況データの描画（キャッシュ描画と通信取得を分離し、超高速描画）
+function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   if (!container) return;
-  container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
 
+  if (!list || list.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">回答はまだありません</div>';
+    return;
+  }
+
+  var deduplicatedMap = new Map();
+  list.forEach(function(item) {
+    var cleanName = String(item.name || '').trim();
+    var pKey = normalizeDateKey(item.date) + "___" + cleanName;
+    if (!deduplicatedMap.has(pKey) || (item.rowIndex > deduplicatedMap.get(pKey).rowIndex)) {
+      deduplicatedMap.set(pKey, item);
+    }
+  });
+  var cleanList = Array.from(deduplicatedMap.values());
+
+  var groups = {};
+  cleanList.forEach(function(item) {
+    var key = normalizeDateKey(item.date);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+  });
+
+  var sortedDates = Object.keys(groups).sort();
+  var html = '';
+
+  sortedDates.forEach(function(date) {
+    var members = groups[date];
+    var companionTotal = 0;
+    var playerTotal = 0;
+    var carpoolMap = {};
+    var carpoolCarTypes = {};
+    var carpoolDisplayNames = {};
+    var carpoolOriginalKeys = {};
+    var countedCarsMap = new Map();
+
+    members.forEach(function(m) {
+      var isCompanionVehicle = String(m.name).includes('（同伴:');
+      if (!isCompanionVehicle) {
+        playerTotal++;
+        companionTotal += parseCompanionCount(m.companionCount);
+      }
+
+      if (m.transport === "自車") {
+        var lastNameOnly = normalizeCarpoolKey(m.name);
+        countedCarsMap.set(lastNameOnly, {
+          type: m.carType || "普通車",
+          owner: lastNameOnly + "号車",
+          isCompanion: isCompanionVehicle
+        });
+      }
+
+      if (m.transport && m.transport.includes("乗り合い") && m.carLeader) {
+        var leaderRaw = String(m.carLeader).trim();
+        var baseKey = normalizeCarpoolKey(leaderRaw);
+        var mapKey = date + ":::" + baseKey;
+        var finalLeaderKey = carpoolMergeMap[mapKey] ? normalizeCarpoolKey(carpoolMergeMap[mapKey]) : baseKey;
+
+        if (finalLeaderKey) {
+          if (!carpoolMap[finalLeaderKey]) {
+            carpoolMap[finalLeaderKey] = [];
+            carpoolCarTypes[finalLeaderKey] = m.carType || "普通車";
+            carpoolDisplayNames[finalLeaderKey] = finalLeaderKey + "号車";
+            carpoolOriginalKeys[finalLeaderKey] = [];
+          }
+          carpoolMap[finalLeaderKey].push(m.name);
+          if (!carpoolOriginalKeys[finalLeaderKey].includes(baseKey)) {
+            carpoolOriginalKeys[finalLeaderKey].push(baseKey);
+          }
+        }
+      }
+    });
+
+    Object.keys(carpoolMap).forEach(function(leaderKey) {
+      if (!countedCarsMap.has(leaderKey)) {
+        countedCarsMap.set(leaderKey, {
+          type: carpoolCarTypes[leaderKey] || "普通車",
+          owner: carpoolDisplayNames[leaderKey],
+          isCarpool: true
+        });
+      }
+    });
+
+    var carsStandard = 0;
+    var carsLight = 0;
+    var carsOther = 0;
+
+    countedCarsMap.forEach(function(c) {
+      if (c.type === "普通車") carsStandard++;
+      else if (c.type === "軽自動車") carsLight++;
+      else carsOther++;
+    });
+
+    var totalCars = countedCarsMap.size;
+    var grandTotalPeople = playerTotal + companionTotal;
+
+    html += '<div class="admin-date-group" data-date="' + date + '">';
+    html += '<div class="admin-date-header">';
+    html += '<span>📅 ' + formatDateLabel(date) + '</span>';
+    html += '<div class="admin-head-badges">';
+    html += '<span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">参加(プレイヤー): ' + playerTotal + '名</span>';
+    if (companionTotal > 0) {
+      html += '<span style="font-size:10px; background:#475569; color:#f1f5f9; padding:2px 6px; border-radius:10px; white-space:nowrap;">同伴: ' + companionTotal + '名</span>';
+    }
+    html += '<span style="font-size:10px; background:#10b981; color:#fff; padding:2px 7px; border-radius:10px; font-weight:bold; white-space:nowrap;">計: ' + grandTotalPeople + '名</span>';
+    html += '</div></div>';
+
+    html += '<div class="admin-card-stats">';
+    html += '<span>👥 <b>人数計: <span class="people-stat-badge">' + grandTotalPeople + '名</span></b> (プレイヤー: ' + playerTotal + '名 / 同伴者: ' + companionTotal + '名)</span>';
+    html += '<span>🚗 <b>車両計: <span class="car-stat-badge">' + totalCars + '台</span></b> (普通: ' + carsStandard + '台 / 軽: ' + carsLight + '台' + (carsOther > 0 ? ' / 他: ' + carsOther + '台' : '') + ')</span>';
+    html += '</div>';
+
+    if (totalCars > 0) {
+      html += '<div class="car-breakdown-box">';
+      html += '<div class="car-breakdown-title">🚗 駐車車両の内訳・オーナー一覧（計 ' + totalCars + '台）</div>';
+      countedCarsMap.forEach(function(c) {
+        var tag = c.isCarpool ? '<span style="color:#34d399; font-size:11px;">(相乗り車両)</span>' : (c.isCompanion ? '<span style="color:#67e8f9; font-size:11px;">(同伴者車両)</span>' : '<span style="color:#93c5fd; font-size:11px;">(自車)</span>');
+        html += '<div class="car-breakdown-item">・<b>' + escapeHtml(c.owner) + '</b> [' + escapeHtml(c.type) + '] ' + tag + '</div>';
+      });
+      html += '</div>';
+    }
+
+    html += '<div class="admin-batch-bar">';
+    html += '<label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">';
+    html += '<input type="checkbox" class="batch-select-all" data-date="' + date + '"> 全選択';
+    html += '</label>';
+    html += '<button type="button" class="btn-batch-del" data-date="' + date + '" style="display:none;">🗑️ 選択した回答を一括削除</button>';
+    html += '</div>';
+
+    members.forEach(function(m) {
+      var isCompanionVehicle = String(m.name).includes('（同伴:');
+      var badgeCls = 'transport-other';
+      if (m.transport === '自車') badgeCls = 'transport-car';
+      else if (m.transport && m.transport.includes('乗り合い')) badgeCls = 'transport-share';
+      else if (m.transport && m.transport.includes('バス')) badgeCls = 'transport-bus';
+      else if (m.transport && m.transport.includes('タクシー')) badgeCls = 'transport-taxi';
+
+      var carInfo = m.carType ? ' (' + m.carType + ')' : '';
+      var hasCompanion = m.companionCount && m.companionCount !== '0名';
+      var hasNote = m.note && m.note.trim() !== '';
+
+      var displayedLeader = m.carLeader ? normalizeCarpoolKey(m.carLeader) : '';
+      if (displayedLeader) {
+        var mapKey = date + ":::" + displayedLeader;
+        if (carpoolMergeMap[mapKey]) displayedLeader = carpoolMergeMap[mapKey];
+      }
+
+      html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'opacity:0.75; border-left:3px solid #60a5fa;' : '') + '">';
+      html += '<div class="member-top-row">';
+      html += '<div class="member-left-side">';
+      html += '<input type="checkbox" class="attendee-check" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" data-row="' + (m.rowIndex || 0) + '">';
+      html += '<span class="member-name">' + escapeHtml(m.name) + '</span>';
+      html += '</div>';
+      html += '<div style="display:flex; align-items:center; gap:6px;">';
+      html += '<span class="badge-transport ' + badgeCls + '">' + escapeHtml(m.transport || 'その他') + escapeHtml(carInfo) + '</span>';
+      html += '<button type="button" class="btn-del-single btn-del-attendee" data-name="' + escapeHtml(m.name) + '" data-date="' + escapeHtml(m.date) + '" data-row="' + (m.rowIndex || 0) + '">🗑️ 削除</button>';
+      html += '</div></div>';
+      html += '<div style="font-size:12px; color:#38bdf8;">⏰ ' + escapeHtml(m.time || '時間指定なし') + '</div>';
+      if (displayedLeader) {
+        html += '<div style="font-size:12px; color:#34d399;">🤝 相乗り: ' + escapeHtml(displayedLeader) + '号車</div>';
+      }
+      if (hasCompanion) {
+        html += '<div style="font-size:12px; color:#cbd5e1;">👥 同伴: ' + escapeHtml(m.companionCount) + ' (' + escapeHtml(m.companionNames) + ')</div>';
+      }
+      if (hasNote) {
+        html += '<div style="font-size:12px; color:#cbd5e1; border-top:1px dashed rgba(255,255,255,0.08); padding-top:4px; margin-top:2px;">💬 備考: ' + escapeHtml(m.note) + '</div>';
+      }
+      html += '</div>';
+    });
+
+    if (Object.keys(carpoolMap).length > 0) {
+      html += '<div class="carpool-group">';
+      html += '<div class="carpool-title">🤝 相乗り車両・同乗者リスト</div>';
+      Object.keys(carpoolMap).forEach(function(k) {
+        var origKeys = carpoolOriginalKeys[k] || [k];
+        var isMerged = origKeys.some(function(ok) { return carpoolMergeMap[date + ":::" + ok]; });
+        var showMergeButton = !isMerged;
+
+        html += '<div class="carpool-item-row">';
+        html += '<div>・<b>' + escapeHtml(carpoolDisplayNames[k]) + '</b> [' + escapeHtml(carpoolCarTypes[k] || '普通車') + '] (' + carpoolMap[k].length + '名同乗): ' + escapeHtml(carpoolMap[k].join(', '));
+        if (isMerged) html += '<span style="font-size:10px; color:#60a5fa; margin-left:4px;">(統合済)</span>';
+        html += '</div>';
+        html += '<div>';
+        
+        if (showMergeButton) {
+          html += '<button type="button" class="btn-merge-car btn-do-merge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(k) + '">✏️ 統合・変更</button>';
+        }
+        
+        if (isMerged) {
+          origKeys.filter(function(ok) { return carpoolMergeMap[date + ":::" + ok]; }).forEach(function(ok) {
+            html += '<button type="button" class="btn-unmerge-car btn-do-unmerge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(ok) + '">↩️ 解除</button>';
+          });
+        }
+        html += '</div></div>';
+      });
+      html += '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+
+  container.querySelectorAll('.batch-select-all').forEach(function(allCb) {
+    allCb.onchange = function() {
+      var d = this.getAttribute('data-date');
+      var group = container.querySelector('.admin-date-group[data-date="' + d + '"]');
+      if (!group) return;
+      var checkboxes = group.querySelectorAll('.attendee-check');
+      checkboxes.forEach(function(cb) { cb.checked = allCb.checked; });
+      updateBatchDeleteBtn(d);
+    };
+  });
+
+  container.querySelectorAll('.attendee-check').forEach(function(cb) {
+    cb.onchange = function() {
+      var d = this.getAttribute('data-date');
+      updateBatchDeleteBtn(d);
+    };
+  });
+
+  container.querySelectorAll('.btn-batch-del').forEach(function(btn) {
+    btn.onclick = function() {
+      var d = this.getAttribute('data-date');
+      var group = container.querySelector('.admin-date-group[data-date="' + d + '"]');
+      if (!group) return;
+      var checkedBoxes = group.querySelectorAll('.attendee-check:checked');
+      if (checkedBoxes.length === 0) return;
+
+      var names = [];
+      var rows = [];
+      checkedBoxes.forEach(function(cb) {
+        names.push(cb.getAttribute('data-name'));
+        rows.push(Number(cb.getAttribute('data-row')));
+      });
+
+      if (!confirm("選択した " + names.length + " 件の回答を一括削除しますか？\n対象：" + names.join(', '))) {
+        return;
+      }
+
+      Promise.all(rows.map(function(r) {
+        return fetch(GAS_URL + "?type=delete_single&rowIndex=" + r + "&t=" + Date.now()).then(function(res){ return res.json(); });
+      })).then(function() {
+        alert("選択した " + names.length + " 件を削除しました。");
+        fetchAdminData(true);
+      }).catch(function() {
+        alert("削除中に通信エラーが発生しました。最新化してご確認ください。");
+        fetchAdminData(true);
+      });
+    };
+  });
+
+  function updateBatchDeleteBtn(date) {
+    var group = container.querySelector('.admin-date-group[data-date="' + date + '"]');
+    if (!group) return;
+    var checkedCount = group.querySelectorAll('.attendee-check:checked').length;
+    var btn = group.querySelector('.btn-batch-del');
+    if (btn) {
+      if (checkedCount > 0) {
+        btn.style.display = 'inline-block';
+        btn.innerText = '🗑️ 選択した ' + checkedCount + ' 件を一括削除';
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+  }
+
+  container.querySelectorAll('.btn-del-attendee').forEach(function(btn) {
+    btn.onclick = function() {
+      var name = this.getAttribute('data-name');
+      var date = this.getAttribute('data-date');
+      var row = Number(this.getAttribute('data-row'));
+      if (confirm("「" + name + "」さんの " + formatDateLabel(date) + " の回答を削除しますか？")) {
+        fetch(GAS_URL + "?type=delete_single&rowIndex=" + row + "&t=" + Date.now())
+          .then(function(res) { return res.json(); })
+          .then(function() {
+            alert("削除しました。");
+            fetchAdminData(true);
+          });
+      }
+    };
+  });
+
+  container.querySelectorAll('.btn-do-merge').forEach(function(btn) {
+    btn.onclick = function(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      var date = this.getAttribute('data-date');
+      var leader = this.getAttribute('data-leader');
+      currentMergeTarget = { date: date, rawLeader: leader };
+      
+      var title = document.getElementById('merge-target-original-name');
+      if (title) title.innerText = leader + "号車";
+
+      var sel = document.getElementById('merge-select-existing');
+      if (sel) {
+        var optsHtml = '<option value="">-- 統一先を選択してください --</option>';
+        customCreatedCars.forEach(function(car) {
+          optsHtml += '<option value="' + car + '">' + car + '号車</option>';
+        });
+        optsHtml += '<option value="__ADD_CUSTOM__">＋ 任意で新しい号車名を追加…</option>';
+        sel.innerHTML = optsHtml;
+        sel.value = "";
+      }
+      showModal('merge-car-modal');
+      return false;
+    };
+  });
+
+  container.querySelectorAll('.btn-do-unmerge').forEach(function(btn) {
+    btn.onclick = function(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      var date = this.getAttribute('data-date');
+      var leader = this.getAttribute('data-leader');
+      if (confirm("「" + leader + "号車」の統合を解除し、元の入力に戻しますか？")) {
+        delete carpoolMergeMap[date + ":::" + leader];
+        try { localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap)); } catch(e){}
+        fetchAdminData(false);
+      }
+      return false;
+    };
+  });
+}
+
+// キャッシュ先行読み込み（即時表示）＋非同期最新化で体感速度ゼロ化
+function fetchAdminData(forceRefresh) {
+  var container = document.getElementById('admin-data-container');
+  if (!container) return;
+
+  // 1. キャッシュがあれば一瞬で画面を描画（待たせない）
+  if (!forceRefresh && registeredRecords && registeredRecords.length > 0) {
+    renderAdminAttendanceHTML(registeredRecords);
+  } else if (!registeredRecords || registeredRecords.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>';
+  }
+
+  // 2. バックグラウンドで最新通信を実行
   fetch(GAS_URL + "?type=attendance&t=" + Date.now())
     .then(function(res) { return res.json(); })
     .then(function(list) {
-      if (!list || list.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:15px;">回答はまだありません</div>';
-        return;
+      if (Array.isArray(list)) {
+        registeredRecords = list;
+        try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
+        renderAdminAttendanceHTML(registeredRecords);
       }
-      registeredRecords = list;
-
-      var deduplicatedMap = new Map();
-      list.forEach(function(item) {
-        var cleanName = String(item.name || '').trim();
-        var pKey = normalizeDateKey(item.date) + "___" + cleanName;
-        if (!deduplicatedMap.has(pKey) || (item.rowIndex > deduplicatedMap.get(pKey).rowIndex)) {
-          deduplicatedMap.set(pKey, item);
-        }
-      });
-      var cleanList = Array.from(deduplicatedMap.values());
-
-      var groups = {};
-      cleanList.forEach(function(item) {
-        var key = normalizeDateKey(item.date);
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(item);
-      });
-
-      var sortedDates = Object.keys(groups).sort();
-      var html = '';
-
-      sortedDates.forEach(function(date) {
-        var members = groups[date];
-        var companionTotal = 0;
-        var playerTotal = 0;
-        var carpoolMap = {};
-        var carpoolCarTypes = {};
-        var carpoolDisplayNames = {};
-        var carpoolOriginalKeys = {};
-        var countedCarsMap = new Map();
-
-        members.forEach(function(m) {
-          var isCompanionVehicle = String(m.name).includes('（同伴:');
-          if (!isCompanionVehicle) {
-            playerTotal++;
-            companionTotal += parseCompanionCount(m.companionCount);
-          }
-
-          if (m.transport === "自車") {
-            // スプレッドシートの「姓 名」から姓を抽出し、〇〇号車とする（石川 翔 → 石川号車）
-            var lastNameOnly = normalizeCarpoolKey(m.name);
-            countedCarsMap.set(lastNameOnly, {
-              type: m.carType || "普通車",
-              owner: lastNameOnly + "号車",
-              isCompanion: isCompanionVehicle
-            });
-          }
-
-          if (m.transport && m.transport.includes("乗り合い") && m.carLeader) {
-            var leaderRaw = String(m.carLeader).trim();
-            var baseKey = normalizeCarpoolKey(leaderRaw);
-            var mapKey = date + ":::" + baseKey;
-            var finalLeaderKey = carpoolMergeMap[mapKey] ? normalizeCarpoolKey(carpoolMergeMap[mapKey]) : baseKey;
-
-            if (finalLeaderKey) {
-              if (!carpoolMap[finalLeaderKey]) {
-                carpoolMap[finalLeaderKey] = [];
-                carpoolCarTypes[finalLeaderKey] = m.carType || "普通車";
-                carpoolDisplayNames[finalLeaderKey] = finalLeaderKey + "号車";
-                carpoolOriginalKeys[finalLeaderKey] = [];
-              }
-              carpoolMap[finalLeaderKey].push(m.name);
-              if (!carpoolOriginalKeys[finalLeaderKey].includes(baseKey)) {
-                carpoolOriginalKeys[finalLeaderKey].push(baseKey);
-              }
-            }
-          }
-        });
-
-        Object.keys(carpoolMap).forEach(function(leaderKey) {
-          if (!countedCarsMap.has(leaderKey)) {
-            countedCarsMap.set(leaderKey, {
-              type: carpoolCarTypes[leaderKey] || "普通車",
-              owner: carpoolDisplayNames[leaderKey],
-              isCarpool: true
-            });
-          }
-        });
-
-        var carsStandard = 0;
-        var carsLight = 0;
-        var carsOther = 0;
-
-        countedCarsMap.forEach(function(c) {
-          if (c.type === "普通車") carsStandard++;
-          else if (c.type === "軽自動車") carsLight++;
-          else carsOther++;
-        });
-
-        var totalCars = countedCarsMap.size;
-        var grandTotalPeople = playerTotal + companionTotal;
-
-        html += '<div class="admin-date-group" data-date="' + date + '">';
-        html += '<div class="admin-date-header">';
-        html += '<span>📅 ' + formatDateLabel(date) + '</span>';
-        html += '<div class="admin-head-badges">';
-        html += '<span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">参加(プレイヤー): ' + playerTotal + '名</span>';
-        if (companionTotal > 0) {
-          html += '<span style="font-size:10px; background:#475569; color:#f1f5f9; padding:2px 6px; border-radius:10px; white-space:nowrap;">同伴: ' + companionTotal + '名</span>';
-        }
-        html += '<span style="font-size:10px; background:#10b981; color:#fff; padding:2px 7px; border-radius:10px; font-weight:bold; white-space:nowrap;">計: ' + grandTotalPeople + '名</span>';
-        html += '</div></div>';
-
-        html += '<div class="admin-card-stats">';
-        html += '<span>👥 <b>人数計: <span class="people-stat-badge">' + grandTotalPeople + '名</span></b> (プレイヤー: ' + playerTotal + '名 / 同伴者: ' + companionTotal + '名)</span>';
-        html += '<span>🚗 <b>車両計: <span class="car-stat-badge">' + totalCars + '台</span></b> (普通: ' + carsStandard + '台 / 軽: ' + carsLight + '台' + (carsOther > 0 ? ' / 他: ' + carsOther + '台' : '') + ')</span>';
-        html += '</div>';
-
-        // 駐車車両の内訳・オーナー一覧（全て苗字＋号車で統一表示）
-        if (totalCars > 0) {
-          html += '<div class="car-breakdown-box">';
-          html += '<div class="car-breakdown-title">🚗 駐車車両の内訳・オーナー一覧（計 ' + totalCars + '台）</div>';
-          countedCarsMap.forEach(function(c) {
-            var tag = c.isCarpool ? '<span style="color:#34d399; font-size:11px;">(相乗り車両)</span>' : (c.isCompanion ? '<span style="color:#67e8f9; font-size:11px;">(同伴者車両)</span>' : '<span style="color:#93c5fd; font-size:11px;">(自車)</span>');
-            html += '<div class="car-breakdown-item">・<b>' + escapeHtml(c.owner) + '</b> [' + escapeHtml(c.type) + '] ' + tag + '</div>';
-          });
-          html += '</div>';
-        }
-
-        // 一括選択・削除バー
-        html += '<div class="admin-batch-bar">';
-        html += '<label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">';
-        html += '<input type="checkbox" class="batch-select-all" data-date="' + date + '"> 全選択';
-        html += '</label>';
-        html += '<button type="button" class="btn-batch-del" data-date="' + date + '" style="display:none;">🗑️ 選択した回答を一括削除</button>';
-        html += '</div>';
-
-        members.forEach(function(m) {
-          var isCompanionVehicle = String(m.name).includes('（同伴:');
-          var badgeCls = 'transport-other';
-          if (m.transport === '自車') badgeCls = 'transport-car';
-          else if (m.transport && m.transport.includes('乗り合い')) badgeCls = 'transport-share';
-          else if (m.transport && m.transport.includes('バス')) badgeCls = 'transport-bus';
-          else if (m.transport && m.transport.includes('タクシー')) badgeCls = 'transport-taxi';
-
-          var carInfo = m.carType ? ' (' + m.carType + ')' : '';
-          var hasCompanion = m.companionCount && m.companionCount !== '0名';
-          var hasNote = m.note && m.note.trim() !== '';
-
-          var displayedLeader = m.carLeader ? normalizeCarpoolKey(m.carLeader) : '';
-          if (displayedLeader) {
-            var mapKey = date + ":::" + displayedLeader;
-            if (carpoolMergeMap[mapKey]) displayedLeader = carpoolMergeMap[mapKey];
-          }
-
-          html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'opacity:0.75; border-left:3px solid #60a5fa;' : '') + '">';
-          html += '<div class="member-top-row">';
-          html += '<div class="member-left-side">';
-          html += '<input type="checkbox" class="attendee-check" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" data-row="' + (m.rowIndex || 0) + '">';
-          html += '<span class="member-name">' + escapeHtml(m.name) + '</span>';
-          html += '</div>';
-          html += '<div style="display:flex; align-items:center; gap:6px;">';
-          html += '<span class="badge-transport ' + badgeCls + '">' + escapeHtml(m.transport || 'その他') + escapeHtml(carInfo) + '</span>';
-          html += '<button type="button" class="btn-del-single btn-del-attendee" data-name="' + escapeHtml(m.name) + '" data-date="' + escapeHtml(m.date) + '" data-row="' + (m.rowIndex || 0) + '">🗑️ 削除</button>';
-          html += '</div></div>';
-          html += '<div style="font-size:12px; color:#38bdf8;">⏰ ' + escapeHtml(m.time || '時間指定なし') + '</div>';
-          if (displayedLeader) {
-            html += '<div style="font-size:12px; color:#34d399;">🤝 相乗り: ' + escapeHtml(displayedLeader) + '号車</div>';
-          }
-          if (hasCompanion) {
-            html += '<div style="font-size:12px; color:#cbd5e1;">👥 同伴: ' + escapeHtml(m.companionCount) + ' (' + escapeHtml(m.companionNames) + ')</div>';
-          }
-          if (hasNote) {
-            html += '<div style="font-size:12px; color:#cbd5e1; border-top:1px dashed rgba(255,255,255,0.08); padding-top:4px; margin-top:2px;">💬 備考: ' + escapeHtml(m.note) + '</div>';
-          }
-          html += '</div>';
-        });
-
-        if (Object.keys(carpoolMap).length > 0) {
-          html += '<div class="carpool-group">';
-          html += '<div class="carpool-title">🤝 相乗り車両・同乗者リスト</div>';
-          Object.keys(carpoolMap).forEach(function(k) {
-            var origKeys = carpoolOriginalKeys[k] || [k];
-            var isMerged = origKeys.some(function(ok) { return carpoolMergeMap[date + ":::" + ok]; });
-            var showMergeButton = !isMerged;
-
-            html += '<div class="carpool-item-row">';
-            html += '<div>・<b>' + escapeHtml(carpoolDisplayNames[k]) + '</b> [' + escapeHtml(carpoolCarTypes[k] || '普通車') + '] (' + carpoolMap[k].length + '名同乗): ' + escapeHtml(carpoolMap[k].join(', '));
-            if (isMerged) html += '<span style="font-size:10px; color:#60a5fa; margin-left:4px;">(統合済)</span>';
-            html += '</div>';
-            html += '<div>';
-            
-            if (showMergeButton) {
-              html += '<button type="button" class="btn-merge-car btn-do-merge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(k) + '">✏️ 統合・変更</button>';
-            }
-            
-            if (isMerged) {
-              origKeys.filter(function(ok) { return carpoolMergeMap[date + ":::" + ok]; }).forEach(function(ok) {
-                html += '<button type="button" class="btn-unmerge-car btn-do-unmerge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(ok) + '">↩️ 解除</button>';
-              });
-            }
-            html += '</div></div>';
-          });
-          html += '</div>';
-        }
-
-        html += '</div>';
-      });
-
-      container.innerHTML = html;
-
-      // チェックボックス・一括削除のイベント結びつけ
-      container.querySelectorAll('.batch-select-all').forEach(function(allCb) {
-        allCb.onchange = function() {
-          var d = this.getAttribute('data-date');
-          var group = container.querySelector('.admin-date-group[data-date="' + d + '"]');
-          if (!group) return;
-          var checkboxes = group.querySelectorAll('.attendee-check');
-          checkboxes.forEach(function(cb) { cb.checked = allCb.checked; });
-          updateBatchDeleteBtn(d);
-        };
-      });
-
-      container.querySelectorAll('.attendee-check').forEach(function(cb) {
-        cb.onchange = function() {
-          var d = this.getAttribute('data-date');
-          updateBatchDeleteBtn(d);
-        };
-      });
-
-      container.querySelectorAll('.btn-batch-del').forEach(function(btn) {
-        btn.onclick = function() {
-          var d = this.getAttribute('data-date');
-          var group = container.querySelector('.admin-date-group[data-date="' + d + '"]');
-          if (!group) return;
-          var checkedBoxes = group.querySelectorAll('.attendee-check:checked');
-          if (checkedBoxes.length === 0) return;
-
-          var names = [];
-          var rows = [];
-          checkedBoxes.forEach(function(cb) {
-            names.push(cb.getAttribute('data-name'));
-            rows.push(Number(cb.getAttribute('data-row')));
-          });
-
-          if (!confirm("選択した " + names.length + " 件の回答を一括削除しますか？\n対象：" + names.join(', '))) {
-            return;
-          }
-
-          Promise.all(rows.map(function(r) {
-            return fetch(GAS_URL + "?type=delete_single&rowIndex=" + r + "&t=" + Date.now()).then(function(res){ return res.json(); });
-          })).then(function() {
-            alert("選択した " + names.length + " 件を削除しました。");
-            fetchAdminData();
-          }).catch(function() {
-            alert("削除中に通信エラーが発生しました。最新化してご確認ください。");
-            fetchAdminData();
-          });
-        };
-      });
-
-      function updateBatchDeleteBtn(date) {
-        var group = container.querySelector('.admin-date-group[data-date="' + date + '"]');
-        if (!group) return;
-        var checkedCount = group.querySelectorAll('.attendee-check:checked').length;
-        var btn = group.querySelector('.btn-batch-del');
-        if (btn) {
-          if (checkedCount > 0) {
-            btn.style.display = 'inline-block';
-            btn.innerText = '🗑️ 選択した ' + checkedCount + ' 件を一括削除';
-          } else {
-            btn.style.display = 'none';
-          }
-        }
-      }
-
-      container.querySelectorAll('.btn-del-attendee').forEach(function(btn) {
-        btn.onclick = function() {
-          var name = this.getAttribute('data-name');
-          var date = this.getAttribute('data-date');
-          var row = Number(this.getAttribute('data-row'));
-          if (confirm("「" + name + "」さんの " + formatDateLabel(date) + " の回答を削除しますか？")) {
-            fetch(GAS_URL + "?type=delete_single&rowIndex=" + row + "&t=" + Date.now())
-              .then(function(res) { return res.json(); })
-              .then(function() {
-                alert("削除しました。");
-                fetchAdminData();
-              });
-          }
-        };
-      });
-
-      container.querySelectorAll('.btn-do-merge').forEach(function(btn) {
-        btn.onclick = function(e) {
-          if (e) { e.preventDefault(); e.stopPropagation(); }
-          var date = this.getAttribute('data-date');
-          var leader = this.getAttribute('data-leader');
-          currentMergeTarget = { date: date, rawLeader: leader };
-          
-          var title = document.getElementById('merge-target-original-name');
-          if (title) title.innerText = leader + "号車";
-
-          var sel = document.getElementById('merge-select-existing');
-          if (sel) {
-            var optsHtml = '<option value="">-- 統一先を選択してください --</option>';
-            customCreatedCars.forEach(function(car) {
-              optsHtml += '<option value="' + car + '">' + car + '号車</option>';
-            });
-            optsHtml += '<option value="__ADD_CUSTOM__">＋ 任意で新しい号車名を追加…</option>';
-            sel.innerHTML = optsHtml;
-            sel.value = "";
-          }
-          showModal('merge-car-modal');
-          return false;
-        };
-      });
-
-      container.querySelectorAll('.btn-do-unmerge').forEach(function(btn) {
-        btn.onclick = function(e) {
-          if (e) { e.preventDefault(); e.stopPropagation(); }
-          var date = this.getAttribute('data-date');
-          var leader = this.getAttribute('data-leader');
-          if (confirm("「" + leader + "号車」の統合を解除し、元の入力に戻しますか？")) {
-            delete carpoolMergeMap[date + ":::" + leader];
-            try { localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap)); } catch(e){}
-            fetchAdminData();
-          }
-          return false;
-        };
-      });
     })
     .catch(function() {
-      container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:15px;">データの取得に失敗しました</div>';
+      if (!registeredRecords || registeredRecords.length === 0) {
+        container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:15px;">データの取得に失敗しました</div>';
+      }
     });
 }
 
@@ -2717,7 +2737,7 @@ window.addEventListener('DOMContentLoaded', function() {
       document.getElementById('tab-btn-form').classList.remove('active');
       document.getElementById('tab-btn-column').classList.remove('active');
       document.getElementById('tab-btn-status').classList.remove('active');
-      fetchAdminData();
+      fetchAdminData(false);
     } else {
       alert("パスワードが正しくありません。");
       hideModal('admin-modal');
@@ -2725,14 +2745,14 @@ window.addEventListener('DOMContentLoaded', function() {
   };
 
   var btnRefresh = document.getElementById('btn-refresh-admin');
-  if (btnRefresh) btnRefresh.onclick = fetchAdminData;
+  if (btnRefresh) btnRefresh.onclick = function() { fetchAdminData(true); };
   var btnClearAll = document.getElementById('btn-clear-all-data');
   if (btnClearAll) btnClearAll.onclick = function() {
     if (confirm("本当にすべての回答データを削除しますか？\n（この操作は元に戻せません）")) {
       fetch(GAS_URL + "?type=clear_all&t=" + Date.now())
         .then(function() {
           alert("すべての回答データを消去しました。");
-          fetchAdminData();
+          fetchAdminData(true);
         });
     }
   };
@@ -2873,7 +2893,7 @@ window.addEventListener('DOMContentLoaded', function() {
       carpoolMergeMap[key] = cleanTarget;
       try { localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap)); } catch(e){}
       hideModal('merge-car-modal');
-      fetchAdminData();
+      fetchAdminData(false);
       return false;
     };
   }
@@ -2921,7 +2941,10 @@ window.addEventListener('DOMContentLoaded', function() {
     fetch(GAS_URL + "?type=attendance&t=" + Date.now())
       .then(function(res) { return res.json(); })
       .then(function(list) {
-        if (Array.isArray(list)) registeredRecords = list;
+        if (Array.isArray(list)) {
+          registeredRecords = list;
+          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
+        }
       }).catch(function() {});
   }, 100);
 });
@@ -3147,7 +3170,10 @@ function submitAttendance(e) {
     fetch(GAS_URL + "?type=attendance&t=" + Date.now())
       .then(function(res) { return res.json(); })
       .then(function(list) {
-        if (Array.isArray(list)) registeredRecords = list;
+        if (Array.isArray(list)) {
+          registeredRecords = list;
+          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
+        }
       }).catch(function() {});
   }).catch(function() {});
 }
