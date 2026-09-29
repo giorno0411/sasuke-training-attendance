@@ -759,6 +759,7 @@
     padding: 2px 7px;
     border-radius: 4px;
     cursor: pointer;
+    flex-shrink: 0;
   }
 
   .admin-clear-all-wrap {
@@ -790,6 +791,20 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .admin-obs-header-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1 1 180px;
+  }
+  .admin-obs-header-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
   }
   .admin-obs-name {
     font-size: 13px;
@@ -820,7 +835,6 @@
     cursor: pointer;
   }
 
-  /* 写真サムネイル */
   .photo-thumbs-wrap {
     display: flex;
     gap: 6px;
@@ -1024,7 +1038,6 @@
           <button type="submit" class="btn-submit" id="btn-save-obs" style="margin-top:14px;">💾 セット稼働状況を保存する</button>
         </form>
 
-        <!-- 管理者のみ閲覧可能な要望一覧 -->
         <div style="margin-top:24px; padding-top:16px; border-top:1px dashed var(--border);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <div style="font-size:14px; font-weight:bold; color:#38bdf8;">📥 参加者から届いたセットへの要望（管理者限定）</div>
@@ -1204,10 +1217,15 @@ var stageData = [
     stage: "その他",
     items: [
       { name: "休憩場", status: "active", note: "", photos: [] },
-      { name: "アップ用器具（旧クリフ、ブランコ）", status: "active", note: "", photos: [] }
+      { name: "アップ用器具（旧クリフ、ブランコ）", status: "active", note: "" , photos: [] }
     ]
   }
 ];
+
+try {
+  var savedStageData = localStorage.getItem('uchimiya_stage_data');
+  if (savedStageData) stageData = JSON.parse(savedStageData);
+} catch(e) {}
 
 var calYear = new Date().getFullYear();
 var calMonth = new Date().getMonth();
@@ -1489,10 +1507,31 @@ function normalizeDateKey(dateStr) {
   return String(dateStr);
 }
 
+// フルネームから苗字（姓）のみを抽出して正規化する関数
+function extractLastName(str) {
+  if (!str) return "";
+  var s = String(str).trim().replace(/\s+/g, ' ');
+  // 空白で区切られている場合は最初の単語を苗字とする
+  if (s.indexOf(' ') !== -1) {
+    return s.split(' ')[0];
+  }
+  // 「〜号車」「〜号」「〜車」「〜くん」「〜さん」等の語尾を削除
+  s = s.replace(/(号車|号|車|くん|さん|君|様)$/g, '');
+  
+  // 一般的な2文字または3文字の苗字＋名前の場合、既知のフルネームから苗字を推定
+  // （例：内宮修造 → 内宮）
+  if (s.length >= 3) {
+    if (s.indexOf('内宮') === 0) return '内宮';
+    if (s.length === 4) return s.substring(0, 2); // 4文字なら2文字姓（山田太郎→山田）
+    if (s.length === 5) return s.substring(0, 2); // 5文字も2文字姓を優先
+  }
+  return s;
+}
+
 function normalizeCarpoolKey(str) {
   if (!str) return "";
-  var s = String(str).trim().replace(/\s+/g, '');
-  return s.replace(/(号車|号|車)$/g, '');
+  var lastName = extractLastName(str);
+  return lastName.replace(/(号車|号|車)$/g, '');
 }
 
 function parseCompanionCount(str) {
@@ -1949,6 +1988,36 @@ function openPhotoViewer(title, photos) {
   showModal('photo-viewer-modal');
 }
 
+function compressImage(file, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var maxSide = 800;
+      var w = img.width;
+      var h = img.height;
+      if (w > maxSide || h > maxSide) {
+        if (w > h) {
+          h = Math.round((h * maxSide) / w);
+          w = maxSide;
+        } else {
+          w = Math.round((w * maxSide) / h);
+          h = maxSide;
+        }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      var compressedData = canvas.toDataURL('image/jpeg', 0.7);
+      callback(compressedData);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function renderAdminObstacleEditor() {
   var container = document.getElementById('admin-obstacle-edit-list');
   if (!container) return;
@@ -1965,14 +2034,14 @@ function renderAdminObstacleEditor() {
 
       html += '<div class="admin-edit-card">';
       html += '<div class="admin-obs-header">';
-      html += '<div style="display:flex; align-items:center; gap:6px;">';
-      html += '<input type="text" class="obs-name-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" value="' + escapeHtml(item.name) + '" style="width:140px; font-size:12px; padding:3px 6px; font-weight:bold; background:rgba(0,0,0,0.3);">';
+      html += '<div class="admin-obs-header-left">';
+      html += '<input type="text" class="obs-name-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" value="' + escapeHtml(item.name) + '" style="flex:1; min-width:120px; font-size:12px; padding:4px 6px; font-weight:bold; background:rgba(0,0,0,0.3);">';
       html += '<div class="order-btn-group">';
       html += '<button type="button" class="btn-order-move btn-obs-up" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" ' + (iIdx === 0 ? 'disabled' : '') + '>▲</button>';
       html += '<button type="button" class="btn-order-move btn-obs-down" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" ' + (iIdx === group.items.length - 1 ? 'disabled' : '') + '>▼</button>';
       html += '</div></div>';
 
-      html += '<div style="display:flex; align-items:center; gap:6px;">';
+      html += '<div class="admin-obs-header-right">';
       html += '<select class="admin-obs-select" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '">';
       html += '<option value="active" ' + (item.status === 'active' ? 'selected' : '') + '>🟢 稼働中</option>';
       html += '<option value="tuning" ' + (item.status === 'tuning' ? 'selected' : '') + '>🟡 調整中</option>';
@@ -1985,7 +2054,6 @@ function renderAdminObstacleEditor() {
       html += '<input type="text" class="obs-note-input" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" value="' + escapeHtml(item.note || '') + '" placeholder="停止理由を入力" style="font-size:12px; padding:6px 10px;">';
       html += '</div>';
 
-      // 写真追加エリア
       html += '<div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.08);">';
       html += '<div style="display:flex; justify-content:space-between; align-items:center;">';
       html += '<label style="font-size:11px; color:#94a3b8; margin:0;">📷 エリア写真 (' + photos.length + '枚)</label>';
@@ -2014,7 +2082,6 @@ function renderAdminObstacleEditor() {
   });
   container.innerHTML = html;
 
-  // 各種イベントハンドラ
   container.querySelectorAll('.obs-name-input').forEach(function(inp) {
     inp.oninput = function() {
       var g = this.getAttribute('data-gidx');
@@ -2110,18 +2177,17 @@ function renderAdminObstacleEditor() {
 
       if (!stageData[g].items[i].photos) stageData[g].items[i].photos = [];
 
-      var readCount = 0;
+      var count = 0;
       for (var f = 0; f < files.length; f++) {
-        var reader = new FileReader();
-        reader.onload = function(evt) {
-          stageData[g].items[i].photos.push(evt.target.result);
-          readCount++;
-          if (readCount === files.length) {
+        compressImage(files[f], function(compBase64) {
+          stageData[g].items[i].photos.push(compBase64);
+          count++;
+          if (count === files.length) {
+            localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData));
             renderAdminObstacleEditor();
             renderStageGroups();
           }
-        };
-        reader.readAsDataURL(files[f]);
+        });
       }
     };
   });
@@ -2133,6 +2199,7 @@ function renderAdminObstacleEditor() {
       var p = Number(this.getAttribute('data-pidx'));
       if (confirm("この写真を削除しますか？")) {
         stageData[g].items[i].photos.splice(p, 1);
+        localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData));
         renderAdminObstacleEditor();
         renderStageGroups();
       }
@@ -2182,7 +2249,6 @@ function fetchAdminData() {
       }
       registeredRecords = list;
 
-      // 相互入力重複抑止（AがBを書き、BがAを書いた場合の自動名寄せ）
       var deduplicatedMap = new Map();
       list.forEach(function(item) {
         var cleanName = String(item.name || '').trim();
@@ -2231,6 +2297,7 @@ function fetchAdminData() {
 
           if (m.transport && m.transport.includes("乗り合い") && m.carLeader) {
             var leaderRaw = String(m.carLeader).trim();
+            // 自動的に苗字＋号車に正規化
             var baseKey = normalizeCarpoolKey(leaderRaw);
             var mapKey = date + ":::" + baseKey;
             var finalLeaderKey = carpoolMergeMap[mapKey] ? normalizeCarpoolKey(carpoolMergeMap[mapKey]) : baseKey;
@@ -2344,12 +2411,19 @@ function fetchAdminData() {
             var origKeys = carpoolOriginalKeys[k] || [k];
             var isMerged = origKeys.some(function(ok) { return carpoolMergeMap[date + ":::" + ok]; });
 
+            // 条件が揃っている（最初から苗字＋号車で合流・統一済み）場合は「統合・変更」ボタンをオフ
+            var showMergeButton = !isMerged;
+
             html += '<div class="carpool-item-row">';
             html += '<div>・<b>' + escapeHtml(carpoolDisplayNames[k]) + '</b> [' + escapeHtml(carpoolCarTypes[k] || '普通車') + '] (' + carpoolMap[k].length + '名同乗): ' + escapeHtml(carpoolMap[k].join(', '));
             if (isMerged) html += '<span style="font-size:10px; color:#60a5fa; margin-left:4px;">(統合済)</span>';
             html += '</div>';
             html += '<div>';
-            html += '<button type="button" class="btn-merge-car btn-do-merge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(k) + '">✏️ 統合・変更</button>';
+            
+            if (showMergeButton) {
+              html += '<button type="button" class="btn-merge-car btn-do-merge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(k) + '">✏️ 統合・変更</button>';
+            }
+            
             if (isMerged) {
               origKeys.filter(function(ok) { return carpoolMergeMap[date + ":::" + ok]; }).forEach(function(ok) {
                 html += '<button type="button" class="btn-unmerge-car btn-do-unmerge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(ok) + '">↩️ 解除</button>';
@@ -2455,13 +2529,11 @@ window.addEventListener('DOMContentLoaded', function() {
   var calDone = document.getElementById('btn-cal-done');
   if (calDone) calDone.onclick = closeCalendarPopup;
   
-  // カレンダー前月・翌月ボタン（ポップアップ維持）
   var calPrev = document.getElementById('btn-cal-prev');
   if (calPrev) calPrev.onclick = prevMonth;
   var calNext = document.getElementById('btn-cal-next');
   if (calNext) calNext.onclick = nextMonth;
   
-  // カレンダーボックス内部のクリック伝播を遮断
   var calBoxInner = document.getElementById('cal-box-inner');
   if (calBoxInner) {
     calBoxInner.onclick = function(e) { e.stopPropagation(); };
@@ -2546,6 +2618,9 @@ window.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
     var btn = document.getElementById('btn-save-obs');
     if (btn) { btn.disabled = true; btn.innerText = "保存中..."; }
+    
+    localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData));
+
     fetch(GAS_URL, {
       method: "POST",
       mode: "no-cors",
@@ -2553,7 +2628,7 @@ window.addEventListener('DOMContentLoaded', function() {
       body: JSON.stringify({ action: "update_obstacles", stages: stageData })
     }).then(function() {
       renderStageGroups();
-      alert("セット稼働状況を更新・保存しました！");
+      alert("セット稼働状況・写真を更新・保存しました！");
     }).finally(function() {
       if (btn) { btn.disabled = false; btn.innerText = "💾 セット稼働状況を保存する"; }
     });
@@ -2679,6 +2754,7 @@ window.addEventListener('DOMContentLoaded', function() {
               }
             });
           });
+          localStorage.setItem('uchimiya_stage_data', JSON.stringify(stageData));
           renderStageGroups();
         }
       }).catch(function() {});
@@ -2750,7 +2826,6 @@ function submitAttendance(e) {
     return;
   }
 
-  // AがBを書き、BがAを書いた場合の重複・二重送信チェック
   var allSubmittedNames = [primaryName];
   otherPlayers.forEach(function(op) { allSubmittedNames.push(op.name); });
 
