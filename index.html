@@ -128,7 +128,7 @@
   }
   .required { color: var(--accent); margin-left: 3px; }
   
-  input[type="text"], input[type="password"], select, textarea {
+  input[type="text"], input[type="password"], input[type="date"], select, textarea {
     width: 100%;
     background: rgba(11, 15, 25, 0.75);
     border: 1px solid var(--border);
@@ -288,7 +288,7 @@
     border-radius: 12px;
     padding: 20px;
     width: 100%;
-    max-width: 340px;
+    max-width: 350px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
     max-height: 90vh;
     overflow-y: auto;
@@ -721,7 +721,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
     padding: 2px 8px;
@@ -733,7 +733,7 @@
   .status-toggle-label {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     cursor: pointer;
     font-weight: bold;
     margin: 0;
@@ -823,7 +823,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 1 1 180px;
+    flex: 1 1 170px;
   }
   .member-name { font-size: 14px; font-weight: bold; }
   
@@ -1029,7 +1029,7 @@
   <div class="tab-nav">
     <button type="button" class="tab-btn active" id="tab-btn-form">✍️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column">📜 注意事項</button>
-    <button type="button" class="tab-btn" id="tab-btn-status">⚙️ セット稼働状況</button>
+    <button type="button" class="tab-btn" id="tab-btn-status">⚙️️ セット稼働状況</button>
   </div>
 
   <!-- 1. 参加送信フォーム -->
@@ -1138,7 +1138,7 @@
         </div>
 
         <div class="admin-clear-all-wrap">
-          <button type="button" class="btn-clear-all" id="btn-clear-all-data">⚠️ 回答データを全件削除（リセット）</button>
+          <button type="button" class="btn-clear-all" id="btn-clear-all-data">⚠️️ 回答データを全件削除（リセット）</button>
         </div>
       </div>
 
@@ -1238,7 +1238,7 @@
   </div>
 </div>
 
-<!-- 管理者手動代理追加モーダル -->
+<!-- 管理者手動代理追加モーダル（日付カレンダーピッカー付き） -->
 <div id="admin-add-modal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0; font-size:15px; color:#fca5a5;">＋ 手動代理追加（LINE・口頭受付）</h3>
@@ -1253,8 +1253,8 @@
       <label style="font-size:11px; color:#cbd5e1;">お名前<span class="required">*</span></label>
       <input type="text" id="m-add-name" placeholder="例：山田 太郎、TBSスタッフA" required style="margin-bottom:8px;">
 
-      <label style="font-size:11px; color:#cbd5e1;">参加日（YYYY-MM-DD）<span class="required">*</span></label>
-      <input type="text" id="m-add-date" placeholder="例：2026-10-04" required style="margin-bottom:8px;">
+      <label style="font-size:11px; color:#cbd5e1;">参加日（タップして選択）<span class="required">*</span></label>
+      <input type="date" id="m-add-date" required style="margin-bottom:8px; color-scheme: dark;">
 
       <label style="font-size:11px; color:#cbd5e1;">参加時間</label>
       <select id="m-add-time" style="margin-bottom:8px;">
@@ -1456,7 +1456,6 @@ try {
   if (savedStatus) dateStatusMap = JSON.parse(savedStatus);
 } catch(e) {}
 
-// 各メンバーの「連絡済み」状態保持マップ (キー: "日付:::名前")
 var contactStatusMap = {};
 try {
   var savedContact = localStorage.getItem('uchimiya_contact_status_map');
@@ -1761,31 +1760,47 @@ function updateTriggerDisplay() {
   }).join('');
 }
 
-// 時差・UTCズレ完全防止フォーマット
+// タイムゾーンによる前日・翌日ズレを完全に排除した日付解析
+function parseDateParts(raw) {
+  if (!raw) return null;
+  var s = String(raw).trim();
+  // 1. ISOタイムスタンプ形式（例: 2026-10-04T15:00:00...）
+  if (s.indexOf('T') !== -1) {
+    s = s.split('T')[0];
+  }
+  // 2. YYYY-MM-DD または YYYY/MM/DD
+  var m = s.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (m) {
+    return {
+      year: parseInt(m[1], 10),
+      month: parseInt(m[2], 10),
+      day: parseInt(m[3], 10)
+    };
+  }
+  return null;
+}
+
 function formatDateLabel(dateStr) {
   if (!dateStr) return "日程未指定";
-  var match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
-  if (match) {
-    var y = parseInt(match[1], 10);
-    var m = parseInt(match[2], 10);
-    var d = parseInt(match[3], 10);
-    var dt = new Date(y, m - 1, d, 12, 0, 0);
+  var p = parseDateParts(dateStr);
+  if (p) {
+    var dt = new Date(p.year, p.month - 1, p.day, 12, 0, 0);
     var w = isNaN(dt.getDay()) ? "" : "(" + weekDays[dt.getDay()] + ")";
-    return m + "月" + d + "日" + w;
+    return p.month + "月" + p.day + "日" + w;
   }
   return String(dateStr);
 }
 
 function normalizeDateKey(dateStr) {
   if (!dateStr) return "未指定";
-  var match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
-  if (match) {
-    return match[1] + "-" + String(match[2]).padStart(2, '0') + "-" + String(match[3]).padStart(2, '0');
+  var p = parseDateParts(dateStr);
+  if (p) {
+    return p.year + "-" + String(p.month).padStart(2, '0') + "-" + String(p.day).padStart(2, '0');
   }
   return String(dateStr).trim();
 }
 
-// 汎用姓名分離（苗字を100%抽出）
+// 汎用姓名分離（苗字抽出）
 function extractLastName(str) {
   if (!str) return "";
   var s = String(str).trim();
@@ -2152,7 +2167,7 @@ function renderAdminRulesEditor() {
     html += '<button type="button" class="btn-order-move btn-move-up" data-idx="' + idx + '" ' + (idx === 0 ? 'disabled' : '') + '>▲</button>';
     html += '<button type="button" class="btn-order-move btn-move-down" data-idx="' + idx + '" ' + (idx === ruleSections.length - 1 ? 'disabled' : '') + '>▼</button>';
     html += '</div></div>';
-    html += '<button type="button" class="btn-del-single btn-del-rule" data-idx="' + idx + '">🗑️️ 削除</button>';
+    html += '<button type="button" class="btn-del-single btn-del-rule" data-idx="' + idx + '">🗑️ 削除</button>';
     html += '</div>';
 
     html += '<input type="text" id="rule-title-' + idx + '" class="rule-title-input" data-idx="' + idx + '" value="' + escapeHtml(sec.title) + '" style="margin-bottom:8px; font-weight:bold;">';
@@ -2593,7 +2608,6 @@ function toggleDateExecutionStatus(date, status) {
   }
 }
 
-// 連絡済みチェック状態の切り替え
 function toggleMemberContactStatus(date, name, isChecked) {
   var key = date + ":::" + name;
   contactStatusMap[key] = isChecked;
@@ -2792,7 +2806,6 @@ function renderAdminAttendanceHTML(list) {
         if (carpoolMergeMap[mapKey]) displayedLeader = carpoolMergeMap[mapKey];
       }
 
-      // 連絡済みチェック状態の取得
       var contactKey = date + ":::" + String(m.name).trim();
       var isContacted = !!contactStatusMap[contactKey];
 
@@ -2803,11 +2816,9 @@ function renderAdminAttendanceHTML(list) {
       html += '<span class="member-name">' + escapeHtml(m.name) + '</span>';
       html += '</div>';
       
-      // 右側：連絡済みトグルスイッチ ＋ 交通バッジ ＋ 削除ボタン
+      // 連絡済みトグルスイッチ（センター揃え） ＋ 交通バッジ ＋ 削除ボタン
       html += '<div style="display:flex; align-items:center; gap:8px;">';
-      
-      // 連絡済みチェック（中央揃えデザイン）
-      html += '<div class="status-toggle-box" style="height:24px; padding:0 8px;">';
+      html += '<div class="status-toggle-box">';
       html += '<label class="status-toggle-label" style="color:' + (isContacted ? '#34d399' : '#94a3b8') + ';">';
       html += '<input type="checkbox" class="contacted-checkbox" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" ' + (isContacted ? 'checked' : '') + '> 連絡済み';
       html += '</label>';
@@ -3118,8 +3129,11 @@ window.addEventListener('DOMContentLoaded', function() {
   var btnOpenAdminAdd = document.getElementById('btn-open-admin-add');
   if (btnOpenAdminAdd) {
     btnOpenAdminAdd.onclick = function() {
-      var todayStr = new Date().toISOString().split('T')[0];
-      document.getElementById('m-add-date').value = todayStr;
+      var now = new Date();
+      var yyyy = now.getFullYear();
+      var mm = String(now.getMonth() + 1).padStart(2, '0');
+      var dd = String(now.getDate()).padStart(2, '0');
+      document.getElementById('m-add-date').value = yyyy + "-" + mm + "-" + dd;
       showModal('admin-add-modal');
     };
   }
