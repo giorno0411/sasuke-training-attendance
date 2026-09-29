@@ -168,7 +168,7 @@
     margin-bottom: 8px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
   .entry-card.companion-card {
     border-color: rgba(6, 182, 212, 0.35);
@@ -178,7 +178,7 @@
     gap: 6px;
     align-items: center;
   }
-  .entry-card-top-companion {
+  .entry-card-sub-row {
     display: flex;
     gap: 6px;
     align-items: center;
@@ -188,7 +188,7 @@
     border: 1px solid rgba(239, 68, 68, 0.4);
     color: #f87171;
     border-radius: 6px;
-    padding: 8px 12px;
+    padding: 9px 12px;
     font-size: 13px;
     font-weight: bold;
     cursor: pointer;
@@ -198,10 +198,9 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px;
-    margin-top: 2px;
   }
 
-  /* 追加ボタン（プレイヤー用: アクセントカラー / 同伴者用: シアン色） */
+  /* 追加ボタン */
   .btn-add-entry {
     background: rgba(30, 41, 59, 0.8);
     border: 1px dashed var(--accent);
@@ -599,6 +598,7 @@
     border-radius: 6px;
     cursor: pointer;
     text-align: center;
+    white-space: nowrap;
   }
   .admin-sub-btn.active {
     background: rgba(239, 68, 68, 0.2);
@@ -853,7 +853,6 @@
           <label>お連れ様・同伴者（見学・補助等の非プレイヤー）</label>
           <p style="font-size:11px; color:var(--text-sub); margin:0 0 6px 0;">お連れ様がいる場合は追加し、役割・人数・交通手段を選択してください。</p>
           <div id="companions-container"></div>
-          <!-- ★シアン色（チカチカ防止）の追加ボタン -->
           <button type="button" class="btn-add-entry-cyan" onclick="addCompanionCard()">
             <span>＋ 同伴者を追加する</span>
           </button>
@@ -889,10 +888,12 @@
   <!-- 4. 管理者専用画面 -->
   <div id="view-admin" class="hidden">
     <div class="card">
+      <!-- サブナビ順序：参加状況 ➔ 注意事項 ➔ セット稼働状況編集 -->
       <div class="admin-subnav">
         <button class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 参加状況</button>
         <button class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
-        <button class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット設定</button>
+        <!-- ★「セット稼働状況編集」に変更 -->
+        <button class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット稼働状況編集</button>
       </div>
 
       <!-- サブタブ1: 参加集計 -->
@@ -938,9 +939,10 @@
         </div>
       </div>
 
-      <!-- サブタブ3: セット稼働設定 -->
+      <!-- サブタブ3: セット稼働状況編集 -->
       <div id="admin-subview-obstacles" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <!-- ★見出しも「セット稼働状況編集」に変更 -->
           <h2 style="font-size:15px; margin:0;">⚙️ セット稼働状況の編集</h2>
           <button class="tab-btn" style="flex:none; padding:5px 10px; border:1px solid var(--border);" onclick="loadRemoteObstacles()">🔄 再読込</button>
         </div>
@@ -1194,7 +1196,7 @@ function addOtherPlayerCard(name = '', transport = '同乗', carType = '普通�
   container.appendChild(card);
 }
 
-// 同伴者（非プレイヤー）カードの追加（家族人数の可変選択に対応）
+// 同伴者（非プレイヤー）カードの追加（横ゆとりのある2段構成で文字切れを完全解消）
 function addCompanionCard(name = '', role = '家族', familyCount = '1名', transport = '同乗', carType = '普通車') {
   const container = document.getElementById('companions-container');
   const cardId = 'companion-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
@@ -1204,17 +1206,27 @@ function addCompanionCard(name = '', role = '家族', familyCount = '1名', tran
   const isFamily = role === '家族';
 
   card.innerHTML = `
-    <div class="entry-card-top-companion">
-      <input type="text" class="field-companion-item-name" placeholder="代表のお名前（例：山田花子）" value="${escapeHtml(name)}" required style="margin:0; flex:1;">
-      <select class="field-companion-item-role" onchange="toggleCompanionRoleCount('${cardId}', this.value)" style="padding:10px 8px; font-size:12px; margin:0; width:95px; flex-shrink:0;">
-        <option value="家族" ${role === '家族' ? 'selected' : ''}>家族</option>
-        <option value="カメラマン" ${role === 'カメラマン' ? 'selected' : ''}>カメラマン</option>
-        <option value="トレーナー" ${role === 'トレーナー' ? 'selected' : ''}>トレーナー</option>
-        <option value="友人・知人" ${role === '友人・知人' ? 'selected' : ''}>友人・知人</option>
-        <option value="その他" ${role === 'その他' ? 'selected' : ''}>その他</option>
-      </select>
-      <div id="${cardId}-family-count-wrap" class="${isFamily ? '' : 'hidden'}" style="width:75px; flex-shrink:0;">
-        <select class="field-companion-item-count" style="padding:10px 6px; font-size:12px; margin:0; border-color:var(--cyan); color:#67e8f9;">
+    <!-- 1段目: お名前（横幅広めで例文字を完全に収容） ＋ 削除ボタン -->
+    <div class="entry-card-top">
+      <input type="text" class="field-companion-item-name" placeholder="同伴者のお名前（例：山田花子）" value="${escapeHtml(name)}" required style="margin:0; flex:1;">
+      <button type="button" class="btn-remove-entry" onclick="document.getElementById('${cardId}').remove()" title="削除">✕</button>
+    </div>
+
+    <!-- 2段目: 役割 ＋ 家族時人数 -->
+    <div class="entry-card-sub-row">
+      <div style="flex:1;">
+        <label style="font-size:10px; margin-bottom:2px;">役割・続柄</label>
+        <select class="field-companion-item-role" onchange="toggleCompanionRoleCount('${cardId}', this.value)" style="padding:8px 8px; font-size:12px;">
+          <option value="家族" ${role === '家族' ? 'selected' : ''}>家族</option>
+          <option value="カメラマン" ${role === 'カメラマン' ? 'selected' : ''}>カメラマン</option>
+          <option value="トレーナー" ${role === 'トレーナー' ? 'selected' : ''}>トレーナー</option>
+          <option value="友人・知人" ${role === '友人・知人' ? 'selected' : ''}>友人・知人</option>
+          <option value="その他" ${role === 'その他' ? 'selected' : ''}>その他</option>
+        </select>
+      </div>
+      <div id="${cardId}-family-count-wrap" class="${isFamily ? '' : 'hidden'}" style="width:110px;">
+        <label style="font-size:10px; margin-bottom:2px; color:var(--cyan);">家族人数</label>
+        <select class="field-companion-item-count" style="padding:8px 8px; font-size:12px; border-color:var(--cyan); color:#67e8f9;">
           <option value="1名" ${familyCount === '1名' ? 'selected' : ''}>1名</option>
           <option value="2名" ${familyCount === '2名' ? 'selected' : ''}>2名</option>
           <option value="3名" ${familyCount === '3名' ? 'selected' : ''}>3名</option>
@@ -1222,8 +1234,9 @@ function addCompanionCard(name = '', role = '家族', familyCount = '1名', tran
           <option value="5名以上" ${familyCount === '5名以上' ? 'selected' : ''}>5名以上</option>
         </select>
       </div>
-      <button type="button" class="btn-remove-entry" onclick="document.getElementById('${cardId}').remove()" title="削除">✕</button>
     </div>
+
+    <!-- 3段目: 交通手段 ＆ 車種 -->
     <div class="entry-transport-row">
       <div>
         <label style="font-size:10px; margin-bottom:2px;">移動手段</label>
@@ -1888,7 +1901,6 @@ async function submitAttendance(e) {
     const t = c.querySelector('.field-companion-item-transport').value;
     const ct = t === '自車' ? c.querySelector('.field-companion-item-car-type').value : '';
     
-    // 家族の場合は人数セレクトの値、それ以外は1名
     let headcount = 1;
     if (role === '家族') {
       const cntVal = c.querySelector('.field-companion-item-count').value;
@@ -1928,7 +1940,6 @@ async function submitAttendance(e) {
     }
   }
 
-  // 同伴者の人数・詳細テキスト作成
   const companionCountStr = totalCompanionHeadcount > 0 ? `${totalCompanionHeadcount}名` : "0名";
   const companionNamesStr = companionList.length > 0 
     ? companionList.map(c => {
@@ -1940,7 +1951,6 @@ async function submitAttendance(e) {
 
   const note = document.getElementById('field-note').value.trim();
 
-  // 代表者の日程ごとの設定
   const primaryDayConfigs = [];
   for (const d of arr) {
     const card = document.querySelector(`.day-config-card[data-date="${d}"]`);
@@ -1988,7 +1998,6 @@ async function submitAttendance(e) {
   btn.disabled = true;
   btn.innerText = "送信中...";
 
-  // 代表者ペイロード
   const payloads = [
     {
       name: primaryName,
@@ -2000,7 +2009,6 @@ async function submitAttendance(e) {
     }
   ];
 
-  // 他参加者ペイロード
   otherPlayers.forEach(op => {
     const opDayConfigs = primaryDayConfigs.map(cfg => {
       let tVal = cfg.transport;
@@ -2037,7 +2045,6 @@ async function submitAttendance(e) {
     });
   });
 
-  // 同伴者で「自車」で来る人の車両枠確保
   companionList.filter(c => c.transportMode === '自車').forEach(comp => {
     const compCarDayConfigs = primaryDayConfigs.map(cfg => ({
       date: cfg.date,
