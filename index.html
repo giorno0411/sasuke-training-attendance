@@ -297,16 +297,16 @@
     background: #161f30;
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 16px;
+    padding: 18px;
     width: 100%;
-    max-width: 330px;
+    max-width: 360px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
     max-height: 90vh;
     overflow-y: auto;
     box-sizing: border-box;
   }
 
-  /* ミニカレンダーが横に突き抜けないよう修正 */
+  /* ミニカレンダー */
   .mini-cal-box {
     background: #151d2c;
     border: 1px solid var(--border);
@@ -459,7 +459,7 @@
     color: #fff;
     border: none;
     width: 100%;
-    padding: 12px;
+    padding: 13px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: bold;
@@ -727,7 +727,6 @@
     flex-wrap: wrap;
   }
 
-  /* 開催 / 中止・連絡済み トグルスイッチ（上下完全中央揃え） */
   .status-toggle-box {
     display: inline-flex;
     align-items: center;
@@ -921,27 +920,34 @@
     cursor: pointer;
   }
 
-  /* コンパクト化した手動追加フォームスタイル */
+  /* ★サイズバランスを最適化した手動追加フォームスタイル */
   .compact-form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 10px;
+    margin-bottom: 10px;
   }
   .compact-field-group {
     display: flex;
     flex-direction: column;
   }
   .compact-field-group label {
-    font-size: 10.5px;
-    margin-bottom: 3px;
+    font-size: 11.5px;
+    margin-bottom: 4px;
     color: #cbd5e1;
+    font-weight: bold;
   }
+  /* 区分と参加日の高さを38pxで完全一致させるスタイル */
   .compact-field-group input, 
   .compact-field-group select {
-    padding: 6px 8px;
-    font-size: 12px;
-    border-radius: 6px;
+    height: 38px;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 7px;
+    box-sizing: border-box;
+    line-height: 1.4;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   .admin-edit-card {
@@ -1273,18 +1279,18 @@
   </div>
 </div>
 
-<!-- 管理者手動代理追加モーダル（超スリム・コンパクトUI） -->
+<!-- 管理者手動代理追加モーダル（マス揃え・適度な拡大UI） -->
 <div id="admin-add-modal" class="modal-overlay">
-  <div class="modal-content" style="max-width:320px; padding:14px;">
-    <h3 style="margin-top:0; margin-bottom:10px; font-size:14px; color:#fca5a5;">＋ 手動代理追加（LINE・口頭）</h3>
+  <div class="modal-content">
+    <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#fca5a5;">＋ 手動代理追加（LINE・口頭）</h3>
     <form id="admin-manual-add-form">
       <div class="compact-form-row">
         <div class="compact-field-group">
           <label>区分<span class="required">*</span></label>
           <select id="m-add-category">
-            <option value="プレイヤー">選手</option>
-            <option value="番組スタッフ">スタッフ</option>
-            <option value="同伴者">同伴者</option>
+            <option value="プレイヤー">選手（プレイヤー）</option>
+            <option value="番組スタッフ">番組スタッフ</option>
+            <option value="同伴者">同伴者（見学等）</option>
           </select>
         </div>
         <div class="compact-field-group">
@@ -1293,9 +1299,9 @@
         </div>
       </div>
 
-      <div class="compact-field-group" style="margin-bottom:8px;">
+      <div class="compact-field-group" style="margin-bottom:10px;">
         <label>お名前<span class="required">*</span></label>
-        <input type="text" id="m-add-name" placeholder="例：山田 太郎、TBSスタッフA" required>
+        <input type="text" id="m-add-name" placeholder="例：山田 太郎、TBSスタッフA" required style="height:38px;">
       </div>
 
       <div class="compact-form-row">
@@ -1305,14 +1311,14 @@
             <option value="終日">終日</option>
             <option value="午前のみ">午前のみ</option>
             <option value="午後のみ">午後のみ</option>
-            <option value="9:00〜17:00">9〜17時</option>
+            <option value="9:00〜17:00">9:00〜17:00</option>
           </select>
         </div>
         <div class="compact-field-group">
           <label>交通手段<span class="required">*</span></label>
           <select id="m-add-transport">
             <option value="自車">🚗 自車</option>
-            <option value="乗り合い（同乗）">🤝 相乗り</option>
+            <option value="乗り合い（同乗）">🤝 相乗り（同乗）</option>
             <option value="現地までバス">🚌 バス</option>
             <option value="タクシー">🚕 タクシー</option>
             <option value="その他">🚲 その他</option>
@@ -1320,14 +1326,14 @@
         </div>
       </div>
 
-      <div id="m-add-car-settings" style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-bottom:8px;">
-        <div class="compact-form-row" style="margin-bottom:4px;">
+      <div id="m-add-car-settings" style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:10px;">
+        <div class="compact-form-row" style="margin-bottom:0;">
           <div class="compact-field-group">
             <label>車種</label>
             <select id="m-add-car-type">
               <option value="普通車">普通車</option>
               <option value="軽自動車">軽自動車</option>
-              <option value="その他">その他</option>
+              <option value="その他">その他（ロケバス等）</option>
             </select>
           </div>
           <div class="compact-field-group">
@@ -1337,21 +1343,21 @@
         </div>
       </div>
 
-      <div id="m-add-share-settings" class="hidden" style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-bottom:8px;">
+      <div id="m-add-share-settings" class="hidden" style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:10px;">
         <div class="compact-field-group">
           <label>同乗先の運転者名</label>
-          <input type="text" id="m-add-share-leader" placeholder="例: 内宮 修造">
+          <input type="text" id="m-add-share-leader" placeholder="例: 内宮 修造" style="height:38px;">
         </div>
       </div>
 
-      <div class="compact-field-group" style="margin-bottom:12px;">
+      <div class="compact-field-group" style="margin-bottom:14px;">
         <label>備考</label>
-        <input type="text" id="m-add-note" placeholder="例: LINE受付済み、機材搬入等">
+        <input type="text" id="m-add-note" placeholder="例: LINE受付済み、機材搬入あり等" style="height:38px;">
       </div>
 
       <div style="display:flex; gap:8px;">
-        <button type="button" class="tab-btn" id="btn-admin-add-cancel" style="border:1px solid var(--border);">閉じる</button>
-        <button type="submit" class="btn-submit" style="margin:0; padding:8px;">追加保存</button>
+        <button type="button" class="tab-btn" id="btn-admin-add-cancel" style="border:1px solid var(--border); padding:10px;">閉じる</button>
+        <button type="submit" class="btn-submit" style="margin:0; padding:10px;">追加して保存</button>
       </div>
     </form>
   </div>
@@ -2460,7 +2466,7 @@ function renderAdminObstacleEditor() {
       html += '<option value="tuning" ' + (item.status === 'tuning' ? 'selected' : '') + '>🟡 調整中</option>';
       html += '<option value="pause" ' + (item.status === 'pause' ? 'selected' : '') + '>🔴 休止中</option>';
       html += '</select>';
-      html += '<button type="button" class="btn-del-single btn-del-obs" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '">🗑️ 削除</button>';
+      html += '<button type="button" class="btn-del-single btn-del-obs" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '">🗑️️ 削除</button>';
       html += '</div></div>';
       
       html += '<div id="obs-wrap-' + gIdx + '-' + iIdx + '" class="' + (isHalted ? '' : 'hidden') + '" style="margin-bottom:8px;">';
@@ -3470,7 +3476,6 @@ window.addEventListener('DOMContentLoaded', function() {
   }, 100);
 });
 
-// 送信処理（砂時計プログレス表示＋高速通信）
 function submitAttendance(e) {
   e.preventDefault();
   var arr = Array.from(selectedDates).sort();
