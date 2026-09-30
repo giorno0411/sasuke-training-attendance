@@ -646,9 +646,7 @@
     border-left: 3px solid #f59e0b;
     color: #e2e8f0;
   }
-  .obstacle-note-box.pause {
-    border-left-color: #ef4444;
-  }
+  .obstacle-note-box.pause { border-left-color: #ef4444; }
 
   .obstacle-actions {
     display: flex;
@@ -697,15 +695,15 @@
     color: #fca5a5;
   }
 
-  /* 管理者画面: 日程スティッキーバー */
+  /* 管理者画面: 日程スティッキーバー（重なり防止にマージン・パディング最適化） */
   .admin-date-tabs-bar {
     position: sticky;
     top: 0;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    padding: 8px 4px;
-    margin: -10px -10px 14px -10px;
+    background: rgba(15, 23, 42, 0.98);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 10px 4px;
+    margin: 0 -8px 16px -8px;
     border-bottom: 1px solid var(--border);
     display: flex;
     gap: 6px;
@@ -714,7 +712,7 @@
   }
   .admin-date-chip {
     flex-shrink: 0;
-    background: rgba(30, 41, 59, 0.8);
+    background: rgba(30, 41, 59, 0.85);
     border: 1px solid var(--border);
     color: var(--text-sub);
     padding: 5px 12px;
@@ -867,15 +865,17 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
-    padding: 2px 7px;
-    border-radius: 6px;
-    font-size: 11px;
-    height: 24px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 10.5px;
+    height: 22px;
     line-height: 1;
     box-sizing: border-box;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .status-toggle-label {
     display: inline-flex;
@@ -886,6 +886,7 @@
     margin: 0;
     line-height: 1;
     user-select: none;
+    white-space: nowrap;
   }
   .status-toggle-label input { margin: 0; vertical-align: middle; }
 
@@ -947,40 +948,51 @@
     cursor: pointer;
   }
 
+  /* カード内レイアウト（改行防止・すっきり横並び） */
   .admin-member-card {
     background: rgba(15, 23, 42, 0.7);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 8px 10px;
     margin-bottom: 6px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
   .member-top-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 6px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* ★改行を完全防止 */
+    overflow-x: auto;
+    padding-bottom: 2px;
   }
   .member-left-side {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex: 1 1 160px;
+    gap: 6px;
+    flex-shrink: 0;
   }
 
-  /* ★参加者の名前カラー分け（プレイヤーは薄い赤、スタッフ・同伴者は黄色） */
-  .member-name { font-size: 14px; font-weight: bold; }
-  .name-player { color: #fca5a5 !important; }
-  .name-non-player { color: #eab308 !important; }
+  /* ★名前の色分け（プレイヤーは白、非プレイヤーは灰色） */
+  .member-name { font-size: 13.5px; font-weight: bold; white-space: nowrap; }
+  .name-player { color: #ffffff !important; }
+  .name-non-player { color: #94a3b8 !important; font-weight: 600; }
   
+  .member-right-side {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
   .badge-transport {
-    font-size: 11px;
-    padding: 2px 7px;
+    font-size: 10px;
+    padding: 2px 6px;
     border-radius: 4px;
     font-weight: 600;
+    white-space: nowrap;
   }
   .transport-car { background: #1e3a8a; color: #93c5fd; }
   .transport-share { background: #064e3b; color: #a7f3d0; }
@@ -1030,11 +1042,16 @@
   }
 
   .btn-action-small {
-    font-size: 11px;
-    padding: 2px 7px;
+    font-size: 10.5px;
+    padding: 2px 6px;
     border-radius: 4px;
     cursor: pointer;
     flex-shrink: 0;
+    white-space: nowrap;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .btn-edit-attendee {
     background: rgba(56, 189, 248, 0.15);
@@ -1307,14 +1324,13 @@
       </div>
 
       <div id="admin-subview-attendance">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+        <!-- ★上部ヘッダー（口頭受付ボタンを削除し、右側の最新化ボタンのみ配置して被りを完全解消） -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
-          <div style="display:flex; gap:6px;">
-            <button type="button" class="tab-btn" id="btn-open-admin-add" style="flex:none; padding:5px 10px; border:1px solid var(--accent); color:#fca5a5; background:rgba(239,68,68,0.15);">＋ 口頭・LINE受付追加</button>
-            <button type="button" class="tab-btn" id="btn-refresh-admin" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 最新化</button>
-          </div>
+          <button type="button" class="tab-btn" id="btn-refresh-admin" style="flex:none; padding:5px 12px; border:1px solid var(--border); font-size:11.5px; border-radius:6px;">🔄 最新化</button>
         </div>
 
+        <!-- 日程クイック切り替えスティッキーバー -->
         <div class="admin-date-tabs-bar" id="admin-date-tabs-bar"></div>
 
         <div id="admin-data-container">
@@ -1322,7 +1338,7 @@
         </div>
 
         <div class="admin-clear-all-wrap">
-          <button type="button" class="btn-clear-all" id="btn-clear-all-data">⚠️ 回答データを全件削除（リセット）</button>
+          <button type="button" class="btn-clear-all" id="btn-clear-all-data">⚠️️ 回答データを全件削除（リセット）</button>
         </div>
       </div>
 
@@ -1519,7 +1535,7 @@
   </div>
 </div>
 
-<!-- ★管理者用：参加者回答の直接編集モーダル -->
+<!-- 管理者用：参加者回答の直接編集モーダル -->
 <div id="admin-edit-entry-modal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️ 回答内容の修正・変更</h3>
@@ -1677,7 +1693,7 @@ var weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 
 var ruleSections = [
   {
-    title: "⚠️ 安全・怪我の防止",
+    title: "⚠️️ 安全・怪我の防止",
     content: "練習前は関節や筋肉のストレッチ、ウォーミングアップを入念に行ってください。\nトライ前は着地ポイントにマットがあるか、ズレや隙間がないかを必ず確認してください。また、マットを一時的に移動した場合は、使用後や練習終了時に必ず元の位置へ戻すよう徹底をお願いします。\nパーク内での怪我や事故につきましては、原則として自己責任の上でご参加ください。万が一に備え、各自でスポーツ安全保険等への加入を推奨します。"
   },
   {
@@ -1835,7 +1851,6 @@ function hideModal(id) {
   if (el) el.style.display = 'none';
 }
 
-// 認証チェック高速化
 function checkGateAccess() {
   var savedName = localStorage.getItem('uchimiya_auth_user');
   if (savedName) {
@@ -2397,7 +2412,7 @@ function formatRuleItem(text, title) {
   str = str.replace(/ぜひ積極的なお手伝いをお願いいたします！/g, '<span class="urgent-highlight">ぜひ積極的なお手伝いをお願いいたします！</span>');
 
   if (title && title.includes("駐車場") && str.includes("駐車レイアウト")) {
-    str += '<div style="margin: 10px 0 6px 0;"><a href="parking-layout.png" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">🗺️️ 駐車レイアウト</a></div>';
+    str += '<div style="margin: 10px 0 6px 0;"><a href="parking-layout.png" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">🗺️ 駐車レイアウト</a></div>';
   }
   return str;
 }
@@ -2929,7 +2944,7 @@ function applyAdminDateFilter(targetDate) {
   });
 }
 
-// 管理者画面描画（名前色分け・編集ボタン対応）
+// 管理者画面描画（改行なし・スッキリ横並び・選手は白、非選手は灰色）
 function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   var tabsBar = document.getElementById('admin-date-tabs-bar');
@@ -3125,7 +3140,7 @@ function renderAdminAttendanceHTML(list) {
       var isCompanionVehicle = String(m.name).includes('（同伴:') || String(m.name).includes('（同伴）');
       var isStaff = String(m.name).includes('（番組スタッフ）') || String(m.note).includes('番組スタッフ');
 
-      // ★名前の色分け：選手は薄い赤(#fca5a5)、スタッフ・同伴者は黄色(#eab308)
+      // ★名前の色分け（プレイヤーは白、非プレイヤーは灰色）
       var isPlayer = !isCompanionVehicle && !isStaff;
       var nameColorClass = isPlayer ? 'name-player' : 'name-non-player';
 
@@ -3148,14 +3163,15 @@ function renderAdminAttendanceHTML(list) {
       var contactKey = date + ":::" + String(m.name).trim();
       var isContacted = !!contactStatusMap[contactKey];
 
-      html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'opacity:0.85; border-left:3px solid #eab308;' : (isStaff ? 'border-left:3px solid #eab308;' : 'border-left:3px solid #fca5a5;')) + '">';
+      // ★カードの見た目をスッキリ整理
+      html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'opacity:0.85; border-left:3px solid #64748b;' : (isStaff ? 'border-left:3px solid #64748b;' : 'border-left:3px solid #ef4444;')) + '">';
       html += '<div class="member-top-row">';
       html += '<div class="member-left-side">';
       html += '<input type="checkbox" class="attendee-check" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" data-row="' + (m.rowIndex || 0) + '">';
       html += '<span class="member-name ' + nameColorClass + '">' + escapeHtml(m.name) + '</span>';
       html += '</div>';
       
-      html += '<div style="display:flex; align-items:center; gap:6px;">';
+      html += '<div class="member-right-side">';
       html += '<div class="status-toggle-box">';
       html += '<label class="status-toggle-label" style="color:' + (isContacted ? '#34d399' : '#94a3b8') + ';">';
       html += '<input type="checkbox" class="contacted-checkbox" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" ' + (isContacted ? 'checked' : '') + '> 連絡済';
@@ -3163,20 +3179,22 @@ function renderAdminAttendanceHTML(list) {
       html += '</div>';
 
       html += '<span class="badge-transport ' + badgeCls + '">' + escapeHtml(m.transport || 'その他') + escapeHtml(carInfo) + '</span>';
-      // ★編集ボタン新設
       html += '<button type="button" class="btn-action-small btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏️ 編集</button>';
-      html += '<button type="button" class="btn-action-small btn-del-single btn-del-attendee" data-name="' + escapeHtml(m.name) + '" data-date="' + escapeHtml(m.date) + '" data-row="' + (m.rowIndex || 0) + '">🗑️ 削除</button>';
+      html += '<button type="button" class="btn-action-small btn-del-single btn-del-attendee" data-name="' + escapeHtml(m.name) + '" data-date="' + escapeHtml(m.date) + '" data-row="' + (m.rowIndex || 0) + '">🗑️</button>';
       html += '</div></div>';
 
-      html += '<div style="font-size:12px; color:#38bdf8;">⏰ ' + escapeHtml(m.time || '時間指定なし') + '</div>';
+      html += '<div style="font-size:11.5px; color:#38bdf8; display:flex; flex-wrap:wrap; gap:4px 10px;">';
+      html += '<span>⏰ ' + escapeHtml(m.time || '時間指定なし') + '</span>';
       if (displayedLeader) {
-        html += '<div style="font-size:12px; color:#34d399;">🤝 相乗り: ' + escapeHtml(displayedLeader) + '号車</div>';
+        html += '<span style="color:#34d399;">🤝 相乗り: ' + escapeHtml(displayedLeader) + '号車</span>';
       }
       if (hasCompanion) {
-        html += '<div style="font-size:12px; color:#cbd5e1;">👥 同伴: ' + escapeHtml(m.companionCount) + ' (' + escapeHtml(m.companionNames) + ')</div>';
+        html += '<span style="color:#cbd5e1;">👥 同伴: ' + escapeHtml(m.companionCount) + ' (' + escapeHtml(m.companionNames) + ')</span>';
       }
+      html += '</div>';
+
       if (hasNote) {
-        html += '<div style="font-size:12px; color:#cbd5e1; border-top:1px dashed rgba(255,255,255,0.08); padding-top:4px; margin-top:2px;">💬 備考: ' + escapeHtml(m.note) + '</div>';
+        html += '<div style="font-size:11px; color:#94a3b8; border-top:1px dashed rgba(255,255,255,0.08); padding-top:3px; margin-top:2px;">💬 備考: ' + escapeHtml(m.note) + '</div>';
       }
       html += '</div>';
     });
@@ -3215,7 +3233,7 @@ function renderAdminAttendanceHTML(list) {
   container.innerHTML = html;
   applyAdminDateFilter(currentAdminSelectedDate);
 
-  // ★「✏️ 編集」ボタンのクリックイベント
+  // 編集ボタンイベント
   container.querySelectorAll('.btn-edit-attendee').forEach(function(btn) {
     btn.onclick = function() {
       var row = Number(this.getAttribute('data-row'));
@@ -3284,7 +3302,6 @@ function renderAdminAttendanceHTML(list) {
     };
   });
 
-  // 一括削除（1回通信＆即座反映）
   container.querySelectorAll('.btn-batch-del').forEach(function(btn) {
     btn.onclick = function() {
       var d = this.getAttribute('data-date');
@@ -3340,7 +3357,6 @@ function renderAdminAttendanceHTML(list) {
     }
   }
 
-  // 単一削除
   container.querySelectorAll('.btn-del-attendee').forEach(function(btn) {
     btn.onclick = function() {
       var name = this.getAttribute('data-name');
@@ -3509,7 +3525,7 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // ★手動代理追加モーダルを開く処理（現在の日程タブから自動引き継ぎ・10/1リセット防止）
+  // 手動代理追加モーダルを開く処理
   function openManualAddModalCommon() {
     var targetDate = "";
     if (currentAdminSelectedDate && currentAdminSelectedDate !== 'ALL') {
@@ -3533,9 +3549,6 @@ window.addEventListener('DOMContentLoaded', function() {
     showModal('admin-add-modal');
   }
 
-  var btnOpenAdminAdd = document.getElementById('btn-open-admin-add');
-  if (btnOpenAdminAdd) btnOpenAdminAdd.onclick = openManualAddModalCommon;
-
   var fabAdminAddBtn = document.getElementById('fab-admin-add-btn');
   if (fabAdminAddBtn) fabAdminAddBtn.onclick = openManualAddModalCommon;
 
@@ -3552,7 +3565,6 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // 手動追加の保存
   var mAddForm = document.getElementById('admin-manual-add-form');
   if (mAddForm) {
     mAddForm.onsubmit = function(e) {
@@ -3610,7 +3622,7 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // ★回答編集モーダルの処理
+  // 回答編集モーダル
   var editTransport = document.getElementById('edit-transport');
   if (editTransport) {
     editTransport.onchange = function() {
