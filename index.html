@@ -34,7 +34,7 @@
     .card { background: var(--card-bg); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     h2 { font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 
-    /* 管理者専用: 日程タブバー（固定スティッキー） */
+    /* 管理者専用: 日程クイック切り替えスティッキーバー */
     .sticky-date-bar {
       position: sticky;
       top: 0;
@@ -68,7 +68,7 @@
     .attendee-item:last-child { border-bottom: none; }
     .contacted-check { text-align: center; }
 
-    /* 右下固定アクションボタン (FAB) */
+    /* 右下固定フローティングボタン (FAB) */
     .fab-add-btn {
       position: fixed;
       bottom: 24px;
@@ -89,7 +89,7 @@
     }
     .fab-add-btn:active { transform: scale(0.96); }
 
-    /* 要望カード（最新が上） */
+    /* 要望カード（最新が一番上） */
     .feedback-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
     .feedback-meta { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; margin-bottom: 6px; }
     .feedback-text { font-size: 14px; white-space: pre-wrap; }
@@ -99,6 +99,8 @@
     .modal-card { background: #fff; border-radius: var(--radius); width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding: 20px; }
     .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
     .input-row > * { flex: 1; }
+    
+    /* 区分と参加日などの高さを38pxで完全統一 */
     .input-field { width: 100%; height: 38px; padding: 0 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
     textarea.input-field { height: 72px; padding: 8px 10px; }
     .btn-submit { width: 100%; height: 42px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; }
@@ -112,9 +114,9 @@
     <p>内宮パーク 専用ポータル</p>
   </header>
 
-  <!-- タブバー -->
+  <!-- タブナビゲーション -->
   <div class="nav-tabs">
-    <button class="active" onclick="switchMainTab('tab-attend')">✍️ 参加回答</button>
+    <button class="active" onclick="switchMainTab('tab-attend')">✍️ 合トレ参加回答</button>
     <button onclick="switchMainTab('tab-admin')">⚙️ 管理者</button>
     <button onclick="switchMainTab('tab-feedback')">💬 要望・意見</button>
   </div>
@@ -171,12 +173,10 @@
       </div>
 
       <div id="adminDashboard" style="display:none;">
-        <!-- 日程クイック切り替えスティッキーバー -->
-        <div class="sticky-date-bar" id="dateFilterBar">
-          <!-- JSで動的にボタン生成 -->
-        </div>
+        <!-- 日程クイック切り替えスティッキーバー（スクロール解消） -->
+        <div class="sticky-date-bar" id="dateFilterBar"></div>
 
-        <!-- 日程ごとのリスト群 -->
+        <!-- 日程ごとの集計リスト -->
         <div id="adminDateLists"></div>
       </div>
     </div>
@@ -199,7 +199,7 @@
 
   </div>
 
-  <!-- スクロールしても常に右下に常駐する追加ボタン（管理者時のみ表示） -->
+  <!-- スクロールしても常に右下に常駐する受付追加ボタン（管理者ログイン時のみ表示） -->
   <button id="fabAdminBtn" class="fab-add-btn" onclick="openManualModal()">
     <span>➕ 口頭・LINE受付追加</span>
   </button>
@@ -213,7 +213,7 @@
           <label style="font-size:12px; color:var(--text-muted);">氏名</label>
           <input type="text" id="mName" class="input-field" required>
         </div>
-        <!-- 区分と参加日の高さを38pxで完全一致 -->
+        <!-- 区分と参加日：高さを38pxで完全一致 -->
         <div class="input-row">
           <div>
             <label style="font-size:12px; color:var(--text-muted);">区分</label>
@@ -256,18 +256,22 @@
     let globalAttendance = [];
     let globalFeedback = [];
 
-    // 初期化
+    // 初期データ読み込み
     window.onload = function() {
+      const savedCode = localStorage.getItem('u_park_auth_code') || '';
       google.script.run.withSuccessHandler(function(res) {
         if (res) {
           globalAttendance = res.attendance || [];
           globalFeedback = res.feedback || [];
+          if (res.userName) {
+            document.getElementById('formUserName').value = res.userName;
+          }
           renderFeedback();
         }
-      }).getPortalData('');
+      }).getPortalData(savedCode);
     };
 
-    // タブ切り替え
+    // メインタブ切り替え
     function switchMainTab(tabId) {
       document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -275,7 +279,7 @@
       document.getElementById(tabId).classList.add('active');
     }
 
-    // 管理者認証
+    // 管理者認証（PW: okpl）
     function checkAdminPw() {
       const pw = document.getElementById('adminPw').value;
       if (pw === 'okpl') {
@@ -288,14 +292,14 @@
       }
     }
 
-    // 日付文字列を確実に正規化（ズレ防止）
+    // 日付ズレ防止：正規表現による文字列直抽出
     function extractDateStr(str) {
       if (!str) return '未定';
       const m = str.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
       return m ? `${m[1]}/${Number(m[2])}/${Number(m[3])}` : str;
     }
 
-    // 管理者画面の描画（日程タブ + 日程別表示）
+    // 管理者画面の描画（日程タブ + 日程別リスト）
     function renderAdminAttendance() {
       const groups = {};
       for (let i = 1; i < globalAttendance.length; i++) {
@@ -307,7 +311,7 @@
 
       const dates = Object.keys(groups).sort();
 
-      // 1. スティッキーバーに日程切り替えボタンを生成
+      // 1. 上部の固定バーに日程切り替えボタンを生成
       const filterBar = document.getElementById('dateFilterBar');
       let barHtml = `<button class="date-filter-chip active" onclick="filterDate('ALL', this)">すべて</button>`;
       dates.forEach(d => {
@@ -320,13 +324,14 @@
       let listsHtml = '';
       dates.forEach(d => {
         const members = groups[d];
+        const carCount = members.filter(m => m[4] === '車').length;
         listsHtml += `
           <div class="card admin-date-card" data-date="${d}">
             <h2>📅 ${d}（参加: ${members.length}名）</h2>
             <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
-              車利用: ${members.filter(m => m[4] === '車').length}台
+              🚗 車利用: ${carCount}台
             </div>
-            ${members.map((m, idx) => `
+            ${members.map((m) => `
               <div class="attendee-item">
                 <div>
                   <strong>${m[1]}</strong>
@@ -346,7 +351,7 @@
       container.innerHTML = listsHtml;
     }
 
-    // 日程クイック切り替え（スクロール不要で即座に対象日程のみ表示）
+    // 日程切り替え（目的の日付だけを即座に表示してスクロール不要に）
     function filterDate(dateKey, btn) {
       document.querySelectorAll('.date-filter-chip').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
@@ -386,7 +391,7 @@
       container.innerHTML = html;
     }
 
-    // モーダル操作
+    // モーダル開閉
     function openManualModal() {
       document.getElementById('manualModal').style.display = 'flex';
     }
@@ -394,7 +399,7 @@
       document.getElementById('manualModal').style.display = 'none';
     }
 
-    // 回答送信（一般）
+    // 一般参加回答送信
     function handleUserSubmit(e) {
       e.preventDefault();
       const data = {
@@ -406,7 +411,7 @@
         note: document.getElementById('formNote').value
       };
       google.script.run.withSuccessHandler(() => {
-        alert('回答を送信しました！');
+        alert('参加回答を送信しました！');
         location.reload();
       }).submitAttendance(data);
     }
