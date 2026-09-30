@@ -169,7 +169,7 @@
     cursor: pointer;
   }
 
-  /* ★回答者自身が自分の予約を確認・編集・取消できるアコーディオン＆横スライドパネル */
+  /* 回答者自身の予約確認・編集・取消パネル（初期は閉じた状態＆横スライド） */
   .my-attendance-panel {
     background: rgba(15, 23, 42, 0.95);
     border: 1px solid rgba(56, 189, 248, 0.35);
@@ -198,7 +198,7 @@
   .my-attendance-body {
     padding: 10px 12px;
     border-top: 1px solid var(--border);
-    display: none; /* ★初期状態は閉じた状態（縮小化） */
+    display: none;
   }
 
   /* 横スライドラッパー */
@@ -217,7 +217,7 @@
   }
 
   .my-entry-card {
-    flex: 0 0 250px; /* 横スライドカード幅 */
+    flex: 0 0 250px;
     scroll-snap-align: start;
     background: rgba(30, 41, 59, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -375,7 +375,7 @@
     border-radius: 12px;
     padding: 18px;
     width: 100%;
-    max-width: 360px;
+    max-width: 400px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
     max-height: 90vh;
     overflow-y: auto;
@@ -982,7 +982,7 @@
     min-width: 0;
   }
 
-  /* 名前：16px・太字で視認性統一（選手は白、非選手・ロケ班等はグレー） */
+  /* 名前：16px・太字で視認性統一（選手は白、非選手・ロケ班・その他等はグレー） */
   .member-name {
     font-family: inherit;
     font-size: 16px;
@@ -1222,9 +1222,10 @@
   <div id="view-form">
     <div class="submit-success-box" id="success-msg">
       <div class="submit-success-title">✓ 参加情報を送信しました！回答ありがとうございます。</div>
+      <!-- ★ご要望通りの改行指定 -->
       <div class="submit-success-note">
         ※別日程の参加も希望される場合は、このまま日程を選択して<br>再度送信できます。<br>
-        ※回答の変更や取り消しは、下記「あなたの回答状況」から直接操作<br>できます。<br>
+        ※回答の変更や取り消しは、下記「あなたの回答状況」から直接操作<br>できます。
       </div>
     </div>
 
@@ -1323,7 +1324,7 @@
       <div class="admin-subnav">
         <button type="button" class="admin-sub-btn active" id="admin-sub-btn-att">👥 参加状況</button>
         <button type="button" class="admin-sub-btn" id="admin-sub-btn-rules">📜 注意事項編集</button>
-        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs">⚙️️ セット稼働状況編集</button>
+        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs">⚙️ セット稼働状況編集</button>
       </div>
 
       <div id="admin-subview-attendance">
@@ -1381,7 +1382,6 @@
           <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
         </div>
 
-        <!-- 最上部：届いた要望（縦スクロールで長文も自然に読めるパネル） -->
         <div class="feedback-quick-panel">
           <div class="feedback-quick-header" id="btn-toggle-feedbacks">
             <div class="feedback-quick-title">
@@ -1470,7 +1470,7 @@
             <option value="プレイヤー">選手（プレイヤー）</option>
             <option value="ロケ班">ロケ班</option>
             <option value="同伴者">同伴者（見学等）</option>
-            <option value="その他">その他（カッコなし）</option>
+            <option value="その他">その他</option>
           </select>
         </div>
         <div class="compact-field-group">
@@ -1543,7 +1543,7 @@
   </div>
 </div>
 
-<!-- 回答内容の修正・編集モーダル -->
+<!-- ★回答内容の修正・編集モーダル（同伴者・他参加者もまとめて編集可能） -->
 <div id="admin-edit-entry-modal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️ 回答内容の修正・変更</h3>
@@ -1557,7 +1557,7 @@
             <option value="プレイヤー">選手（プレイヤー）</option>
             <option value="ロケ班">ロケ班</option>
             <option value="同伴者">同伴者（見学等）</option>
-            <option value="その他">その他（カッコなし）</option>
+            <option value="その他">その他</option>
           </select>
         </div>
         <div class="compact-field-group">
@@ -1612,19 +1612,26 @@
         </div>
       </div>
 
-      <div class="compact-form-row">
-        <div class="compact-field-group">
-          <label>同伴人数</label>
-          <input type="text" id="edit-companion-count" placeholder="例: 0名、2名">
+      <!-- ★同伴者・他参加者の編集セクション -->
+      <div style="background:rgba(15,23,42,0.6); border:1px dashed var(--border); border-radius:8px; padding:10px; margin-bottom:10px;">
+        <label style="font-size:12px; color:#38bdf8; margin-bottom:6px;">👥 同伴者・お連れ様の変更</label>
+        <div class="compact-form-row" style="margin-bottom:6px;">
+          <div class="compact-field-group">
+            <label>同伴人数</label>
+            <input type="text" id="edit-companion-count" placeholder="例: 0名、2名">
+          </div>
+          <div class="compact-field-group">
+            <label>同伴内訳・お名前</label>
+            <input type="text" id="edit-companion-names" placeholder="例: 内宮花子(家族 1名)">
+          </div>
         </div>
-        <div class="compact-field-group">
-          <label>同伴内訳</label>
-          <input type="text" id="edit-companion-names" placeholder="例: 内宮花子(家族 1名)">
-        </div>
+        <p style="font-size:10.5px; color:var(--text-sub); margin:0; line-height:1.4;">
+          ※他参加者や同伴者の追加・削除・変更内容はこちらの内訳および下の備考欄に自由にご入力いただけます。
+        </p>
       </div>
 
       <div class="compact-field-group" style="margin-bottom:14px;">
-        <label>備考</label>
+        <label>備考・連絡事項</label>
         <input type="text" id="edit-note" placeholder="備考" style="height:38px;">
       </div>
 
@@ -1934,7 +1941,7 @@ function verifyGateCode() {
     });
 }
 
-// ★★★ 回答者自身の回答一覧（横スライド・初期は閉じた状態） ★★★
+// 回答者自身の回答一覧（横スライド・初期は閉じた状態）
 function renderMyAttendanceList(userName) {
   var panel = document.getElementById('my-attendance-panel');
   var container = document.getElementById('my-attendance-list-container');
@@ -1964,7 +1971,6 @@ function renderMyAttendanceList(userName) {
     return normalizeDateKey(a.date).localeCompare(normalizeDateKey(b.date));
   });
 
-  // 横スライドラッパー
   var html = '<div class="my-attendance-scroll-wrap">';
   myRecords.forEach(function(rec) {
     var transText = rec.transport || 'その他';
@@ -2056,7 +2062,7 @@ function refreshMyAttendanceView() {
     });
 }
 
-// ★「ロケ班」「同伴者」「その他」に対応したモーダルオープン
+// 編集モーダルオープン
 function openEditModalByRow(row) {
   var target = registeredRecords.find(function(r) { return Number(r.rowIndex) === row; });
   if (!target) return;
@@ -2069,9 +2075,8 @@ function openEditModalByRow(row) {
   } else if (rawName.includes('（同伴') || rawName.includes('(同伴')) {
     cat = "同伴者";
     rawName = rawName.replace(/（同伴.*?）/g, '').replace(/\(同伴.*?\)/g, '').trim();
-  } else if (rawName.includes('（その他）')) {
+  } else if (String(target.note || '').includes('区分:その他')) {
     cat = "その他";
-    rawName = rawName.replace('（その他）', '').trim();
   }
 
   document.getElementById('edit-row-index').value = row;
@@ -2087,7 +2092,9 @@ function openEditModalByRow(row) {
   document.getElementById('edit-share-leader').value = target.carLeader || '';
   document.getElementById('edit-companion-count').value = target.companionCount || '0名';
   document.getElementById('edit-companion-names').value = target.companionNames || 'なし';
-  document.getElementById('edit-note').value = target.note || '';
+  
+  var cleanNote = String(target.note || '').replace(/（管理者登録:.*?）/g, '').replace(/区分:その他/g, '').trim();
+  document.getElementById('edit-note').value = cleanNote;
 
   var isCar = trans === '自車';
   var isShare = trans.includes('乗り合い');
@@ -2586,7 +2593,7 @@ function formatRuleItem(text, title) {
   str = str.replace(/ぜひ積極的なお手伝いをお願いいたします！/g, '<span class="urgent-highlight">ぜひ積極的なお手伝いをお願いいたします！</span>');
 
   if (title && title.includes("駐車場") && str.includes("駐車レイアウト")) {
-    str += '<div style="margin: 10px 0 6px 0;"><a href="parking-layout.png" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">🗺️ 駐車レイアウト</a></div>';
+    str += '<div style="margin: 10px 0 6px 0;"><a href="parking-layout.png" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #ef4444; color: #f8fafc; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold;">🗺️️ 駐車レイアウト</a></div>';
   }
   return str;
 }
@@ -2623,7 +2630,7 @@ function renderAdminRulesEditor() {
     html += '<button type="button" class="btn-order-move btn-move-up" data-idx="' + idx + '" ' + (idx === 0 ? 'disabled' : '') + '>▲</button>';
     html += '<button type="button" class="btn-order-move btn-move-down" data-idx="' + idx + '" ' + (idx === ruleSections.length - 1 ? 'disabled' : '') + '>▼</button>';
     html += '</div></div>';
-    html += '<button type="button" class="action-pill-btn btn-del-rule" data-idx="' + idx + '" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">🗑️ 削除</button>';
+    html += '<button type="button" class="action-pill-btn btn-del-rule" data-idx="' + idx + '" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">🗑 削除</button>';
     html += '</div>';
 
     html += '<input type="text" id="rule-title-' + idx + '" class="rule-title-input" data-idx="' + idx + '" value="' + escapeHtml(sec.title) + '" style="margin-bottom:8px; font-weight:bold;">';
@@ -3116,7 +3123,7 @@ function applyAdminDateFilter(targetDate) {
   });
 }
 
-// 管理者画面描画（「ロケ班」バッジ表記・色分け対応）
+// 管理者画面描画（★非プレイヤーはプレイヤーの下に並ぶように自動ソート）
 function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   var tabsBar = document.getElementById('admin-date-tabs-bar');
@@ -3167,10 +3174,21 @@ function renderAdminAttendanceHTML(list) {
   var html = '';
 
   sortedDates.forEach(function(date) {
-    var members = groups[date];
+    var rawMembers = groups[date];
+
+    // ★★★ 選手（プレイヤー）が上、非プレイヤー（ロケ班・同伴・その他）が下になるよう整列 ★★★
+    var members = rawMembers.slice().sort(function(a, b) {
+      var isNonA = String(a.name).includes('（同伴:') || String(a.name).includes('（同伴）') || String(a.name).includes('（ロケ班）') || String(a.name).includes('（番組スタッフ）') || String(a.note).includes('区分:その他');
+      var isNonB = String(b.name).includes('（同伴:') || String(b.name).includes('（同伴）') || String(b.name).includes('（ロケ班）') || String(b.name).includes('（番組スタッフ）') || String(b.note).includes('区分:その他');
+      if (isNonA && !isNonB) return 1;
+      if (!isNonA && isNonB) return -1;
+      return Number(a.rowIndex) - Number(b.rowIndex);
+    });
+
     var companionTotal = 0;
     var playerTotal = 0;
     var staffTotal = 0;
+    var otherTotal = 0;
     var carpoolMap = {};
     var carpoolCarTypes = {};
     var carpoolDisplayNames = {};
@@ -3182,9 +3200,12 @@ function renderAdminAttendanceHTML(list) {
     members.forEach(function(m) {
       var isCompanionVehicle = String(m.name).includes('（同伴:') || String(m.name).includes('（同伴）');
       var isStaff = String(m.name).includes('（ロケ班）') || String(m.name).includes('（番組スタッフ）') || String(m.note).includes('ロケ班') || String(m.note).includes('番組スタッフ');
+      var isOther = String(m.note).includes('（管理者登録: その他') || String(m.note).includes('区分:その他');
 
       if (isStaff) {
         staffTotal++;
+      } else if (isOther) {
+        otherTotal++;
       } else if (!isCompanionVehicle) {
         playerTotal++;
         companionTotal += parseCompanionCount(m.companionCount);
@@ -3258,7 +3279,7 @@ function renderAdminAttendanceHTML(list) {
     });
 
     var totalCars = countedCarsMap.size;
-    var grandTotalPeople = playerTotal + companionTotal + staffTotal;
+    var grandTotalPeople = playerTotal + companionTotal + staffTotal + otherTotal;
 
     html += '<div class="admin-date-group ' + (isDateCanceled ? 'is-canceled' : '') + '" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
@@ -3285,11 +3306,14 @@ function renderAdminAttendanceHTML(list) {
     if (companionTotal > 0) {
       html += '<span style="font-size:10px; background:#475569; color:#f1f5f9; padding:2px 6px; border-radius:10px; white-space:nowrap;">同伴: ' + companionTotal + '名</span>';
     }
+    if (otherTotal > 0) {
+      html += '<span style="font-size:10px; background:#334155; color:#cbd5e1; padding:2px 6px; border-radius:10px; white-space:nowrap;">他: ' + otherTotal + '名</span>';
+    }
     html += '<span style="font-size:10px; background:#10b981; color:#fff; padding:2px 7px; border-radius:10px; font-weight:bold; white-space:nowrap;">計: ' + grandTotalPeople + '名</span>';
     html += '</div></div>';
 
     html += '<div class="admin-card-stats">';
-    html += '<span>👥 <b>人数計: <span class="people-stat-badge">' + grandTotalPeople + '名</span></b> (選手: ' + playerTotal + ' / ロケ班: ' + staffTotal + ' / 同伴: ' + companionTotal + ')</span>';
+    html += '<span>👥 <b>人数計: <span class="people-stat-badge">' + grandTotalPeople + '名</span></b> (選手: ' + playerTotal + ' / ロケ班: ' + staffTotal + (otherTotal > 0 ? ' / 他: ' + otherTotal : '') + ' / 同伴: ' + companionTotal + ')</span>';
     html += '<span>🚗 <b>車両計: <span class="car-stat-badge">' + totalCars + '台</span></b> (普通: ' + carsStandard + '台 / 軽: ' + carsLight + '台' + (carsOther > 0 ? ' / 他: ' + carsOther + '台' : '') + ')</span>';
     html += '</div>';
 
@@ -3333,7 +3357,7 @@ function renderAdminAttendanceHTML(list) {
       html += '<div class="swipe-item-container">';
       html += '<div class="swipe-delete-action btn-swipe-del" data-name="' + escapeHtml(m.name) + '" data-date="' + escapeHtml(m.date) + '" data-row="' + (m.rowIndex || 0) + '">削除</div>';
 
-      html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'border-left:3.5px solid #64748b;' : (isStaff ? 'border-left:3.5px solid #64748b;' : 'border-left:3.5px solid #ef4444;')) + '">';
+      html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'border-left:3.5px solid #64748b;' : (isStaff || isOther ? 'border-left:3.5px solid #64748b;' : 'border-left:3.5px solid #ef4444;')) + '">';
       
       html += '<div class="member-top-row">';
       html += '<div class="member-left-side">';
@@ -3624,7 +3648,7 @@ window.addEventListener('DOMContentLoaded', function() {
   var btnReset = document.getElementById('btn-reset-auth');
   if (btnReset) btnReset.onclick = resetUserAuth;
 
-  // ★「あなたの回答・予約状況」の開閉トグル
+  // 「あなたの回答・予約状況」の開閉トグル
   var toggleMyAtt = document.getElementById('btn-toggle-my-attendance');
   var myAttBody = document.getElementById('my-attendance-content');
   var myAttArrow = document.getElementById('my-attendance-toggle-arrow');
@@ -3738,7 +3762,7 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // ★手動追加の保存（ロケ班・同伴・その他対応）
+  // 手動追加の保存
   var mAddForm = document.getElementById('admin-manual-add-form');
   if (mAddForm) {
     mAddForm.onsubmit = function(e) {
@@ -3761,7 +3785,6 @@ window.addEventListener('DOMContentLoaded', function() {
       var finalName = rawName;
       if (cat === "ロケ班") finalName += "（ロケ班）";
       else if (cat === "同伴者") finalName += "（同伴）";
-      // その他はカッコを付けずにそのままの名前を使用
 
       var finalLeader = "";
       if (transVal === "自車") finalLeader = customCarName;
@@ -3801,7 +3824,7 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // ★回答編集モーダル（ロケ班・同伴・その他対応）
+  // 回答編集モーダル
   var editTransport = document.getElementById('edit-transport');
   if (editTransport) {
     editTransport.onchange = function() {
@@ -3840,11 +3863,14 @@ window.addEventListener('DOMContentLoaded', function() {
       var finalName = rawName;
       if (cat === "ロケ班") finalName += "（ロケ班）";
       else if (cat === "同伴者") finalName += "（同伴）";
-      // その他はカッコを付けずにそのまま
 
       var finalLeader = "";
       if (transVal === "自車") finalLeader = customCarName;
       else if (transVal.includes("乗り合い")) finalLeader = shareLeader;
+
+      var extraNote = "";
+      if (cat === "その他") extraNote = "区分:その他";
+      var fullNote = noteVal ? (extraNote ? extraNote + " " + noteVal : noteVal) : extraNote;
 
       hideModal('admin-edit-entry-modal');
       showProgressModal("回答を更新中...");
@@ -3864,7 +3890,7 @@ window.addEventListener('DOMContentLoaded', function() {
           carLeader: finalLeader,
           companionCount: companionCount,
           companionNames: companionNames,
-          note: noteVal
+          note: fullNote
         })
       }).then(function() {
         finishProgressModal("更新完了！", function() {
@@ -3878,7 +3904,7 @@ window.addEventListener('DOMContentLoaded', function() {
             target.carLeader = finalLeader;
             target.companionCount = companionCount;
             target.companionNames = companionNames;
-            target.note = noteVal;
+            target.note = fullNote;
             try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
             renderAdminAttendanceHTML(registeredRecords);
             var user = localStorage.getItem('uchimiya_auth_user');
