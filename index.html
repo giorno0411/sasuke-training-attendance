@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>U PARK PORTAL</title>
 
-<!-- OGP設定（LINE・SNS等でのリンク共有プレビュー用） -->
+<!-- OGP設定 -->
 <meta property="og:title" content="U PARK PORTAL">
 <meta property="og:description" content="内宮パーク 専用ポータル">
 <meta property="og:type" content="website">
@@ -697,7 +697,7 @@
     color: #fca5a5;
   }
 
-  /* 管理者画面: スクロール解消の日程クイック切り替えスティッキーバー */
+  /* 管理者画面: 日程クイック切り替えスティッキーバー */
   .admin-date-tabs-bar {
     position: sticky;
     top: 0;
@@ -732,7 +732,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
-  /* ★右下固定「受付追加」ボタン（ネオン発光オフ、上品な中央揃え） */
+  /* ★右下固定「受付追加」ボタン（ネオン無効・赤色マット・完全センター揃え） */
   .fab-admin-add {
     position: fixed;
     bottom: 22px;
@@ -741,16 +741,16 @@
     display: none; /* 参加状況タブ時のみ flex で表示 */
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    background: #1e293b;
-    color: #f8fafc;
-    border: 1px solid rgba(239, 68, 68, 0.8);
-    padding: 9px 18px;
+    gap: 6px;
+    background: #dc2626; /* 落ち着いたマットな赤 */
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 18px;
     border-radius: 24px;
     font-weight: bold;
     font-size: 13px;
-    letter-spacing: 0.2px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45); /* 黒系シャドウのみ */
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
     text-align: center;
@@ -761,12 +761,11 @@
     justify-content: center;
   }
   .fab-admin-add:hover {
-    background: #334155;
-    border-color: #ef4444;
+    background: #b91c1c;
   }
   .fab-admin-add:active {
     transform: scale(0.96);
-    background: #0f172a;
+    background: #991b1b;
   }
 
   .admin-date-group {
@@ -1277,7 +1276,7 @@
 
         <div style="margin-top:24px; padding-top:16px; border-top:1px dashed var(--border);">
           <div style="font-size:13px; font-weight:bold; color:#93c5fd; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-            <span>👁️ 公開プレビュー（ユーザー画面と同じ表示）</span>
+            <span>👁️️ 公開プレビュー（ユーザー画面と同じ表示）</span>
           </div>
           <div id="rules-live-preview-container"></div>
         </div>
@@ -1314,7 +1313,7 @@
 
 </div>
 
-<!-- ★参加状況画面専用・右下固定受付追加ボタン（ネオン無効・中央揃え） -->
+<!-- ★参加状況専用・右下固定受付追加ボタン（ネオン無効・赤色マット・完全センター揃え） -->
 <button type="button" class="fab-admin-add" id="fab-admin-add-btn">
   <span>➕ 受付追加</span>
 </button>
@@ -1630,14 +1629,14 @@ function showProgressModal(text) {
   var txt = document.getElementById('progress-status-text');
   var bar = document.getElementById('progress-bar-inner');
   if (txt) txt.innerText = text || "データ処理中...";
-  if (bar) bar.style.width = '25%';
+  if (bar) bar.style.width = '35%';
   if (modal) modal.style.display = 'flex';
 
   clearInterval(globalProgressTimer);
   globalProgressTimer = setInterval(function() {
-    var cur = parseInt(bar.style.width) || 25;
+    var cur = parseInt(bar.style.width) || 35;
     if (cur < 85) bar.style.width = (cur + 15) + '%';
-  }, 300);
+  }, 200);
 }
 
 function finishProgressModal(successText, callback) {
@@ -1649,7 +1648,7 @@ function finishProgressModal(successText, callback) {
   setTimeout(function() {
     hideModal('submit-progress-modal');
     if (callback) callback();
-  }, 400);
+  }, 350);
 }
 
 function escapeHtml(str) {
@@ -1666,31 +1665,22 @@ function hideModal(id) {
   if (el) el.style.display = 'none';
 }
 
+// ★ログイン認証高速化：キャッシュがあれば通信待ちなしで即入場
 function checkGateAccess() {
-  var savedCode = localStorage.getItem('uchimiya_auth_code');
   var savedName = localStorage.getItem('uchimiya_auth_user');
-
-  if (savedCode) {
-    fetch(GAS_URL + "?type=verify_code&code=" + encodeURIComponent(savedCode) + "&t=" + Date.now())
-      .then(function(res){ return res.json(); })
-      .then(function(data){
-        if (data && data.valid && data.name) {
-          localStorage.setItem('uchimiya_auth_user', data.name);
-          applyAuthenticatedUser(data.name);
-        }
-      }).catch(function(){});
-  }
+  var savedCode = localStorage.getItem('uchimiya_auth_code');
 
   if (savedName) {
     applyAuthenticatedUser(savedName);
     hideModal('gate-modal');
     return;
   }
+
   showModal('gate-modal');
   setTimeout(function() {
     var inp = document.getElementById('gate-code-input');
     if (inp) inp.focus();
-  }, 150);
+  }, 100);
 }
 
 function applyAuthenticatedUser(name) {
@@ -1763,7 +1753,7 @@ function switchTab(tab) {
   if (vs) vs.classList.toggle('hidden', tab !== 'status');
   if (va) va.classList.add('hidden');
   
-  // 一般タブ切り替え時は右下ボタンを必ず非表示
+  // 一般タブでは右下ボタンを非表示
   if (fab) fab.style.display = 'none';
 
   var tbf = document.getElementById('tab-btn-form');
@@ -2714,7 +2704,7 @@ function renderAdminObstacleEditor() {
   });
 }
 
-// ★セット要望（アクセスログ）の読み込み・最新順描画（両データ形式対応で確実に復元）
+// ★セット要望を「新しい順（降順）」で表示＆データ構造正規化
 function loadRemoteFeedbacks() {
   var container = document.getElementById('admin-feedbacks-container');
   if (!container) return;
@@ -2727,23 +2717,21 @@ function loadRemoteFeedbacks() {
         return;
       }
       
-      // オブジェクト形式・行配列形式の両方に対応して正規化
       var normalized = [];
       list.forEach(function(f, idx) {
         if (Array.isArray(f)) {
-          // ヘッダー行があればスキップ
           if (idx === 0 && (f[0] === 'タイムスタンプ' || f[0] === '送信日時')) return;
           normalized.push({
             date: f[0] || '',
             name: f[1] || '匿名',
-            target: f[3] || 'セット要望',
-            content: f[2] || f[3] || ''
+            target: f[2] || 'セット全般',
+            content: f[3] || f[2] || ''
           });
         } else if (typeof f === 'object' && f !== null) {
           normalized.push({
             date: f.date || f.timestamp || '',
             name: f.name || f.userName || '匿名',
-            target: f.target || 'セット要望',
+            target: f.target || 'セット全般',
             content: f.content || f.message || ''
           });
         }
@@ -2754,7 +2742,6 @@ function loadRemoteFeedbacks() {
         return;
       }
 
-      // ★最新が一番上になるよう逆順にソート
       var reversedList = normalized.slice().reverse();
 
       var html = '';
@@ -3070,7 +3057,7 @@ function renderAdminAttendanceHTML(list) {
         html += '<div>';
         
         if (showMergeButton) {
-          html += '<button type="button" class="btn-merge-car btn-do-merge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(k) + '">✏️ 統合・変更</button>';
+          html += '<button type="button" class="btn-merge-car btn-do-merge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(k) + '">✏️️ 統合・変更</button>';
         }
         
         if (isMerged) {
@@ -3333,9 +3320,7 @@ window.addEventListener('DOMContentLoaded', function() {
       document.getElementById('tab-btn-column').classList.remove('active');
       document.getElementById('tab-btn-status').classList.remove('active');
       
-      // 管理者ログイン直後は「参加状況」サブタブが開くのでボタンを表示
       switchAdminSubTab('attendance');
-
       fetchAdminData(false);
     } else {
       alert("パスワードが正しくありません。");
@@ -3495,7 +3480,7 @@ window.addEventListener('DOMContentLoaded', function() {
   if (btnRefFeedbacks) btnRefFeedbacks.onclick = function() {
     showProgressModal("要望を読み込み中...");
     loadRemoteFeedbacks();
-    setTimeout(function() { finishProgressModal("更新完了！"); }, 500);
+    setTimeout(function() { finishProgressModal("更新完了！"); }, 400);
   };
 
   var btnCloseViewer = document.getElementById('btn-viewer-close');
@@ -3638,6 +3623,7 @@ window.addEventListener('DOMContentLoaded', function() {
   }, 100);
 });
 
+// ★送信高速化：複数通信をまとめ1回のバッチPOSTで送信
 function submitAttendance(e) {
   e.preventDefault();
   var arr = Array.from(selectedDates).sort();
@@ -3832,14 +3818,13 @@ function submitAttendance(e) {
 
   showProgressModal("データ送信中...");
 
-  Promise.all(payloads.map(function(p) {
-    return fetch(GAS_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(p)
-    });
-  }))
+  // ★1回で全payloadを一括POST送信
+  fetch(GAS_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(payloads)
+  })
   .then(function() {
     finishProgressModal("✓ 送信完了！", function() {
       var sMsg = document.getElementById('success-msg');
