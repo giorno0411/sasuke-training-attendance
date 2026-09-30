@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>U PARK PORTAL</title>
 
-<!-- OGP設定 -->
+<!-- OGP設定（LINE・SNS等でのリンク共有プレビュー用） -->
 <meta property="og:title" content="U PARK PORTAL">
 <meta property="og:description" content="内宮パーク 専用ポータル">
 <meta property="og:type" content="website">
@@ -454,6 +454,7 @@
     border-radius: 8px;
   }
 
+  /* ★送信ボタン・追加して保存ボタン（ネオン発光・赤色グローを無効化し、色はそのまま維持） */
   .btn-submit {
     background: var(--accent);
     color: #fff;
@@ -464,7 +465,7 @@
     font-size: 14px;
     font-weight: bold;
     margin-top: 6px;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); /* ネオン影を除去し自然な黒影のみに */
     cursor: pointer;
   }
   .btn-submit:active { background: var(--accent-hover); }
@@ -732,39 +733,41 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
-  /* ★右下固定「受付追加」ボタン（ネオン無効・赤色マット・完全センター揃え） */
+  /* ★右下固定「受付追加」ボタン（枠をコンパクト化・＋も文字も完全白色・ネオンなし） */
   .fab-admin-add {
     position: fixed;
-    bottom: 22px;
-    right: 18px;
+    bottom: 20px;
+    right: 16px;
     z-index: 9999;
     display: none; /* 参加状況タブ時のみ flex で表示 */
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     background: #dc2626; /* 落ち着いたマットな赤 */
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 10px 18px;
-    border-radius: 24px;
+    color: #ffffff !important; /* ＋も含め全体を完全白色 */
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 7px 14px; /* 枠をひとまわりコンパクトに調整 */
+    border-radius: 20px;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 12px; /* 文字サイズも適度な小ささに */
     letter-spacing: 0.3px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45); /* 黒系シャドウのみ */
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45); /* ネオンなし・黒影のみ */
     cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+    transition: background 0.15s, transform 0.1s;
     text-align: center;
+    line-height: 1;
   }
-  .fab-admin-add span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  .fab-admin-add .fab-plus {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
   }
   .fab-admin-add:hover {
     background: #b91c1c;
   }
   .fab-admin-add:active {
-    transform: scale(0.96);
+    transform: scale(0.95);
     background: #991b1b;
   }
 
@@ -1276,7 +1279,7 @@
 
         <div style="margin-top:24px; padding-top:16px; border-top:1px dashed var(--border);">
           <div style="font-size:13px; font-weight:bold; color:#93c5fd; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-            <span>👁️️ 公開プレビュー（ユーザー画面と同じ表示）</span>
+            <span>👁 公開プレビュー（ユーザー画面と同じ表示）</span>
           </div>
           <div id="rules-live-preview-container"></div>
         </div>
@@ -1313,9 +1316,9 @@
 
 </div>
 
-<!-- ★参加状況専用・右下固定受付追加ボタン（ネオン無効・赤色マット・完全センター揃え） -->
+<!-- ★参加状況専用・右下固定受付追加ボタン（ネオン無効・赤色マット・枠コンパクト・「+」も文字も完全白色） -->
 <button type="button" class="fab-admin-add" id="fab-admin-add-btn">
-  <span>➕ 受付追加</span>
+  <span class="fab-plus">+</span><span>受付追加</span>
 </button>
 
 <!-- ミニカレンダーポップアップ -->
@@ -1665,7 +1668,7 @@ function hideModal(id) {
   if (el) el.style.display = 'none';
 }
 
-// ★ログイン認証高速化：キャッシュがあれば通信待ちなしで即入場
+// ★ログイン認証高速化：キャッシュがあれば即入場
 function checkGateAccess() {
   var savedName = localStorage.getItem('uchimiya_auth_user');
   var savedCode = localStorage.getItem('uchimiya_auth_code');
@@ -1753,7 +1756,6 @@ function switchTab(tab) {
   if (vs) vs.classList.toggle('hidden', tab !== 'status');
   if (va) va.classList.add('hidden');
   
-  // 一般タブでは右下ボタンを非表示
   if (fab) fab.style.display = 'none';
 
   var tbf = document.getElementById('tab-btn-form');
@@ -3057,7 +3059,7 @@ function renderAdminAttendanceHTML(list) {
         html += '<div>';
         
         if (showMergeButton) {
-          html += '<button type="button" class="btn-merge-car btn-do-merge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(k) + '">✏️️ 統合・変更</button>';
+          html += '<button type="button" class="btn-merge-car btn-do-merge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(k) + '">✏ 統合・変更</button>';
         }
         
         if (isMerged) {
@@ -3818,7 +3820,7 @@ function submitAttendance(e) {
 
   showProgressModal("データ送信中...");
 
-  // ★1回で全payloadを一括POST送信
+  // 1回で全payloadを一括POST送信
   fetch(GAS_URL, {
     method: "POST",
     mode: "no-cors",
