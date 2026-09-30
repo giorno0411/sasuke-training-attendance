@@ -733,25 +733,25 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
-  /* ★右下固定「受付追加」ボタン（枠をコンパクト化・＋も文字も完全白色・ネオンなし） */
+  /* ★右下固定「受付追加」ボタン（少しだけ拡大・親指で押しやすい適度なサイズ・完全白色・ネオンなし） */
   .fab-admin-add {
     position: fixed;
-    bottom: 20px;
-    right: 16px;
+    bottom: 22px;
+    right: 18px;
     z-index: 9999;
     display: none; /* 参加状況タブ時のみ flex で表示 */
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 5px;
     background: #dc2626; /* 落ち着いたマットな赤 */
     color: #ffffff !important; /* ＋も含め全体を完全白色 */
     border: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 7px 14px; /* 枠をひとまわりコンパクトに調整 */
-    border-radius: 20px;
+    padding: 9px 16px; /* ★親指で押しやすい適度なサイズに拡大 */
+    border-radius: 22px;
     font-weight: bold;
-    font-size: 12px; /* 文字サイズも適度な小ささに */
+    font-size: 12.5px;
     letter-spacing: 0.3px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45); /* ネオンなし・黒影のみ */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45); /* ネオンなし・黒影のみ */
     cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     text-align: center;
@@ -759,16 +759,41 @@
   }
   .fab-admin-add .fab-plus {
     color: #ffffff;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
     line-height: 1;
   }
-  .fab-admin-add:hover {
-    background: #b91c1c;
+  .fab-admin-add:hover { background: #b91c1c; }
+  .fab-admin-add:active { transform: scale(0.96); background: #991b1b; }
+
+  /* ★要望リストの横スライド（カルーセルスクロール）スタイル */
+  .feedback-scroll-wrap {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 4px 2px 10px 2px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
   }
-  .fab-admin-add:active {
-    transform: scale(0.95);
-    background: #991b1b;
+  .feedback-scroll-wrap::-webkit-scrollbar {
+    height: 5px;
+  }
+  .feedback-scroll-wrap::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+  .feedback-card-item {
+    flex: 0 0 240px; /* カード1枚の横幅 */
+    scroll-snap-align: start;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
   }
 
   .admin-date-group {
@@ -1301,10 +1326,11 @@
 
         <div style="margin-top:24px; padding-top:16px; border-top:1px dashed var(--border);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <div style="font-size:14px; font-weight:bold; color:#38bdf8;">📥 参加者から届いたセットへの要望（管理者限定・最新順）</div>
+            <div style="font-size:14px; font-weight:bold; color:#38bdf8;">📥 参加者から届いたセットへの要望（横スクロールで閲覧）</div>
             <button type="button" class="tab-btn" id="btn-refresh-feedbacks" style="flex:none; padding:4px 8px; border:1px solid var(--border); font-size:11px;">🔄 要望更新</button>
           </div>
-          <div id="admin-feedbacks-container" style="display:flex; flex-direction:column; gap:6px;">
+          <!-- ★横スライドでコンパクトに閲覧できるコンテナ -->
+          <div id="admin-feedbacks-container">
             <div style="color:var(--text-sub); font-size:12px; padding:10px; text-align:center;">要望データを読み込み中...</div>
           </div>
         </div>
@@ -1316,7 +1342,7 @@
 
 </div>
 
-<!-- ★参加状況専用・右下固定受付追加ボタン（ネオン無効・赤色マット・枠コンパクト・「+」も文字も完全白色） -->
+<!-- ★参加状況専用・右下固定受付追加ボタン（少しだけ拡大・親指で押しやすいサイズ・完全白色・ネオンなし） -->
 <button type="button" class="fab-admin-add" id="fab-admin-add-btn">
   <span class="fab-plus">+</span><span>受付追加</span>
 </button>
@@ -2706,7 +2732,7 @@ function renderAdminObstacleEditor() {
   });
 }
 
-// ★セット要望を「新しい順（降順）」で表示＆データ構造正規化
+// ★セット要望を「新しい順（降順）」＆「横スライド表示」で描画
 function loadRemoteFeedbacks() {
   var container = document.getElementById('admin-feedbacks-container');
   if (!container) return;
@@ -2746,16 +2772,21 @@ function loadRemoteFeedbacks() {
 
       var reversedList = normalized.slice().reverse();
 
-      var html = '';
+      // ★横スライド（カルーセルスクロール）ラッパー
+      var html = '<div class="feedback-scroll-wrap">';
       reversedList.forEach(function(f) {
-        html += '<div style="background:rgba(15,23,42,0.7); border:1px solid var(--border); padding:8px 10px; border-radius:6px; font-size:12px;">';
-        html += '<div style="display:flex; justify-content:space-between; margin-bottom:4px;">';
-        html += '<b style="color:#93c5fd;">' + escapeHtml(f.target) + '</b>';
-        html += '<span style="color:var(--text-sub); font-size:10px;">' + escapeHtml(f.date) + ' (' + escapeHtml(f.name) + ')</span>';
+        html += '<div class="feedback-card-item">';
+        html += '<div>';
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">';
+        html += '<b style="color:#93c5fd; font-size:12.5px;">' + escapeHtml(f.target) + '</b>';
+        html += '<span style="color:var(--text-sub); font-size:10px;">' + escapeHtml(f.date) + '</span>';
         html += '</div>';
-        html += '<div style="color:#f8fafc; line-height:1.4;">' + escapeHtml(f.content) + '</div>';
+        html += '<div style="color:#f8fafc; line-height:1.45; white-space:pre-wrap; margin-bottom:8px;">' + escapeHtml(f.content) + '</div>';
+        html += '</div>';
+        html += '<div style="font-size:10.5px; color:#94a3b8; text-align:right;">投稿者: ' + escapeHtml(f.name) + '</div>';
         html += '</div>';
       });
+      html += '</div>';
       container.innerHTML = html;
     })
     .catch(function() {
