@@ -746,19 +746,19 @@
   }
   .admin-head-badges { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 
-  /* 連絡済トグル（高さ28pxに完全統一） */
+  /* 開催・中止トグル */
   .status-toggle-box {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
-    padding: 0 8px;
-    border-radius: 6px;
+    padding: 2px 7px;
+    border-radius: 5px;
     font-size: 11px;
-    height: 28px;
-    line-height: 28px;
+    height: 24px;
+    line-height: 1;
     box-sizing: border-box;
     white-space: nowrap;
     flex-shrink: 0;
@@ -770,12 +770,33 @@
     cursor: pointer;
     font-weight: bold;
     margin: 0;
-    height: 100%;
     line-height: 1;
     user-select: none;
     white-space: nowrap;
   }
   .status-toggle-label input { margin: 0; vertical-align: middle; cursor: pointer; }
+
+  /* ★開催・中止の右横に配置する「独立した日別一括削除ゴミ箱」 */
+  .btn-del-entire-date {
+    background: rgba(239, 68, 68, 0.18);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #f87171;
+    font-size: 11px;
+    font-weight: bold;
+    height: 24px;
+    padding: 0 7px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .btn-del-entire-date:hover {
+    background: rgba(239, 68, 68, 0.35);
+  }
 
   .admin-card-stats {
     display: flex;
@@ -809,7 +830,7 @@
   }
   .car-breakdown-item { margin-bottom: 3px; color: #cbd5e1; line-height: 1.4; }
 
-  /* ★★★ iPhone風左スワイプ削除ラッパー ★★★ */
+  /* iPhone風左スワイプ削除ラッパー */
   .swipe-item-container {
     position: relative;
     overflow: hidden;
@@ -836,9 +857,8 @@
     border-bottom-right-radius: 8px;
     user-select: none;
   }
-  .swipe-delete-action:active {
-    background: #b91c1c;
-  }
+  .swipe-delete-action:active { background: #b91c1c; }
+
   .admin-member-card {
     position: relative;
     z-index: 2;
@@ -869,25 +889,28 @@
     min-width: 0;
   }
 
-  /* ★名前の色分け＆折り返し対応（番組スタッフ等も漏れなく全て表示） */
+  /* ★選手も番組スタッフも「全く同じフォント・大きさ・太さ」で統一（色のみ白とグレーに分ける） */
   .member-name {
-    font-size: 14.5px;
-    font-weight: bold;
-    white-space: normal; /* 折り返しを許可して全文字表示 */
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    white-space: normal;
     word-break: break-all;
     line-height: 1.35;
   }
   .name-player { color: #ffffff !important; }
-  .name-non-player { color: #94a3b8 !important; font-weight: normal; }
+  .name-non-player { color: #94a3b8 !important; } /* グレーっぽく */
   
   .member-right-side {
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
     flex-shrink: 0;
   }
 
-  /* ★交通手段バッジ */
+  /* 交通手段バッジ */
   .badge-transport {
     font-size: 11px;
     padding: 3px 8px;
@@ -945,19 +968,20 @@
     cursor: pointer;
   }
 
-  /* ★編集ボタン（高さ28pxで連絡済トグルとピタッと揃える） */
-  .btn-action-small {
+  /* ★「連絡済」と「編集」を完全同一サイズに統一（高さ24px、気持ち小さめ） */
+  .action-pill-btn {
     font-size: 11px;
-    padding: 0 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    flex-shrink: 0;
-    white-space: nowrap;
-    height: 28px;
+    height: 24px;
+    line-height: 22px;
+    padding: 0 8px;
+    border-radius: 4px;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
   }
   .btn-edit-attendee {
     background: rgba(56, 189, 248, 0.15);
@@ -965,6 +989,13 @@
     color: #38bdf8;
     font-weight: bold;
   }
+  .status-contact-box {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+    gap: 4px;
+  }
+  .status-contact-box input { margin: 0; cursor: pointer; }
 
   .admin-clear-all-wrap {
     margin-top: 24px;
@@ -1169,7 +1200,7 @@
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
-        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️️ 現在のセット稼働状況</h2>
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
@@ -1195,7 +1226,7 @@
         <div class="admin-date-tabs-bar" id="admin-date-tabs-bar"></div>
 
         <div style="font-size:11px; color:var(--text-sub); margin-bottom:8px; display:flex; align-items:center; gap:4px;">
-          <span>👈 参加者カードを左にスワイプすると削除ボタンが出現します</span>
+          <span>👈 各カードを左にスワイプすると削除ボタンが出現します</span>
         </div>
 
         <div id="admin-data-container">
@@ -1240,6 +1271,7 @@
           <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
         </div>
 
+        <!-- 最上部：届いた要望（縦スクロールで長文も自然に読めるパネル） -->
         <div class="feedback-quick-panel">
           <div class="feedback-quick-header" id="btn-toggle-feedbacks">
             <div class="feedback-quick-title">
@@ -2314,7 +2346,7 @@ function renderAdminRulesEditor() {
     html += '<button type="button" class="btn-order-move btn-move-up" data-idx="' + idx + '" ' + (idx === 0 ? 'disabled' : '') + '>▲</button>';
     html += '<button type="button" class="btn-order-move btn-move-down" data-idx="' + idx + '" ' + (idx === ruleSections.length - 1 ? 'disabled' : '') + '>▼</button>';
     html += '</div></div>';
-    html += '<button type="button" class="btn-action-small btn-del-rule" data-idx="' + idx + '" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">🗑️ 削除</button>';
+    html += '<button type="button" class="action-pill-btn btn-del-rule" data-idx="' + idx + '" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">🗑️ 削除</button>';
     html += '</div>';
 
     html += '<input type="text" id="rule-title-' + idx + '" class="rule-title-input" data-idx="' + idx + '" value="' + escapeHtml(sec.title) + '" style="margin-bottom:8px; font-weight:bold;">';
@@ -2552,7 +2584,7 @@ function renderAdminObstacleEditor() {
       html += '<option value="tuning" ' + (item.status === 'tuning' ? 'selected' : '') + '>🟡 調整中</option>';
       html += '<option value="pause" ' + (item.status === 'pause' ? 'selected' : '') + '>🔴 休止中</option>';
       html += '</select>';
-      html += '<button type="button" class="btn-action-small btn-del-obs" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">🗑 削除</button>';
+      html += '<button type="button" class="action-pill-btn btn-del-obs" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">🗑 削除</button>';
       html += '</div></div>';
       
       html += '<div id="obs-wrap-' + gIdx + '-' + iIdx + '" class="' + (isHalted ? '' : 'hidden') + '" style="margin-bottom:8px;">';
@@ -2807,7 +2839,7 @@ function applyAdminDateFilter(targetDate) {
   });
 }
 
-// 管理者画面描画（iPhone風スワイプ削除・名前全文表示・連絡済＆編集の高さ統一）
+// 管理者画面描画
 function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   var tabsBar = document.getElementById('admin-date-tabs-bar');
@@ -2953,7 +2985,7 @@ function renderAdminAttendanceHTML(list) {
 
     html += '<div class="admin-date-group ' + (isDateCanceled ? 'is-canceled' : '') + '" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
-    html += '<div style="display:flex; align-items:center; gap:8px;">';
+    html += '<div style="display:flex; align-items:center; gap:6px;">';
     html += '<span>📅 ' + formatDateLabel(date) + '</span>';
     
     html += '<div class="status-toggle-box">';
@@ -2964,6 +2996,9 @@ function renderAdminAttendanceHTML(list) {
     html += '<input type="radio" name="exec-status-' + date + '" value="canceled" ' + (isDateCanceled ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'canceled\')"> 中止';
     html += '</label>';
     html += '</div>';
+
+    // ★開催・中止の右横に「独立したゴミ箱（その日のデータを一括削除）」を新設
+    html += '<button type="button" class="btn-del-entire-date" data-date="' + date + '" title="この日の回答データを全件削除">🗑️ 中止削除</button>';
 
     html += '</div>';
     html += '<div class="admin-head-badges">';
@@ -3018,7 +3053,6 @@ function renderAdminAttendanceHTML(list) {
       var contactKey = date + ":::" + String(m.name).trim();
       var isContacted = !!contactStatusMap[contactKey];
 
-      // ★左スワイプで赤削除ボタンが出現するiPhone風ラッパー
       html += '<div class="swipe-item-container">';
       html += '<div class="swipe-delete-action btn-swipe-del" data-name="' + escapeHtml(m.name) + '" data-date="' + escapeHtml(m.date) + '" data-row="' + (m.rowIndex || 0) + '">削除</div>';
 
@@ -3028,14 +3062,14 @@ function renderAdminAttendanceHTML(list) {
       html += '<span class="member-name ' + nameColorClass + '">' + escapeHtml(m.name) + '</span>';
       html += '</div>';
       
+      // ★右側のボタン配置（編集ボタンが上、連絡済トグルが下・どちらも高さ24pxの同一サイズ）
       html += '<div class="member-right-side">';
-      html += '<div class="status-toggle-box">';
+      html += '<button type="button" class="action-pill-btn btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏️ 編集</button>';
+      html += '<div class="action-pill-btn status-contact-box">';
       html += '<label class="status-toggle-label" style="color:' + (isContacted ? '#34d399' : '#94a3b8') + ';">';
       html += '<input type="checkbox" class="contacted-checkbox" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" ' + (isContacted ? 'checked' : '') + '> 連絡済';
       html += '</label>';
       html += '</div>';
-
-      html += '<button type="button" class="btn-action-small btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏️ 編集</button>';
       html += '</div></div>';
 
       html += '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px;">';
@@ -3090,8 +3124,48 @@ function renderAdminAttendanceHTML(list) {
   container.innerHTML = html;
   applyAdminDateFilter(currentAdminSelectedDate);
 
-  // ★★★ スワイプ削除（タッチ＆マウス対応）のイベント登録 ★★★
+  // スワイプ削除の有効化
   initSwipeActions(container);
+
+  // ★「🗑️ 中止削除（日別一括削除）」ボタンのイベント登録
+  container.querySelectorAll('.btn-del-entire-date').forEach(function(btn) {
+    btn.onclick = function() {
+      var d = this.getAttribute('data-date');
+      var group = container.querySelector('.admin-date-group[data-date="' + d + '"]');
+      if (!group) return;
+
+      var delButtons = group.querySelectorAll('.btn-swipe-del');
+      if (delButtons.length === 0) return;
+
+      var rows = [];
+      delButtons.forEach(function(b) {
+        rows.push(Number(b.getAttribute('data-row')));
+      });
+
+      if (!confirm("【警告】\n" + formatDateLabel(d) + " の回答データ（計 " + rows.length + " 件）をすべて削除しますか？\n※失注・中止等で一括リセットする場合に実行してください。")) {
+        return;
+      }
+
+      showProgressModal(formatDateLabel(d) + " の全データを削除中...");
+      var rowsParam = rows.join(',');
+      fetch(GAS_URL + "?type=delete_batch&rows=" + rowsParam + "&t=" + Date.now())
+        .then(function(res) { return res.json(); })
+        .then(function() {
+          finishProgressModal("全件削除完了！", function() {
+            registeredRecords = registeredRecords.filter(function(r) {
+              return !rows.includes(Number(r.rowIndex));
+            });
+            try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
+            renderAdminAttendanceHTML(registeredRecords);
+          });
+        })
+        .catch(function() {
+          finishProgressModal("削除に失敗しました", function() {
+            fetchAdminData(true);
+          });
+        });
+    };
+  });
 
   // 編集ボタン
   container.querySelectorAll('.btn-edit-attendee').forEach(function(btn) {
@@ -3185,7 +3259,7 @@ function renderAdminAttendanceHTML(list) {
   });
 }
 
-// ★★★ iPhone風左スワイプ削除の実装 ★★★
+// iPhone風左スワイプ削除
 function initSwipeActions(container) {
   var containers = container.querySelectorAll('.swipe-item-container');
   var activeCard = null;
@@ -3194,10 +3268,8 @@ function initSwipeActions(container) {
     var card = wrap.querySelector('.admin-member-card');
     var delBtn = wrap.querySelector('.btn-swipe-del');
     var startX = 0;
-    var currentX = 0;
     var isSwiping = false;
 
-    // タッチ操作
     card.addEventListener('touchstart', function(e) {
       if (activeCard && activeCard !== card) {
         activeCard.style.transform = 'translateX(0px)';
@@ -3228,7 +3300,6 @@ function initSwipeActions(container) {
       }
     });
 
-    // 削除ボタンのクリック処理
     delBtn.onclick = function(e) {
       e.stopPropagation();
       var name = this.getAttribute('data-name');
@@ -3258,7 +3329,6 @@ function initSwipeActions(container) {
     };
   });
 
-  // 画面の他をタップしたらスワイプを閉じる
   document.addEventListener('touchstart', function(e) {
     if (activeCard && !e.target.closest('.swipe-item-container')) {
       activeCard.style.transform = 'translateX(0px)';
