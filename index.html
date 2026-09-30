@@ -699,13 +699,13 @@
     display: block;
   }
 
-  /* ★要望リストの縦スクロール（長文も折り返して快適に下へスクロール） */
+  /* 要望縦スクロール */
   .feedback-vertical-wrap {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 280px; /* 適度な高さで固定 */
-    overflow-y: auto;  /* 縦スクロール */
+    max-height: 280px;
+    overflow-y: auto;
     padding-right: 4px;
     -webkit-overflow-scrolling: touch;
   }
@@ -746,18 +746,19 @@
   }
   .admin-head-badges { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 
+  /* 連絡済トグル（高さ28pxに完全統一） */
   .status-toggle-box {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(15, 23, 42, 0.9);
     border: 1px solid var(--border);
-    padding: 2px 7px;
-    border-radius: 5px;
+    padding: 0 8px;
+    border-radius: 6px;
     font-size: 11px;
-    height: 24px;
-    line-height: 1;
+    height: 28px;
+    line-height: 28px;
     box-sizing: border-box;
     white-space: nowrap;
     flex-shrink: 0;
@@ -769,6 +770,7 @@
     cursor: pointer;
     font-weight: bold;
     margin: 0;
+    height: 100%;
     line-height: 1;
     user-select: none;
     white-space: nowrap;
@@ -807,39 +809,51 @@
   }
   .car-breakdown-item { margin-bottom: 3px; color: #cbd5e1; line-height: 1.4; }
 
-  .admin-batch-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px dashed var(--border);
-    padding: 6px 10px;
-    border-radius: 6px;
+  /* ★★★ iPhone風左スワイプ削除ラッパー ★★★ */
+  .swipe-item-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
     margin-bottom: 8px;
-    font-size: 12px;
+    touch-action: pan-y;
   }
-  .btn-batch-del {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid rgba(239, 68, 68, 0.5);
-    color: #f87171;
-    font-size: 11px;
+  .swipe-delete-action {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 80px;
+    background: #dc2626;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: bold;
-    padding: 3px 8px;
-    border-radius: 4px;
+    font-size: 13px;
     cursor: pointer;
+    z-index: 1;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    user-select: none;
   }
-
-  /* ★参加者カード（ゴミ箱撤去・スッキリ横並びレイアウト） */
+  .swipe-delete-action:active {
+    background: #b91c1c;
+  }
   .admin-member-card {
-    background: rgba(15, 23, 42, 0.7);
+    position: relative;
+    z-index: 2;
+    background: #161f30;
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 12px;
-    margin-bottom: 6px;
     display: flex;
     flex-direction: column;
     gap: 6px;
+    transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+    box-sizing: border-box;
+    width: 100%;
   }
+
   .member-top-row {
     display: flex;
     justify-content: space-between;
@@ -850,21 +864,21 @@
   .member-left-side {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex: 1;
     min-width: 0;
   }
 
-  /* ★名前の色分け（プレイヤーは白、非プレイヤーは灰色） */
+  /* ★名前の色分け＆折り返し対応（番組スタッフ等も漏れなく全て表示） */
   .member-name {
-    font-size: 14px;
+    font-size: 14.5px;
     font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal; /* 折り返しを許可して全文字表示 */
+    word-break: break-all;
+    line-height: 1.35;
   }
   .name-player { color: #ffffff !important; }
-  .name-non-player { color: #94a3b8 !important; font-weight: 500; }
+  .name-non-player { color: #94a3b8 !important; font-weight: normal; }
   
   .member-right-side {
     display: flex;
@@ -873,10 +887,10 @@
     flex-shrink: 0;
   }
 
-  /* ★車両・交通機関バッジ（大きく見やすく広げる） */
+  /* ★交通手段バッジ */
   .badge-transport {
     font-size: 11px;
-    padding: 4px 9px;
+    padding: 3px 8px;
     border-radius: 5px;
     font-weight: bold;
     display: inline-flex;
@@ -931,17 +945,19 @@
     cursor: pointer;
   }
 
+  /* ★編集ボタン（高さ28pxで連絡済トグルとピタッと揃える） */
   .btn-action-small {
     font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 5px;
+    padding: 0 10px;
+    border-radius: 6px;
     cursor: pointer;
     flex-shrink: 0;
     white-space: nowrap;
-    height: 24px;
+    height: 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
   }
   .btn-edit-attendee {
     background: rgba(56, 189, 248, 0.15);
@@ -1153,7 +1169,7 @@
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
-        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️️ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
@@ -1170,7 +1186,6 @@
       </div>
 
       <div id="admin-subview-attendance">
-        <!-- 上部ヘッダー（口頭受付ボタンを撤去し、最新化ボタンのみ配置して重なりを解消） -->
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
           <button type="button" class="tab-btn" id="btn-refresh-admin" style="flex:none; padding:5px 12px; border:1px solid var(--border); font-size:11.5px; border-radius:6px;">🔄 最新化</button>
@@ -1179,12 +1194,16 @@
         <!-- 日程クイック切り替えスティッキーバー -->
         <div class="admin-date-tabs-bar" id="admin-date-tabs-bar"></div>
 
+        <div style="font-size:11px; color:var(--text-sub); margin-bottom:8px; display:flex; align-items:center; gap:4px;">
+          <span>👈 参加者カードを左にスワイプすると削除ボタンが出現します</span>
+        </div>
+
         <div id="admin-data-container">
           <div style="color:var(--text-sub); text-align:center; padding:15px;">データを読み込み中...</div>
         </div>
 
         <div class="admin-clear-all-wrap">
-          <button type="button" class="btn-clear-all" id="btn-clear-all-data">⚠️️ 回答データを全件削除（リセット）</button>
+          <button type="button" class="btn-clear-all" id="btn-clear-all-data">⚠ 回答データを全件削除（リセット）</button>
         </div>
       </div>
 
@@ -1221,7 +1240,6 @@
           <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
         </div>
 
-        <!-- 最上部：届いた要望（縦スクロールで長文も自然に読めるパネル） -->
         <div class="feedback-quick-panel">
           <div class="feedback-quick-header" id="btn-toggle-feedbacks">
             <div class="feedback-quick-title">
@@ -2296,7 +2314,7 @@ function renderAdminRulesEditor() {
     html += '<button type="button" class="btn-order-move btn-move-up" data-idx="' + idx + '" ' + (idx === 0 ? 'disabled' : '') + '>▲</button>';
     html += '<button type="button" class="btn-order-move btn-move-down" data-idx="' + idx + '" ' + (idx === ruleSections.length - 1 ? 'disabled' : '') + '>▼</button>';
     html += '</div></div>';
-    html += '<button type="button" class="btn-action-small btn-del-single btn-del-rule" data-idx="' + idx + '">🗑️ 削除</button>';
+    html += '<button type="button" class="btn-action-small btn-del-rule" data-idx="' + idx + '" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">🗑️ 削除</button>';
     html += '</div>';
 
     html += '<input type="text" id="rule-title-' + idx + '" class="rule-title-input" data-idx="' + idx + '" value="' + escapeHtml(sec.title) + '" style="margin-bottom:8px; font-weight:bold;">';
@@ -2534,7 +2552,7 @@ function renderAdminObstacleEditor() {
       html += '<option value="tuning" ' + (item.status === 'tuning' ? 'selected' : '') + '>🟡 調整中</option>';
       html += '<option value="pause" ' + (item.status === 'pause' ? 'selected' : '') + '>🔴 休止中</option>';
       html += '</select>';
-      html += '<button type="button" class="btn-action-small btn-del-single btn-del-obs" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '">🗑 削除</button>';
+      html += '<button type="button" class="btn-action-small btn-del-obs" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">🗑 削除</button>';
       html += '</div></div>';
       
       html += '<div id="obs-wrap-' + gIdx + '-' + iIdx + '" class="' + (isHalted ? '' : 'hidden') + '" style="margin-bottom:8px;">';
@@ -2696,7 +2714,6 @@ function renderAdminObstacleEditor() {
   });
 }
 
-// ★セット要望を「新しい順（降順）」＆「縦スクロール表示」で描画
 function loadRemoteFeedbacks() {
   var container = document.getElementById('admin-feedbacks-container');
   var badge = document.getElementById('feedback-badge-count');
@@ -2741,7 +2758,6 @@ function loadRemoteFeedbacks() {
 
       var reversedList = normalized.slice().reverse();
 
-      // ★縦スクロールラッパー（長文も自動折り返し）
       var html = '<div class="feedback-vertical-wrap">';
       reversedList.forEach(function(f) {
         html += '<div class="feedback-card-item">';
@@ -2756,7 +2772,7 @@ function loadRemoteFeedbacks() {
       html += '</div>';
       container.innerHTML = html;
     })
-    .catch(function(err) {
+    .catch(function() {
       container.innerHTML = '<div style="color:#f87171; font-size:12px; padding:10px; text-align:center;">要望データの取得に失敗しました</div>';
     });
 }
@@ -2791,7 +2807,7 @@ function applyAdminDateFilter(targetDate) {
   });
 }
 
-// 管理者画面描画（個別ゴミ箱ボタン撤去・交通手段バッジ拡大・連絡済トグル位置最適化）
+// 管理者画面描画（iPhone風スワイプ削除・名前全文表示・連絡済＆編集の高さ統一）
 function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   var tabsBar = document.getElementById('admin-date-tabs-bar');
@@ -2976,13 +2992,6 @@ function renderAdminAttendanceHTML(list) {
       html += '</div>';
     }
 
-    html += '<div class="admin-batch-bar">';
-    html += '<label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">';
-    html += '<input type="checkbox" class="batch-select-all" data-date="' + date + '"> 全選択';
-    html += '</label>';
-    html += '<button type="button" class="btn-batch-del" data-date="' + date + '" style="display:none;">🗑️ 選択した回答を一括削除</button>';
-    html += '</div>';
-
     members.forEach(function(m) {
       var isCompanionVehicle = String(m.name).includes('（同伴:') || String(m.name).includes('（同伴）');
       var isStaff = String(m.name).includes('（番組スタッフ）') || String(m.note).includes('番組スタッフ');
@@ -3009,14 +3018,16 @@ function renderAdminAttendanceHTML(list) {
       var contactKey = date + ":::" + String(m.name).trim();
       var isContacted = !!contactStatusMap[contactKey];
 
-      html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'opacity:0.85; border-left:3px solid #64748b;' : (isStaff ? 'border-left:3px solid #64748b;' : 'border-left:3px solid #ef4444;')) + '">';
+      // ★左スワイプで赤削除ボタンが出現するiPhone風ラッパー
+      html += '<div class="swipe-item-container">';
+      html += '<div class="swipe-delete-action btn-swipe-del" data-name="' + escapeHtml(m.name) + '" data-date="' + escapeHtml(m.date) + '" data-row="' + (m.rowIndex || 0) + '">削除</div>';
+
+      html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'border-left:3px solid #64748b;' : (isStaff ? 'border-left:3px solid #64748b;' : 'border-left:3px solid #ef4444;')) + '">';
       html += '<div class="member-top-row">';
       html += '<div class="member-left-side">';
-      html += '<input type="checkbox" class="attendee-check" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" data-row="' + (m.rowIndex || 0) + '">';
       html += '<span class="member-name ' + nameColorClass + '">' + escapeHtml(m.name) + '</span>';
       html += '</div>';
       
-      // ★右側：連絡済トグルと編集ボタンのみを整理して配置（ゴミ箱は削除）
       html += '<div class="member-right-side">';
       html += '<div class="status-toggle-box">';
       html += '<label class="status-toggle-label" style="color:' + (isContacted ? '#34d399' : '#94a3b8') + ';">';
@@ -3027,7 +3038,6 @@ function renderAdminAttendanceHTML(list) {
       html += '<button type="button" class="btn-action-small btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏️ 編集</button>';
       html += '</div></div>';
 
-      // ★2段目：大きく見やすい交通手段バッジ＋時間・相乗り情報
       html += '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px;">';
       html += '<span class="badge-transport ' + badgeCls + '">' + escapeHtml(m.transport || 'その他') + escapeHtml(carInfo) + '</span>';
       html += '<span style="font-size:12px; color:#38bdf8;">⏰ ' + escapeHtml(m.time || '時間指定なし') + '</span>';
@@ -3042,7 +3052,8 @@ function renderAdminAttendanceHTML(list) {
       if (hasNote) {
         html += '<div style="font-size:11.5px; color:#94a3b8; border-top:1px dashed rgba(255,255,255,0.08); padding-top:4px; margin-top:4px;">💬 備考: ' + escapeHtml(m.note) + '</div>';
       }
-      html += '</div>';
+      html += '</div>'; // .admin-member-card
+      html += '</div>'; // .swipe-item-container
     });
 
     if (Object.keys(carpoolMap).length > 0) {
@@ -3079,9 +3090,13 @@ function renderAdminAttendanceHTML(list) {
   container.innerHTML = html;
   applyAdminDateFilter(currentAdminSelectedDate);
 
-  // 編集ボタンイベント
+  // ★★★ スワイプ削除（タッチ＆マウス対応）のイベント登録 ★★★
+  initSwipeActions(container);
+
+  // 編集ボタン
   container.querySelectorAll('.btn-edit-attendee').forEach(function(btn) {
-    btn.onclick = function() {
+    btn.onclick = function(e) {
+      e.stopPropagation();
       var row = Number(this.getAttribute('data-row'));
       var target = registeredRecords.find(function(r) { return Number(r.rowIndex) === row; });
       if (!target) return;
@@ -3130,80 +3145,6 @@ function renderAdminAttendanceHTML(list) {
     };
   });
 
-  container.querySelectorAll('.batch-select-all').forEach(function(allCb) {
-    allCb.onchange = function() {
-      var d = this.getAttribute('data-date');
-      var group = container.querySelector('.admin-date-group[data-date="' + d + '"]');
-      if (!group) return;
-      var checkboxes = group.querySelectorAll('.attendee-check');
-      checkboxes.forEach(function(cb) { cb.checked = allCb.checked; });
-      updateBatchDeleteBtn(d);
-    };
-  });
-
-  container.querySelectorAll('.attendee-check').forEach(function(cb) {
-    cb.onchange = function() {
-      var d = this.getAttribute('data-date');
-      updateBatchDeleteBtn(d);
-    };
-  });
-
-  // 一括削除（1件でも複数件でもチェックを入れてここから削除）
-  container.querySelectorAll('.btn-batch-del').forEach(function(btn) {
-    btn.onclick = function() {
-      var d = this.getAttribute('data-date');
-      var group = container.querySelector('.admin-date-group[data-date="' + d + '"]');
-      if (!group) return;
-      var checkedBoxes = group.querySelectorAll('.attendee-check:checked');
-      if (checkedBoxes.length === 0) return;
-
-      var names = [];
-      var rows = [];
-      checkedBoxes.forEach(function(cb) {
-        names.push(cb.getAttribute('data-name'));
-        rows.push(Number(cb.getAttribute('data-row')));
-      });
-
-      if (!confirm("選択した " + names.length + " 件の回答を削除しますか？\n対象：" + names.join(', '))) {
-        return;
-      }
-
-      showProgressModal("削除中...");
-      var rowsParam = rows.join(',');
-      fetch(GAS_URL + "?type=delete_batch&rows=" + rowsParam + "&t=" + Date.now())
-        .then(function(res) { return res.json(); })
-        .then(function() {
-          finishProgressModal("削除完了！", function() {
-            registeredRecords = registeredRecords.filter(function(r) {
-              return !rows.includes(Number(r.rowIndex));
-            });
-            try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
-            renderAdminAttendanceHTML(registeredRecords);
-          });
-        })
-        .catch(function() {
-          finishProgressModal("一部削除に失敗しました", function() {
-            fetchAdminData(true);
-          });
-        });
-    };
-  });
-
-  function updateBatchDeleteBtn(date) {
-    var group = container.querySelector('.admin-date-group[data-date="' + date + '"]');
-    if (!group) return;
-    var checkedCount = group.querySelectorAll('.attendee-check:checked').length;
-    var btn = group.querySelector('.btn-batch-del');
-    if (btn) {
-      if (checkedCount > 0) {
-        btn.style.display = 'inline-block';
-        btn.innerText = '🗑️ 選択した ' + checkedCount + ' 件を削除';
-      } else {
-        btn.style.display = 'none';
-      }
-    }
-  }
-
   container.querySelectorAll('.btn-do-merge').forEach(function(btn) {
     btn.onclick = function(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -3242,6 +3183,88 @@ function renderAdminAttendanceHTML(list) {
       return false;
     };
   });
+}
+
+// ★★★ iPhone風左スワイプ削除の実装 ★★★
+function initSwipeActions(container) {
+  var containers = container.querySelectorAll('.swipe-item-container');
+  var activeCard = null;
+
+  containers.forEach(function(wrap) {
+    var card = wrap.querySelector('.admin-member-card');
+    var delBtn = wrap.querySelector('.btn-swipe-del');
+    var startX = 0;
+    var currentX = 0;
+    var isSwiping = false;
+
+    // タッチ操作
+    card.addEventListener('touchstart', function(e) {
+      if (activeCard && activeCard !== card) {
+        activeCard.style.transform = 'translateX(0px)';
+        activeCard = null;
+      }
+      startX = e.touches[0].clientX;
+      isSwiping = true;
+    }, { passive: true });
+
+    card.addEventListener('touchmove', function(e) {
+      if (!isSwiping) return;
+      var diffX = e.touches[0].clientX - startX;
+      if (diffX < 0 && diffX >= -80) {
+        card.style.transform = 'translateX(' + diffX + 'px)';
+      }
+    }, { passive: true });
+
+    card.addEventListener('touchend', function(e) {
+      if (!isSwiping) return;
+      isSwiping = false;
+      var diffX = e.changedTouches[0].clientX - startX;
+      if (diffX < -35) {
+        card.style.transform = 'translateX(-80px)';
+        activeCard = card;
+      } else {
+        card.style.transform = 'translateX(0px)';
+        if (activeCard === card) activeCard = null;
+      }
+    });
+
+    // 削除ボタンのクリック処理
+    delBtn.onclick = function(e) {
+      e.stopPropagation();
+      var name = this.getAttribute('data-name');
+      var date = this.getAttribute('data-date');
+      var row = Number(this.getAttribute('data-row'));
+
+      if (confirm("「" + name + "」さんの " + formatDateLabel(date) + " の回答を削除しますか？")) {
+        showProgressModal("削除中...");
+        fetch(GAS_URL + "?type=delete_single&rowIndex=" + row + "&t=" + Date.now())
+          .then(function(res) { return res.json(); })
+          .then(function() {
+            finishProgressModal("削除完了！", function() {
+              registeredRecords = registeredRecords.filter(function(r) {
+                return Number(r.rowIndex) !== row;
+              });
+              try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
+              renderAdminAttendanceHTML(registeredRecords);
+            });
+          })
+          .catch(function() {
+            finishProgressModal("通信エラー");
+          });
+      } else {
+        card.style.transform = 'translateX(0px)';
+        if (activeCard === card) activeCard = null;
+      }
+    };
+  });
+
+  // 画面の他をタップしたらスワイプを閉じる
+  document.addEventListener('touchstart', function(e) {
+    if (activeCard && !e.target.closest('.swipe-item-container')) {
+      activeCard.style.transform = 'translateX(0px)';
+      activeCard = null;
+    }
+  }, { passive: true });
 }
 
 function fetchAdminData(forceRefresh) {
@@ -3347,7 +3370,6 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // 手動代理追加モーダルを開く処理
   function openManualAddModalCommon() {
     var targetDate = "";
     if (currentAdminSelectedDate && currentAdminSelectedDate !== 'ALL') {
