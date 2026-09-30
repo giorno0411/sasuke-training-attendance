@@ -169,6 +169,75 @@
     cursor: pointer;
   }
 
+  /* ★回答者自身が自分の予約を確認・編集・取消できる専用パネル */
+  .my-attendance-panel {
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  }
+  .my-attendance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+  .my-attendance-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .my-entry-card {
+    background: rgba(30, 41, 59, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .my-entry-card:last-child { margin-bottom: 0; }
+  .my-entry-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .my-entry-date {
+    font-weight: bold;
+    color: #f8fafc;
+    font-size: 13.5px;
+  }
+  .my-entry-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .btn-my-edit {
+    background: rgba(56, 189, 248, 0.2);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    color: #38bdf8;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn-my-cancel {
+    background: rgba(239, 68, 68, 0.18);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #f87171;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
   .entry-card {
     background: rgba(11, 15, 25, 0.65);
     border: 1px dashed rgba(255, 255, 255, 0.2);
@@ -776,7 +845,7 @@
   }
   .status-toggle-label input { margin: 0; vertical-align: middle; cursor: pointer; }
 
-  /* ★開催・中止の右横に配置する「独立した日別一括削除ゴミ箱」 */
+  /* 開催・中止の右横に配置する「独立した日別一括削除ゴミ箱」 */
   .btn-del-entire-date {
     background: rgba(239, 68, 68, 0.18);
     border: 1px solid rgba(239, 68, 68, 0.45);
@@ -889,24 +958,24 @@
     min-width: 0;
   }
 
-  /* ★選手も番組スタッフも「全く同じフォント・大きさ・太さ」で統一（色のみ白とグレーに分ける） */
+  /* 名前：16px・太字で視認性抜群 */
   .member-name {
     font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 800;
     letter-spacing: -0.2px;
     white-space: normal;
     word-break: break-all;
-    line-height: 1.35;
+    line-height: 1.3;
   }
   .name-player { color: #ffffff !important; }
-  .name-non-player { color: #94a3b8 !important; } /* グレーっぽく */
-  
+  .name-non-player { color: #94a3b8 !important; }
+
+  /* 連絡済＆編集（横並びでピタッと整列） */
   .member-right-side {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
+    align-items: center;
+    gap: 6px;
     flex-shrink: 0;
   }
 
@@ -968,13 +1037,13 @@
     cursor: pointer;
   }
 
-  /* ★「連絡済」と「編集」を完全同一サイズに統一（高さ24px、気持ち小さめ） */
+  /* 連絡済＆編集（高さ26px） */
   .action-pill-btn {
     font-size: 11px;
-    height: 24px;
-    line-height: 22px;
+    height: 26px;
+    line-height: 24px;
     padding: 0 8px;
-    border-radius: 4px;
+    border-radius: 5px;
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
@@ -1131,13 +1200,25 @@
       <div class="submit-success-title">✓ 参加情報を送信しました！回答ありがとうございます。</div>
       <div class="submit-success-note">
         ※別日程の参加も希望される場合は、このまま日程を選択して<br>再度送信できます。<br>
-        ※万一回答の変更や取り消し（キャンセル）を希望される場合は、<br>直接内宮までご連絡をお願いいたします。
+        ※回答の変更や取り消しは、下記「あなたの回答状況」から直接操作できます。
       </div>
     </div>
 
     <div class="auth-user-bar" id="auth-banner" style="display:none;">
       <span>👤 ログイン中: <span class="auth-user-name" id="auth-display-name"></span></span>
       <span class="auth-user-reauth" id="btn-reset-auth">コード再入力</span>
+    </div>
+
+    <!-- ★★★ 回答者自身の回答確認・編集・取消パネル ★★★ -->
+    <div class="my-attendance-panel" id="my-attendance-panel" style="display:none;">
+      <div class="my-attendance-header">
+        <div class="my-attendance-title">
+          <span>📋 あなたの回答・予約状況</span>
+          <span style="font-size:11px; color:#38bdf8;" id="my-attendance-count"></span>
+        </div>
+        <button type="button" class="tab-btn" id="btn-refresh-my-attendance" style="padding:2px 8px; font-size:10.5px; border:1px solid var(--border);" onclick="refreshMyAttendanceView()">🔄 更新</button>
+      </div>
+      <div id="my-attendance-list-container"></div>
     </div>
 
     <div class="card">
@@ -1271,7 +1352,6 @@
           <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
         </div>
 
-        <!-- 最上部：届いた要望（縦スクロールで長文も自然に読めるパネル） -->
         <div class="feedback-quick-panel">
           <div class="feedback-quick-header" id="btn-toggle-feedbacks">
             <div class="feedback-quick-title">
@@ -1432,7 +1512,7 @@
   </div>
 </div>
 
-<!-- 管理者用：参加者回答の直接編集モーダル -->
+<!-- ★回答内容の修正・編集モーダル（管理者＆回答者本人の両方が使用） -->
 <div id="admin-edit-entry-modal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️ 回答内容の修正・変更</h3>
@@ -1455,7 +1535,7 @@
       </div>
 
       <div class="compact-field-group" style="margin-bottom:10px;">
-        <label>お名前（接尾辞を除く本名）<span class="required">*</span></label>
+        <label>お名前<span class="required">*</span></label>
         <input type="text" id="edit-name" required style="height:38px;">
       </div>
 
@@ -1772,6 +1852,9 @@ function applyAuthenticatedUser(name) {
     displayEl.innerText = name;
     banner.style.display = 'flex';
   }
+
+  // ★回答者自身の回答リストを描画
+  renderMyAttendanceList(name);
 }
 
 function resetUserAuth() {
@@ -1818,6 +1901,165 @@ function verifyGateCode() {
         btn.innerText = "認証して入場 ↵";
       }
     });
+}
+
+// ★★★ 回答者自身の回答一覧を描画する処理 ★★★
+function renderMyAttendanceList(userName) {
+  var panel = document.getElementById('my-attendance-panel');
+  var container = document.getElementById('my-attendance-list-container');
+  var countEl = document.getElementById('my-attendance-count');
+  if (!panel || !container) return;
+
+  var targetName = userName || localStorage.getItem('uchimiya_auth_user') || '';
+  if (!targetName) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  // 自分の名前で出欠レコードを抽出
+  var myRecords = registeredRecords.filter(function(r) {
+    var cleanRName = String(r.name || '').trim();
+    return cleanRName === targetName || cleanRName.indexOf(targetName + '（') === 0;
+  });
+
+  if (myRecords.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+  if (countEl) countEl.innerText = '（計 ' + myRecords.length + '件）';
+
+  // 日付順にソート
+  myRecords.sort(function(a, b) {
+    return normalizeDateKey(a.date).localeCompare(normalizeDateKey(b.date));
+  });
+
+  var html = '';
+  myRecords.forEach(function(rec) {
+    var transText = rec.transport || 'その他';
+    if (rec.carType) transText += ' (' + rec.carType + ')';
+    if (rec.carLeader) transText += ' [相乗り:' + rec.carLeader + ']';
+
+    var hasCompanion = rec.companionCount && rec.companionCount !== '0名';
+    var hasNote = rec.note && rec.note.trim() !== '';
+
+    html += '<div class="my-entry-card">';
+    html += '<div class="my-entry-top">';
+    html += '<div class="my-entry-date">📅 ' + formatDateLabel(rec.date) + '</div>';
+    html += '<div class="my-entry-actions">';
+    html += '<button type="button" class="btn-my-edit" data-row="' + rec.rowIndex + '">✏️ 変更</button>';
+    html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️ 取消</button>';
+    html += '</div></div>';
+
+    html += '<div style="font-size:12px; color:#cbd5e1; display:flex; flex-direction:column; gap:2px;">';
+    html += '<div>⏰ <b>希望時間:</b> ' + escapeHtml(rec.time || '終日') + '</div>';
+    html += '<div>🚗 <b>移動手段:</b> ' + escapeHtml(transText) + '</div>';
+    if (hasCompanion) {
+      html += '<div>👥 <b>同伴者:</b> ' + escapeHtml(rec.companionCount) + ' (' + escapeHtml(rec.companionNames) + ')</div>';
+    }
+    if (hasNote) {
+      html += '<div style="color:#94a3b8; font-size:11.5px; margin-top:2px;">💬 <b>備考:</b> ' + escapeHtml(rec.note) + '</div>';
+    }
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+
+  // 変更ボタンのイベント
+  container.querySelectorAll('.btn-my-edit').forEach(function(btn) {
+    btn.onclick = function() {
+      var row = Number(this.getAttribute('data-row'));
+      openEditModalByRow(row);
+    };
+  });
+
+  // 取消（キャンセル）ボタンのイベント
+  container.querySelectorAll('.btn-my-cancel').forEach(function(btn) {
+    btn.onclick = function() {
+      var row = Number(this.getAttribute('data-row'));
+      var d = this.getAttribute('data-date');
+      if (confirm("【参加取り消しの確認】\n" + formatDateLabel(d) + " の合トレ参加を取り消しますか？\n（取り消しは管理者にLINE通知されます）")) {
+        showProgressModal("参加を取り消し中...");
+        fetch(GAS_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            action: "cancel_user_attendance",
+            rowIndex: row,
+            name: targetName,
+            date: formatDateLabel(d)
+          })
+        }).then(function() {
+          finishProgressModal("取り消しが完了しました！", function() {
+            registeredRecords = registeredRecords.filter(function(r) { return Number(r.rowIndex) !== row; });
+            try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
+            renderMyAttendanceList(targetName);
+            renderAdminAttendanceHTML(registeredRecords);
+          });
+        }).catch(function() {
+          finishProgressModal("通信エラーが発生しました");
+        });
+      }
+    };
+  });
+}
+
+function refreshMyAttendanceView() {
+  showProgressModal("最新の回答を取得中...");
+  fetch(GAS_URL + "?type=attendance&t=" + Date.now())
+    .then(function(res) { return res.json(); })
+    .then(function(list) {
+      if (Array.isArray(list)) {
+        registeredRecords = list;
+        try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
+        var user = localStorage.getItem('uchimiya_auth_user');
+        if (user) renderMyAttendanceList(user);
+        renderAdminAttendanceHTML(registeredRecords);
+      }
+      finishProgressModal("更新完了！");
+    })
+    .catch(function() {
+      finishProgressModal("更新に失敗しました");
+    });
+}
+
+function openEditModalByRow(row) {
+  var target = registeredRecords.find(function(r) { return Number(r.rowIndex) === row; });
+  if (!target) return;
+
+  var rawName = String(target.name || '');
+  var cat = "プレイヤー";
+  if (rawName.includes('（番組スタッフ）')) {
+    cat = "番組スタッフ";
+    rawName = rawName.replace('（番組スタッフ）', '').trim();
+  } else if (rawName.includes('（同伴') || rawName.includes('(同伴')) {
+    cat = "同伴者";
+    rawName = rawName.replace(/（同伴.*?）/g, '').replace(/\(同伴.*?\)/g, '').trim();
+  }
+
+  document.getElementById('edit-row-index').value = row;
+  document.getElementById('edit-category').value = cat;
+  document.getElementById('edit-name').value = rawName;
+  document.getElementById('edit-date').value = normalizeDateKey(target.date);
+  document.getElementById('edit-time').value = target.time || '終日';
+  
+  var trans = target.transport || '自車';
+  document.getElementById('edit-transport').value = trans;
+  document.getElementById('edit-car-type').value = target.carType || '普通車';
+  document.getElementById('edit-custom-car-name').value = target.carLeader || '';
+  document.getElementById('edit-share-leader').value = target.carLeader || '';
+  document.getElementById('edit-companion-count').value = target.companionCount || '0名';
+  document.getElementById('edit-companion-names').value = target.companionNames || 'なし';
+  document.getElementById('edit-note').value = target.note || '';
+
+  var isCar = trans === '自車';
+  var isShare = trans.includes('乗り合い');
+  document.getElementById('edit-car-settings').classList.toggle('hidden', !isCar);
+  document.getElementById('edit-share-settings').classList.toggle('hidden', !isShare);
+
+  showModal('admin-edit-entry-modal');
 }
 
 function switchTab(tab) {
@@ -2839,7 +3081,7 @@ function applyAdminDateFilter(targetDate) {
   });
 }
 
-// 管理者画面描画
+// 管理者画面描画（名前16px拡大・横並び最適化）
 function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   var tabsBar = document.getElementById('admin-date-tabs-bar');
@@ -2997,7 +3239,6 @@ function renderAdminAttendanceHTML(list) {
     html += '</label>';
     html += '</div>';
 
-    // ★開催・中止の右横に「独立したゴミ箱（その日のデータを一括削除）」を新設
     html += '<button type="button" class="btn-del-entire-date" data-date="' + date + '" title="この日の回答データを全件削除">🗑️ 中止削除</button>';
 
     html += '</div>';
@@ -3056,22 +3297,24 @@ function renderAdminAttendanceHTML(list) {
       html += '<div class="swipe-item-container">';
       html += '<div class="swipe-delete-action btn-swipe-del" data-name="' + escapeHtml(m.name) + '" data-date="' + escapeHtml(m.date) + '" data-row="' + (m.rowIndex || 0) + '">削除</div>';
 
-      html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'border-left:3px solid #64748b;' : (isStaff ? 'border-left:3px solid #64748b;' : 'border-left:3px solid #ef4444;')) + '">';
+      html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'border-left:3.5px solid #64748b;' : (isStaff ? 'border-left:3.5px solid #64748b;' : 'border-left:3.5px solid #ef4444;')) + '">';
+      
+      // 1段目：【名前】 と 【連絡済 ＋ 編集】
       html += '<div class="member-top-row">';
       html += '<div class="member-left-side">';
       html += '<span class="member-name ' + nameColorClass + '">' + escapeHtml(m.name) + '</span>';
       html += '</div>';
       
-      // ★右側のボタン配置（編集ボタンが上、連絡済トグルが下・どちらも高さ24pxの同一サイズ）
       html += '<div class="member-right-side">';
-      html += '<button type="button" class="action-pill-btn btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏️ 編集</button>';
       html += '<div class="action-pill-btn status-contact-box">';
       html += '<label class="status-toggle-label" style="color:' + (isContacted ? '#34d399' : '#94a3b8') + ';">';
       html += '<input type="checkbox" class="contacted-checkbox" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" ' + (isContacted ? 'checked' : '') + '> 連絡済';
       html += '</label>';
       html += '</div>';
+      html += '<button type="button" class="action-pill-btn btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏️ 編集</button>';
       html += '</div></div>';
 
+      // 2段目：【交通手段バッジ】 ＋ 【時間】 ＋ 【相乗り】 ＋ 【同伴】
       html += '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px;">';
       html += '<span class="badge-transport ' + badgeCls + '">' + escapeHtml(m.transport || 'その他') + escapeHtml(carInfo) + '</span>';
       html += '<span style="font-size:12px; color:#38bdf8;">⏰ ' + escapeHtml(m.time || '時間指定なし') + '</span>';
@@ -3086,8 +3329,8 @@ function renderAdminAttendanceHTML(list) {
       if (hasNote) {
         html += '<div style="font-size:11.5px; color:#94a3b8; border-top:1px dashed rgba(255,255,255,0.08); padding-top:4px; margin-top:4px;">💬 備考: ' + escapeHtml(m.note) + '</div>';
       }
-      html += '</div>'; // .admin-member-card
-      html += '</div>'; // .swipe-item-container
+      html += '</div>';
+      html += '</div>';
     });
 
     if (Object.keys(carpoolMap).length > 0) {
@@ -3124,10 +3367,9 @@ function renderAdminAttendanceHTML(list) {
   container.innerHTML = html;
   applyAdminDateFilter(currentAdminSelectedDate);
 
-  // スワイプ削除の有効化
   initSwipeActions(container);
 
-  // ★「🗑️ 中止削除（日別一括削除）」ボタンのイベント登録
+  // 日別一括削除ボタン
   container.querySelectorAll('.btn-del-entire-date').forEach(function(btn) {
     btn.onclick = function() {
       var d = this.getAttribute('data-date');
@@ -3157,6 +3399,8 @@ function renderAdminAttendanceHTML(list) {
             });
             try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
             renderAdminAttendanceHTML(registeredRecords);
+            var user = localStorage.getItem('uchimiya_auth_user');
+            if (user) renderMyAttendanceList(user);
           });
         })
         .catch(function() {
@@ -3172,40 +3416,7 @@ function renderAdminAttendanceHTML(list) {
     btn.onclick = function(e) {
       e.stopPropagation();
       var row = Number(this.getAttribute('data-row'));
-      var target = registeredRecords.find(function(r) { return Number(r.rowIndex) === row; });
-      if (!target) return;
-
-      var rawName = String(target.name || '');
-      var cat = "プレイヤー";
-      if (rawName.includes('（番組スタッフ）')) {
-        cat = "番組スタッフ";
-        rawName = rawName.replace('（番組スタッフ）', '').trim();
-      } else if (rawName.includes('（同伴') || rawName.includes('(同伴')) {
-        cat = "同伴者";
-        rawName = rawName.replace(/（同伴.*?）/g, '').replace(/\(同伴.*?\)/g, '').trim();
-      }
-
-      document.getElementById('edit-row-index').value = row;
-      document.getElementById('edit-category').value = cat;
-      document.getElementById('edit-name').value = rawName;
-      document.getElementById('edit-date').value = normalizeDateKey(target.date);
-      document.getElementById('edit-time').value = target.time || '終日';
-      
-      var trans = target.transport || '自車';
-      document.getElementById('edit-transport').value = trans;
-      document.getElementById('edit-car-type').value = target.carType || '普通車';
-      document.getElementById('edit-custom-car-name').value = target.carLeader || '';
-      document.getElementById('edit-share-leader').value = target.carLeader || '';
-      document.getElementById('edit-companion-count').value = target.companionCount || '0名';
-      document.getElementById('edit-companion-names').value = target.companionNames || 'なし';
-      document.getElementById('edit-note').value = target.note || '';
-
-      var isCar = trans === '自車';
-      var isShare = trans.includes('乗り合い');
-      document.getElementById('edit-car-settings').classList.toggle('hidden', !isCar);
-      document.getElementById('edit-share-settings').classList.toggle('hidden', !isShare);
-
-      showModal('admin-edit-entry-modal');
+      openEditModalByRow(row);
     };
   });
 
@@ -3259,7 +3470,7 @@ function renderAdminAttendanceHTML(list) {
   });
 }
 
-// iPhone風左スワイプ削除
+// iPhone風スワイプ削除
 function initSwipeActions(container) {
   var containers = container.querySelectorAll('.swipe-item-container');
   var activeCard = null;
@@ -3317,6 +3528,8 @@ function initSwipeActions(container) {
               });
               try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
               renderAdminAttendanceHTML(registeredRecords);
+              var user = localStorage.getItem('uchimiya_auth_user');
+              if (user) renderMyAttendanceList(user);
             });
           })
           .catch(function() {
@@ -3358,6 +3571,8 @@ function fetchAdminData(forceRefresh) {
         registeredRecords = list;
         try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
         renderAdminAttendanceHTML(registeredRecords);
+        var user = localStorage.getItem('uchimiya_auth_user');
+        if (user) renderMyAttendanceList(user);
       }
       if (forceRefresh) finishProgressModal("更新完了！");
     })
@@ -3616,6 +3831,8 @@ window.addEventListener('DOMContentLoaded', function() {
             target.note = noteVal;
             try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
             renderAdminAttendanceHTML(registeredRecords);
+            var user = localStorage.getItem('uchimiya_auth_user');
+            if (user) renderMyAttendanceList(user);
           } else {
             fetchAdminData(true);
           }
@@ -3638,6 +3855,8 @@ window.addEventListener('DOMContentLoaded', function() {
             registeredRecords = [];
             try { localStorage.removeItem('uchimiya_cached_records'); } catch(e){}
             fetchAdminData(true);
+            var user = localStorage.getItem('uchimiya_auth_user');
+            if (user) renderMyAttendanceList(user);
           });
         });
     }
@@ -3838,6 +4057,8 @@ window.addEventListener('DOMContentLoaded', function() {
         if (Array.isArray(list)) {
           registeredRecords = list;
           try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
+          var user = localStorage.getItem('uchimiya_auth_user');
+          if (user) renderMyAttendanceList(user);
         }
       }).catch(function() {});
   }, 100);
@@ -4064,10 +4285,15 @@ function submitAttendance(e) {
       renderDaysConfigCards();
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
+      // 最新回答を再取得して自分の回答一覧に即反映
       fetch(GAS_URL + "?type=attendance&t=" + Date.now())
         .then(function(res) { return res.json(); })
         .then(function(list) {
-          if (Array.isArray(list)) registeredRecords = list;
+          if (Array.isArray(list)) {
+            registeredRecords = list;
+            try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
+            if (authUser) renderMyAttendanceList(authUser);
+          }
         }).catch(function() {});
     });
   })
