@@ -169,22 +169,23 @@
     cursor: pointer;
   }
 
-  /* ★回答者自身が自分の予約を確認・編集・取消できる専用パネル */
+  /* ★回答者自身が自分の予約を確認・編集・取消できるアコーディオン＆横スライドパネル */
   .my-attendance-panel {
     background: rgba(15, 23, 42, 0.95);
     border: 1px solid rgba(56, 189, 248, 0.35);
     border-radius: 10px;
-    padding: 12px;
     margin-bottom: 16px;
+    overflow: hidden;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
   }
   .my-attendance-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 8px;
-    margin-bottom: 10px;
+    padding: 10px 12px;
+    background: rgba(30, 41, 59, 0.7);
+    cursor: pointer;
+    user-select: none;
   }
   .my-attendance-title {
     font-size: 13px;
@@ -194,14 +195,39 @@
     align-items: center;
     gap: 6px;
   }
+  .my-attendance-body {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    display: none; /* ★初期状態は閉じた状態（縮小化） */
+  }
+
+  /* 横スライドラッパー */
+  .my-attendance-scroll-wrap {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .my-attendance-scroll-wrap::-webkit-scrollbar { height: 5px; }
+  .my-attendance-scroll-wrap::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.3);
+    border-radius: 10px;
+  }
+
   .my-entry-card {
-    background: rgba(30, 41, 59, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex: 0 0 250px; /* 横スライドカード幅 */
+    scroll-snap-align: start;
+    background: rgba(30, 41, 59, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 8px;
     padding: 10px 12px;
-    margin-bottom: 8px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
-  .my-entry-card:last-child { margin-bottom: 0; }
   .my-entry-top {
     display: flex;
     justify-content: space-between;
@@ -211,18 +237,18 @@
   .my-entry-date {
     font-weight: bold;
     color: #f8fafc;
-    font-size: 13.5px;
+    font-size: 13px;
   }
   .my-entry-actions {
     display: flex;
-    gap: 6px;
+    gap: 5px;
   }
   .btn-my-edit {
     background: rgba(56, 189, 248, 0.2);
     border: 1px solid rgba(56, 189, 248, 0.5);
     color: #38bdf8;
     font-size: 11px;
-    padding: 3px 8px;
+    padding: 3px 7px;
     border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
@@ -232,7 +258,7 @@
     border: 1px solid rgba(239, 68, 68, 0.45);
     color: #f87171;
     font-size: 11px;
-    padding: 3px 8px;
+    padding: 3px 7px;
     border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
@@ -845,7 +871,7 @@
   }
   .status-toggle-label input { margin: 0; vertical-align: middle; cursor: pointer; }
 
-  /* 開催・中止の右横に配置する「独立した日別一括削除ゴミ箱」 */
+  /* 開催・中止の右横：日別一括削除ゴミ箱 */
   .btn-del-entire-date {
     background: rgba(239, 68, 68, 0.18);
     border: 1px solid rgba(239, 68, 68, 0.45);
@@ -863,9 +889,7 @@
     white-space: nowrap;
     transition: background 0.15s;
   }
-  .btn-del-entire-date:hover {
-    background: rgba(239, 68, 68, 0.35);
-  }
+  .btn-del-entire-date:hover { background: rgba(239, 68, 68, 0.35); }
 
   .admin-card-stats {
     display: flex;
@@ -958,7 +982,7 @@
     min-width: 0;
   }
 
-  /* 名前：16px・太字で視認性抜群 */
+  /* 名前：16px・太字で視認性統一（選手は白、非選手・ロケ班等はグレー） */
   .member-name {
     font-family: inherit;
     font-size: 16px;
@@ -971,7 +995,7 @@
   .name-player { color: #ffffff !important; }
   .name-non-player { color: #94a3b8 !important; }
 
-  /* 連絡済＆編集（横並びでピタッと整列） */
+  /* 連絡済＆編集（横並び） */
   .member-right-side {
     display: flex;
     align-items: center;
@@ -1209,16 +1233,21 @@
       <span class="auth-user-reauth" id="btn-reset-auth">コード再入力</span>
     </div>
 
-    <!-- ★★★ 回答者自身の回答確認・編集・取消パネル ★★★ -->
+    <!-- ★回答者自身の回答確認・編集・取消パネル（初期は閉じた状態＆横スライド） -->
     <div class="my-attendance-panel" id="my-attendance-panel" style="display:none;">
-      <div class="my-attendance-header">
+      <div class="my-attendance-header" id="btn-toggle-my-attendance">
         <div class="my-attendance-title">
           <span>📋 あなたの回答・予約状況</span>
           <span style="font-size:11px; color:#38bdf8;" id="my-attendance-count"></span>
         </div>
-        <button type="button" class="tab-btn" id="btn-refresh-my-attendance" style="padding:2px 8px; font-size:10.5px; border:1px solid var(--border);" onclick="refreshMyAttendanceView()">🔄 更新</button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" class="tab-btn" id="btn-refresh-my-attendance" style="padding:2px 8px; font-size:10.5px; border:1px solid var(--border);" onclick="event.stopPropagation(); refreshMyAttendanceView();">🔄 更新</button>
+          <span id="my-attendance-toggle-arrow" style="font-size:11px; color:var(--text-sub);">▼ 開く</span>
+        </div>
       </div>
-      <div id="my-attendance-list-container"></div>
+      <div class="my-attendance-body" id="my-attendance-content">
+        <div id="my-attendance-list-container"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -1294,7 +1323,7 @@
       <div class="admin-subnav">
         <button type="button" class="admin-sub-btn active" id="admin-sub-btn-att">👥 参加状況</button>
         <button type="button" class="admin-sub-btn" id="admin-sub-btn-rules">📜 注意事項編集</button>
-        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs">⚙️ セット稼働状況編集</button>
+        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs">⚙️️ セット稼働状況編集</button>
       </div>
 
       <div id="admin-subview-attendance">
@@ -1352,6 +1381,7 @@
           <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
         </div>
 
+        <!-- 最上部：届いた要望（縦スクロールで長文も自然に読めるパネル） -->
         <div class="feedback-quick-panel">
           <div class="feedback-quick-header" id="btn-toggle-feedbacks">
             <div class="feedback-quick-title">
@@ -1438,8 +1468,9 @@
           <label>区分<span class="required">*</span></label>
           <select id="m-add-category">
             <option value="プレイヤー">選手（プレイヤー）</option>
-            <option value="番組スタッフ">番組スタッフ</option>
+            <option value="ロケ班">ロケ班</option>
             <option value="同伴者">同伴者（見学等）</option>
+            <option value="その他">その他（カッコなし）</option>
           </select>
         </div>
         <div class="compact-field-group">
@@ -1450,7 +1481,7 @@
 
       <div class="compact-field-group" style="margin-bottom:10px;">
         <label>お名前<span class="required">*</span></label>
-        <input type="text" id="m-add-name" placeholder="例：山田 太郎、TBSスタッフA" required style="height:38px;">
+        <input type="text" id="m-add-name" placeholder="例：山田 太郎、TBSロケ班A" required style="height:38px;">
       </div>
 
       <div class="compact-form-row">
@@ -1512,7 +1543,7 @@
   </div>
 </div>
 
-<!-- ★回答内容の修正・編集モーダル（管理者＆回答者本人の両方が使用） -->
+<!-- 回答内容の修正・編集モーダル -->
 <div id="admin-edit-entry-modal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️ 回答内容の修正・変更</h3>
@@ -1524,8 +1555,9 @@
           <label>区分<span class="required">*</span></label>
           <select id="edit-category">
             <option value="プレイヤー">選手（プレイヤー）</option>
-            <option value="番組スタッフ">番組スタッフ</option>
+            <option value="ロケ班">ロケ班</option>
             <option value="同伴者">同伴者（見学等）</option>
+            <option value="その他">その他（カッコなし）</option>
           </select>
         </div>
         <div class="compact-field-group">
@@ -1853,7 +1885,6 @@ function applyAuthenticatedUser(name) {
     banner.style.display = 'flex';
   }
 
-  // ★回答者自身の回答リストを描画
   renderMyAttendanceList(name);
 }
 
@@ -1903,7 +1934,7 @@ function verifyGateCode() {
     });
 }
 
-// ★★★ 回答者自身の回答一覧を描画する処理 ★★★
+// ★★★ 回答者自身の回答一覧（横スライド・初期は閉じた状態） ★★★
 function renderMyAttendanceList(userName) {
   var panel = document.getElementById('my-attendance-panel');
   var container = document.getElementById('my-attendance-list-container');
@@ -1916,7 +1947,6 @@ function renderMyAttendanceList(userName) {
     return;
   }
 
-  // 自分の名前で出欠レコードを抽出
   var myRecords = registeredRecords.filter(function(r) {
     var cleanRName = String(r.name || '').trim();
     return cleanRName === targetName || cleanRName.indexOf(targetName + '（') === 0;
@@ -1928,14 +1958,14 @@ function renderMyAttendanceList(userName) {
   }
 
   panel.style.display = 'block';
-  if (countEl) countEl.innerText = '（計 ' + myRecords.length + '件）';
+  if (countEl) countEl.innerText = '（' + myRecords.length + '件）';
 
-  // 日付順にソート
   myRecords.sort(function(a, b) {
     return normalizeDateKey(a.date).localeCompare(normalizeDateKey(b.date));
   });
 
-  var html = '';
+  // 横スライドラッパー
+  var html = '<div class="my-attendance-scroll-wrap">';
   myRecords.forEach(function(rec) {
     var transText = rec.transport || 'その他';
     if (rec.carType) transText += ' (' + rec.carType + ')';
@@ -1945,6 +1975,7 @@ function renderMyAttendanceList(userName) {
     var hasNote = rec.note && rec.note.trim() !== '';
 
     html += '<div class="my-entry-card">';
+    html += '<div>';
     html += '<div class="my-entry-top">';
     html += '<div class="my-entry-date">📅 ' + formatDateLabel(rec.date) + '</div>';
     html += '<div class="my-entry-actions">';
@@ -1952,21 +1983,22 @@ function renderMyAttendanceList(userName) {
     html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️ 取消</button>';
     html += '</div></div>';
 
-    html += '<div style="font-size:12px; color:#cbd5e1; display:flex; flex-direction:column; gap:2px;">';
+    html += '<div style="font-size:11.5px; color:#cbd5e1; display:flex; flex-direction:column; gap:3px;">';
     html += '<div>⏰ <b>希望時間:</b> ' + escapeHtml(rec.time || '終日') + '</div>';
     html += '<div>🚗 <b>移動手段:</b> ' + escapeHtml(transText) + '</div>';
     if (hasCompanion) {
       html += '<div>👥 <b>同伴者:</b> ' + escapeHtml(rec.companionCount) + ' (' + escapeHtml(rec.companionNames) + ')</div>';
     }
     if (hasNote) {
-      html += '<div style="color:#94a3b8; font-size:11.5px; margin-top:2px;">💬 <b>備考:</b> ' + escapeHtml(rec.note) + '</div>';
+      html += '<div style="color:#94a3b8; font-size:11px; margin-top:2px;">💬 <b>備考:</b> ' + escapeHtml(rec.note) + '</div>';
     }
     html += '</div></div>';
+    html += '</div>';
   });
+  html += '</div>';
 
   container.innerHTML = html;
 
-  // 変更ボタンのイベント
   container.querySelectorAll('.btn-my-edit').forEach(function(btn) {
     btn.onclick = function() {
       var row = Number(this.getAttribute('data-row'));
@@ -1974,7 +2006,6 @@ function renderMyAttendanceList(userName) {
     };
   });
 
-  // 取消（キャンセル）ボタンのイベント
   container.querySelectorAll('.btn-my-cancel').forEach(function(btn) {
     btn.onclick = function() {
       var row = Number(this.getAttribute('data-row'));
@@ -2025,18 +2056,22 @@ function refreshMyAttendanceView() {
     });
 }
 
+// ★「ロケ班」「同伴者」「その他」に対応したモーダルオープン
 function openEditModalByRow(row) {
   var target = registeredRecords.find(function(r) { return Number(r.rowIndex) === row; });
   if (!target) return;
 
   var rawName = String(target.name || '');
   var cat = "プレイヤー";
-  if (rawName.includes('（番組スタッフ）')) {
-    cat = "番組スタッフ";
-    rawName = rawName.replace('（番組スタッフ）', '').trim();
+  if (rawName.includes('（ロケ班）') || rawName.includes('（番組スタッフ）')) {
+    cat = "ロケ班";
+    rawName = rawName.replace('（ロケ班）', '').replace('（番組スタッフ）', '').trim();
   } else if (rawName.includes('（同伴') || rawName.includes('(同伴')) {
     cat = "同伴者";
     rawName = rawName.replace(/（同伴.*?）/g, '').replace(/\(同伴.*?\)/g, '').trim();
+  } else if (rawName.includes('（その他）')) {
+    cat = "その他";
+    rawName = rawName.replace('（その他）', '').trim();
   }
 
   document.getElementById('edit-row-index').value = row;
@@ -3081,7 +3116,7 @@ function applyAdminDateFilter(targetDate) {
   });
 }
 
-// 管理者画面描画（名前16px拡大・横並び最適化）
+// 管理者画面描画（「ロケ班」バッジ表記・色分け対応）
 function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   var tabsBar = document.getElementById('admin-date-tabs-bar');
@@ -3146,7 +3181,7 @@ function renderAdminAttendanceHTML(list) {
 
     members.forEach(function(m) {
       var isCompanionVehicle = String(m.name).includes('（同伴:') || String(m.name).includes('（同伴）');
-      var isStaff = String(m.name).includes('（番組スタッフ）') || String(m.note).includes('番組スタッフ');
+      var isStaff = String(m.name).includes('（ロケ班）') || String(m.name).includes('（番組スタッフ）') || String(m.note).includes('ロケ班') || String(m.note).includes('番組スタッフ');
 
       if (isStaff) {
         staffTotal++;
@@ -3245,7 +3280,7 @@ function renderAdminAttendanceHTML(list) {
     html += '<div class="admin-head-badges">';
     html += '<span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">プレイヤー: ' + playerTotal + '名</span>';
     if (staffTotal > 0) {
-      html += '<span style="font-size:10px; background:#eab308; color:#000; padding:2px 6px; border-radius:10px; font-weight:bold; white-space:nowrap;">番組スタッフ: ' + staffTotal + '名</span>';
+      html += '<span style="font-size:10px; background:#eab308; color:#000; padding:2px 6px; border-radius:10px; font-weight:bold; white-space:nowrap;">ロケ班: ' + staffTotal + '名</span>';
     }
     if (companionTotal > 0) {
       html += '<span style="font-size:10px; background:#475569; color:#f1f5f9; padding:2px 6px; border-radius:10px; white-space:nowrap;">同伴: ' + companionTotal + '名</span>';
@@ -3254,7 +3289,7 @@ function renderAdminAttendanceHTML(list) {
     html += '</div></div>';
 
     html += '<div class="admin-card-stats">';
-    html += '<span>👥 <b>人数計: <span class="people-stat-badge">' + grandTotalPeople + '名</span></b> (選手: ' + playerTotal + ' / スタッフ: ' + staffTotal + ' / 同伴: ' + companionTotal + ')</span>';
+    html += '<span>👥 <b>人数計: <span class="people-stat-badge">' + grandTotalPeople + '名</span></b> (選手: ' + playerTotal + ' / ロケ班: ' + staffTotal + ' / 同伴: ' + companionTotal + ')</span>';
     html += '<span>🚗 <b>車両計: <span class="car-stat-badge">' + totalCars + '台</span></b> (普通: ' + carsStandard + '台 / 軽: ' + carsLight + '台' + (carsOther > 0 ? ' / 他: ' + carsOther + '台' : '') + ')</span>';
     html += '</div>';
 
@@ -3270,9 +3305,10 @@ function renderAdminAttendanceHTML(list) {
 
     members.forEach(function(m) {
       var isCompanionVehicle = String(m.name).includes('（同伴:') || String(m.name).includes('（同伴）');
-      var isStaff = String(m.name).includes('（番組スタッフ）') || String(m.note).includes('番組スタッフ');
+      var isStaff = String(m.name).includes('（ロケ班）') || String(m.name).includes('（番組スタッフ）') || String(m.note).includes('ロケ班') || String(m.note).includes('番組スタッフ');
+      var isOther = String(m.note).includes('（管理者登録: その他') || String(m.note).includes('区分:その他');
 
-      var isPlayer = !isCompanionVehicle && !isStaff;
+      var isPlayer = !isCompanionVehicle && !isStaff && !isOther;
       var nameColorClass = isPlayer ? 'name-player' : 'name-non-player';
 
       var badgeCls = 'transport-other';
@@ -3299,7 +3335,6 @@ function renderAdminAttendanceHTML(list) {
 
       html += '<div class="admin-member-card" style="' + (isCompanionVehicle ? 'border-left:3.5px solid #64748b;' : (isStaff ? 'border-left:3.5px solid #64748b;' : 'border-left:3.5px solid #ef4444;')) + '">';
       
-      // 1段目：【名前】 と 【連絡済 ＋ 編集】
       html += '<div class="member-top-row">';
       html += '<div class="member-left-side">';
       html += '<span class="member-name ' + nameColorClass + '">' + escapeHtml(m.name) + '</span>';
@@ -3314,7 +3349,6 @@ function renderAdminAttendanceHTML(list) {
       html += '<button type="button" class="action-pill-btn btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏️ 編集</button>';
       html += '</div></div>';
 
-      // 2段目：【交通手段バッジ】 ＋ 【時間】 ＋ 【相乗り】 ＋ 【同伴】
       html += '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px;">';
       html += '<span class="badge-transport ' + badgeCls + '">' + escapeHtml(m.transport || 'その他') + escapeHtml(carInfo) + '</span>';
       html += '<span style="font-size:12px; color:#38bdf8;">⏰ ' + escapeHtml(m.time || '時間指定なし') + '</span>';
@@ -3369,7 +3403,6 @@ function renderAdminAttendanceHTML(list) {
 
   initSwipeActions(container);
 
-  // 日別一括削除ボタン
   container.querySelectorAll('.btn-del-entire-date').forEach(function(btn) {
     btn.onclick = function() {
       var d = this.getAttribute('data-date');
@@ -3411,7 +3444,6 @@ function renderAdminAttendanceHTML(list) {
     };
   });
 
-  // 編集ボタン
   container.querySelectorAll('.btn-edit-attendee').forEach(function(btn) {
     btn.onclick = function(e) {
       e.stopPropagation();
@@ -3592,6 +3624,18 @@ window.addEventListener('DOMContentLoaded', function() {
   var btnReset = document.getElementById('btn-reset-auth');
   if (btnReset) btnReset.onclick = resetUserAuth;
 
+  // ★「あなたの回答・予約状況」の開閉トグル
+  var toggleMyAtt = document.getElementById('btn-toggle-my-attendance');
+  var myAttBody = document.getElementById('my-attendance-content');
+  var myAttArrow = document.getElementById('my-attendance-toggle-arrow');
+  if (toggleMyAtt && myAttBody) {
+    toggleMyAtt.onclick = function() {
+      var isHidden = myAttBody.style.display === 'none' || myAttBody.style.display === '';
+      myAttBody.style.display = isHidden ? 'block' : 'none';
+      if (myAttArrow) myAttArrow.innerText = isHidden ? '▲ 閉じる' : '▼ 開く';
+    };
+  }
+
   var tbf = document.getElementById('tab-btn-form');
   if (tbf) tbf.onclick = function() { switchTab('form'); };
   var tbc = document.getElementById('tab-btn-column');
@@ -3694,7 +3738,7 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // 手動追加の保存
+  // ★手動追加の保存（ロケ班・同伴・その他対応）
   var mAddForm = document.getElementById('admin-manual-add-form');
   if (mAddForm) {
     mAddForm.onsubmit = function(e) {
@@ -3715,12 +3759,17 @@ window.addEventListener('DOMContentLoaded', function() {
       }
 
       var finalName = rawName;
-      if (cat === "番組スタッフ") finalName += "（番組スタッフ）";
-      if (cat === "同伴者") finalName += "（同伴）";
+      if (cat === "ロケ班") finalName += "（ロケ班）";
+      else if (cat === "同伴者") finalName += "（同伴）";
+      // その他はカッコを付けずにそのままの名前を使用
 
       var finalLeader = "";
       if (transVal === "自車") finalLeader = customCarName;
       else if (transVal.includes("乗り合い")) finalLeader = shareLeader;
+
+      var extraNote = "";
+      if (cat === "その他") extraNote = "区分:その他";
+      var fullNote = noteVal ? (extraNote ? extraNote + " " + noteVal : noteVal) : extraNote;
 
       hideModal('admin-add-modal');
       showProgressModal("データを追加中...");
@@ -3740,7 +3789,7 @@ window.addEventListener('DOMContentLoaded', function() {
           }],
           companionCount: "0名",
           companionNames: "なし",
-          note: noteVal ? "（管理者登録: " + noteVal + "）" : "（管理者登録）"
+          note: fullNote ? "（管理者登録: " + fullNote + "）" : "（管理者登録）"
         })
       }).then(function() {
         finishProgressModal("追加完了！", function() {
@@ -3752,7 +3801,7 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // 回答編集モーダル
+  // ★回答編集モーダル（ロケ班・同伴・その他対応）
   var editTransport = document.getElementById('edit-transport');
   if (editTransport) {
     editTransport.onchange = function() {
@@ -3789,8 +3838,9 @@ window.addEventListener('DOMContentLoaded', function() {
       }
 
       var finalName = rawName;
-      if (cat === "番組スタッフ") finalName += "（番組スタッフ）";
-      if (cat === "同伴者") finalName += "（同伴）";
+      if (cat === "ロケ班") finalName += "（ロケ班）";
+      else if (cat === "同伴者") finalName += "（同伴）";
+      // その他はカッコを付けずにそのまま
 
       var finalLeader = "";
       if (transVal === "自車") finalLeader = customCarName;
@@ -4285,7 +4335,6 @@ function submitAttendance(e) {
       renderDaysConfigCards();
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-      // 最新回答を再取得して自分の回答一覧に即反映
       fetch(GAS_URL + "?type=attendance&t=" + Date.now())
         .then(function(res) { return res.json(); })
         .then(function(list) {
