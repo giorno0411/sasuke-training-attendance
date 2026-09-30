@@ -697,7 +697,7 @@
     color: #fca5a5;
   }
 
-  /* ★管理者画面: スクロール解消の日程クイック切り替えスティッキーバー */
+  /* 管理者画面: スクロール解消の日程クイック切り替えスティッキーバー */
   .admin-date-tabs-bar {
     position: sticky;
     top: 0;
@@ -729,32 +729,44 @@
     background: var(--accent);
     border-color: var(--accent);
     color: #ffffff;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
-  /* ★スクロール位置に関係なく常に右下に常駐する受付追加ボタン (FAB) */
+  /* ★右下固定「受付追加」ボタン（ネオン発光オフ、上品な中央揃え） */
   .fab-admin-add {
     position: fixed;
-    bottom: 24px;
+    bottom: 22px;
     right: 18px;
     z-index: 9999;
-    display: none; /* 管理者画面表示時に flex に切り替え */
+    display: none; /* 参加状況タブ時のみ flex で表示 */
     align-items: center;
-    gap: 6px;
-    background: var(--accent);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 12px 18px;
-    border-radius: 50px;
+    justify-content: center;
+    gap: 5px;
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid rgba(239, 68, 68, 0.8);
+    padding: 9px 18px;
+    border-radius: 24px;
     font-weight: bold;
-    font-size: 13.5px;
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.5);
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
     cursor: pointer;
-    transition: transform 0.15s ease, background 0.2s ease;
+    transition: background 0.2s, transform 0.1s;
+    text-align: center;
+  }
+  .fab-admin-add span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fab-admin-add:hover {
+    background: #334155;
+    border-color: #ef4444;
   }
   .fab-admin-add:active {
-    transform: scale(0.95);
-    background: var(--accent-hover);
+    transform: scale(0.96);
+    background: #0f172a;
   }
 
   .admin-date-group {
@@ -980,7 +992,6 @@
     cursor: pointer;
   }
 
-  /* サイズバランスを最適化した手動追加フォームスタイル */
   .compact-form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -997,7 +1008,6 @@
     color: #cbd5e1;
     font-weight: bold;
   }
-  /* 区分と参加日の高さを38pxで完全一致させるスタイル */
   .compact-field-group input, 
   .compact-field-group select {
     height: 38px;
@@ -1234,7 +1244,7 @@
           </div>
         </div>
 
-        <!-- ★スクロール解消：日程クイック切り替えスティッキーバー -->
+        <!-- 日程クイック切り替えスティッキーバー -->
         <div class="admin-date-tabs-bar" id="admin-date-tabs-bar"></div>
 
         <div id="admin-data-container">
@@ -1304,7 +1314,7 @@
 
 </div>
 
-<!-- ★スクロール位置に関係なく常に右下に常駐する受付追加ボタン (FAB) -->
+<!-- ★参加状況画面専用・右下固定受付追加ボタン（ネオン無効・中央揃え） -->
 <button type="button" class="fab-admin-add" id="fab-admin-add-btn">
   <span>➕ 受付追加</span>
 </button>
@@ -1347,7 +1357,7 @@
   </div>
 </div>
 
-<!-- 管理者手動代理追加モーダル（マス揃え・適度な拡大UI） -->
+<!-- 管理者手動代理追加モーダル -->
 <div id="admin-add-modal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#fca5a5;">＋ 手動代理追加（LINE・口頭）</h3>
@@ -1613,7 +1623,7 @@ try {
 var currentMergeTarget = { date: '', rawLeader: '' };
 var currentFeedbackTarget = '';
 var globalProgressTimer = null;
-var currentAdminSelectedDate = 'ALL'; // 現在選択中の管理者日程フィルタ
+var currentAdminSelectedDate = 'ALL';
 
 function showProgressModal(text) {
   var modal = document.getElementById('submit-progress-modal');
@@ -1752,6 +1762,8 @@ function switchTab(tab) {
   if (vc) vc.classList.toggle('hidden', tab !== 'column');
   if (vs) vs.classList.toggle('hidden', tab !== 'status');
   if (va) va.classList.add('hidden');
+  
+  // 一般タブ切り替え時は右下ボタンを必ず非表示
   if (fab) fab.style.display = 'none';
 
   var tbf = document.getElementById('tab-btn-form');
@@ -1773,7 +1785,7 @@ function switchAdminSubTab(sub) {
   if (subRules) subRules.classList.toggle('hidden', sub !== 'rules');
   if (subObs) subObs.classList.toggle('hidden', sub !== 'obstacles');
 
-  // 受付追加ボタンは参加状況タブの時だけ表示
+  // ★「参加状況」サブタブのときだけ右下ボタンを表示
   if (fab) fab.style.display = (sub === 'attendance') ? 'inline-flex' : 'none';
 
   var btnAtt = document.getElementById('admin-sub-btn-att');
@@ -1898,7 +1910,6 @@ function updateTriggerDisplay() {
   }).join('');
 }
 
-// 【絶対ズレない日付パーサー】文字列から直接年月日を抽出
 function parseDateParts(raw) {
   if (!raw) return null;
   var s = String(raw).trim();
@@ -2703,7 +2714,7 @@ function renderAdminObstacleEditor() {
   });
 }
 
-// ★セット要望を「新しい順（降順）」で表示するように修正
+// ★セット要望（アクセスログ）の読み込み・最新順描画（両データ形式対応で確実に復元）
 function loadRemoteFeedbacks() {
   var container = document.getElementById('admin-feedbacks-container');
   if (!container) return;
@@ -2711,20 +2722,47 @@ function loadRemoteFeedbacks() {
   fetch(GAS_URL + "?type=feedbacks&t=" + Date.now())
     .then(function(res) { return res.json(); })
     .then(function(list) {
-      if (!list || list.length === 0) {
+      if (!list || !Array.isArray(list) || list.length === 0) {
         container.innerHTML = '<div style="color:var(--text-sub); font-size:12px; padding:10px; text-align:center;">まだ要望はありません</div>';
         return;
       }
       
-      // ★配列を逆順（最新が一番上）にして描画
-      var reversedList = list.slice().reverse();
+      // オブジェクト形式・行配列形式の両方に対応して正規化
+      var normalized = [];
+      list.forEach(function(f, idx) {
+        if (Array.isArray(f)) {
+          // ヘッダー行があればスキップ
+          if (idx === 0 && (f[0] === 'タイムスタンプ' || f[0] === '送信日時')) return;
+          normalized.push({
+            date: f[0] || '',
+            name: f[1] || '匿名',
+            target: f[3] || 'セット要望',
+            content: f[2] || f[3] || ''
+          });
+        } else if (typeof f === 'object' && f !== null) {
+          normalized.push({
+            date: f.date || f.timestamp || '',
+            name: f.name || f.userName || '匿名',
+            target: f.target || 'セット要望',
+            content: f.content || f.message || ''
+          });
+        }
+      });
+
+      if (normalized.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-sub); font-size:12px; padding:10px; text-align:center;">まだ要望はありません</div>';
+        return;
+      }
+
+      // ★最新が一番上になるよう逆順にソート
+      var reversedList = normalized.slice().reverse();
 
       var html = '';
       reversedList.forEach(function(f) {
         html += '<div style="background:rgba(15,23,42,0.7); border:1px solid var(--border); padding:8px 10px; border-radius:6px; font-size:12px;">';
         html += '<div style="display:flex; justify-content:space-between; margin-bottom:4px;">';
         html += '<b style="color:#93c5fd;">' + escapeHtml(f.target) + '</b>';
-        html += '<span style="color:var(--text-sub); font-size:10px;">' + escapeHtml(f.date || '') + ' (' + escapeHtml(f.name || '匿名') + ')</span>';
+        html += '<span style="color:var(--text-sub); font-size:10px;">' + escapeHtml(f.date) + ' (' + escapeHtml(f.name) + ')</span>';
         html += '</div>';
         html += '<div style="color:#f8fafc; line-height:1.4;">' + escapeHtml(f.content) + '</div>';
         html += '</div>';
@@ -2732,7 +2770,7 @@ function loadRemoteFeedbacks() {
       container.innerHTML = html;
     })
     .catch(function() {
-      container.innerHTML = '<div style="color:var(--text-sub); font-size:12px; padding:10px; text-align:center;">要望はありません</div>';
+      container.innerHTML = '<div style="color:var(--text-sub); font-size:12px; padding:10px; text-align:center;">要望データを取得できませんでした</div>';
     });
 }
 
@@ -2756,7 +2794,6 @@ function toggleMemberContactStatus(date, name, isChecked) {
   } catch(e) {}
 }
 
-// ★日程フィルタリング（スクロール不要で目的の日程のみ瞬時に表示）
 function applyAdminDateFilter(targetDate) {
   currentAdminSelectedDate = targetDate;
   var chips = document.querySelectorAll('.admin-date-chip');
@@ -2804,7 +2841,6 @@ function renderAdminAttendanceHTML(list) {
 
   var sortedDates = Object.keys(groups).sort();
 
-  // ★上部スティッキーバーに日程切り替えボタンを動的生成
   if (tabsBar) {
     var tabsHtml = '<button type="button" class="admin-date-chip ' + (currentAdminSelectedDate === 'ALL' ? 'active' : '') + '" data-date="ALL">すべて表示</button>';
     sortedDates.forEach(function(date) {
@@ -2995,7 +3031,6 @@ function renderAdminAttendanceHTML(list) {
       html += '<span class="member-name">' + escapeHtml(m.name) + '</span>';
       html += '</div>';
       
-      // 連絡済みトグルスイッチ ＋ 交通バッジ ＋ 削除ボタン
       html += '<div style="display:flex; align-items:center; gap:8px;">';
       html += '<div class="status-toggle-box">';
       html += '<label class="status-toggle-label" style="color:' + (isContacted ? '#34d399' : '#94a3b8') + ';">';
@@ -3298,9 +3333,8 @@ window.addEventListener('DOMContentLoaded', function() {
       document.getElementById('tab-btn-column').classList.remove('active');
       document.getElementById('tab-btn-status').classList.remove('active');
       
-      // 管理者ログイン時に右下固定ボタンを表示
-      var fab = document.getElementById('fab-admin-add-btn');
-      if (fab) fab.style.display = 'inline-flex';
+      // 管理者ログイン直後は「参加状況」サブタブが開くのでボタンを表示
+      switchAdminSubTab('attendance');
 
       fetchAdminData(false);
     } else {
@@ -3309,7 +3343,6 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // 手動追加モーダルを開く関数（上部ボタン & 右下常駐ボタン共通）
   function openManualAddModalCommon() {
     var now = new Date();
     var yyyy = now.getFullYear();
