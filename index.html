@@ -169,7 +169,7 @@
     cursor: pointer;
   }
 
-  /* 回答者自身の予約確認・編集・取消パネル（初期は閉じた状態＆横スライド） */
+  /* 回答者自身の予約確認・編集・取消パネル */
   .my-attendance-panel {
     background: rgba(15, 23, 42, 0.95);
     border: 1px solid rgba(56, 189, 248, 0.35);
@@ -375,7 +375,7 @@
     border-radius: 12px;
     padding: 18px;
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.7);
     max-height: 90vh;
     overflow-y: auto;
@@ -1213,7 +1213,7 @@
   </header>
 
   <div class="tab-nav">
-    <button type="button" class="tab-btn active" id="tab-btn-form">✍️ 合トレ参加回答</button>
+    <button type="button" class="tab-btn active" id="tab-btn-form">✍️️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column">📜 注意事項</button>
     <button type="button" class="tab-btn" id="tab-btn-status">⚙️ セット稼働状況</button>
   </div>
@@ -1377,10 +1377,11 @@
 
       <div id="admin-subview-obstacles" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <h2 style="font-size:15px; margin:0;">⚙️️ セット稼働状況の編集</h2>
+          <h2 style="font-size:15px; margin:0;">⚙️ セット稼働状況の編集</h2>
           <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
         </div>
 
+        <!-- 最上部：届いた要望（縦スクロールで長文も自然に読めるパネル） -->
         <div class="feedback-quick-panel">
           <div class="feedback-quick-header" id="btn-toggle-feedbacks">
             <div class="feedback-quick-title">
@@ -1542,7 +1543,7 @@
   </div>
 </div>
 
-<!-- ★回答内容の修正・編集モーダル（他参加者の追加・削除・同伴者変更に完全対応） -->
+<!-- ★★★ 回答内容の修正・編集モーダル（他参加者＆同伴者の動的追加・編集・削除に完全対応） ★★★ -->
 <div id="admin-edit-entry-modal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️ 回答内容の修正・変更</h3>
@@ -1611,7 +1612,7 @@
         </div>
       </div>
 
-      <!-- ★★★ 他参加者（プレイヤー）の追加・削除・編集エリア ★★★ -->
+      <!-- 他参加者（プレイヤー）の追加・削除・編集エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(239,68,68,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold;">🏃 他参加者（プレイヤー）の変更・追加</label>
@@ -1620,19 +1621,13 @@
         <div id="edit-other-players-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
-      <!-- 同伴者（非プレイヤー）セクション -->
-      <div style="background:rgba(15,23,42,0.6); border:1px dashed var(--border); border-radius:8px; padding:10px; margin-bottom:10px;">
-        <label style="font-size:12px; color:#38bdf8; margin-bottom:6px; font-weight:bold;">👥 同伴者（見学等・非プレイヤー）</label>
-        <div class="compact-form-row" style="margin-bottom:6px;">
-          <div class="compact-field-group">
-            <label>同伴人数</label>
-            <input type="text" id="edit-companion-count" placeholder="例: 0名、2名">
-          </div>
-          <div class="compact-field-group">
-            <label>同伴内訳・お名前</label>
-            <input type="text" id="edit-companion-names" placeholder="例: 内宮花子(家族 1名)">
-          </div>
+      <!-- ★★★ 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア ★★★ -->
+      <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(6,182,212,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold;">👥 同伴者（見学等・非プレイヤー）</label>
+          <button type="button" class="tab-btn" id="btn-edit-add-companion" style="padding:2px 8px; font-size:11px; color:#67e8f9; border:1px solid rgba(6,182,212,0.5);">＋ 同伴者を追加</button>
         </div>
+        <div id="edit-companions-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
       <div class="compact-field-group" style="margin-bottom:14px;">
@@ -1831,7 +1826,6 @@ var currentFeedbackTarget = '';
 var globalProgressTimer = null;
 var currentAdminSelectedDate = 'ALL';
 
-// 編集モーダル内で削除された行インデックス保持用
 var editDeletedRowIndices = [];
 
 function showProgressModal(text) {
@@ -2069,12 +2063,12 @@ function refreshMyAttendanceView() {
     });
 }
 
-// ★★★ 回答編集モーダルオープン（他参加者を自動検知して展開） ★★★
+// ★★★ 回答編集モーダルオープン（他参加者＆同伴者を自動展開） ★★★
 function openEditModalByRow(row) {
   var target = registeredRecords.find(function(r) { return Number(r.rowIndex) === row; });
   if (!target) return;
 
-  editDeletedRowIndices = []; // 削除追跡リセット
+  editDeletedRowIndices = [];
 
   var rawName = String(target.name || '');
   var cat = "プレイヤー";
@@ -2099,8 +2093,6 @@ function openEditModalByRow(row) {
   document.getElementById('edit-car-type').value = target.carType || '普通車';
   document.getElementById('edit-custom-car-name').value = target.carLeader || '';
   document.getElementById('edit-share-leader').value = target.carLeader || '';
-  document.getElementById('edit-companion-count').value = target.companionCount || '0名';
-  document.getElementById('edit-companion-names').value = target.companionNames || 'なし';
   
   var cleanNote = String(target.note || '').replace(/（管理者登録:.*?）/g, '').replace(/区分:その他/g, '').trim();
   document.getElementById('edit-note').value = cleanNote;
@@ -2110,9 +2102,9 @@ function openEditModalByRow(row) {
   document.getElementById('edit-car-settings').classList.toggle('hidden', !isCar);
   document.getElementById('edit-share-settings').classList.toggle('hidden', !isShare);
 
-  // ★同じ日程・同じ代表者で紐付いている他参加者を自動抽出して展開
-  var container = document.getElementById('edit-other-players-container');
-  container.innerHTML = '';
+  // 1. 他参加者（プレイヤー）の展開
+  var opContainer = document.getElementById('edit-other-players-container');
+  opContainer.innerHTML = '';
 
   var targetDateKey = normalizeDateKey(target.date);
   var companionRecords = registeredRecords.filter(function(r) {
@@ -2125,10 +2117,41 @@ function openEditModalByRow(row) {
     addEditOtherPlayerCard(cr.name, cr.transport, cr.carType, cr.rowIndex);
   });
 
+  // 2. ★同伴者（非プレイヤー）カードの自動展開
+  var compContainer = document.getElementById('edit-companions-container');
+  compContainer.innerHTML = '';
+
+  var rawCompNames = String(target.companionNames || '');
+  if (rawCompNames && rawCompNames !== 'なし') {
+    var compItems = rawCompNames.split('、');
+    compItems.forEach(function(itemStr) {
+      // 例: "内宮花子(家族 1名[自車:普通車])" または "山本さん(スタッフ 2名[乗り合い])"
+      var m = itemStr.match(/^(.*?)\((.*?)\s+(\d+名)(?:\[(.*?)\])?\)$/);
+      if (m) {
+        var cName = m[1].trim();
+        var cRole = m[2].trim();
+        var cCount = m[3].trim();
+        var cTransRaw = m[4] || '同乗';
+        var cTrans = '同乗';
+        var cCar = '普通車';
+        if (cTransRaw.includes('自車')) {
+          cTrans = '自車';
+          var carM = cTransRaw.match(/自車:(.*)/);
+          if (carM) cCar = carM[1].trim();
+        } else if (cTransRaw.includes('その他') || cTransRaw.includes('バス')) {
+          cTrans = 'その他';
+        }
+        addEditCompanionCard(cName, cRole, cCount, cTrans, cCar);
+      } else {
+        addEditCompanionCard(itemStr.trim(), '家族', '1名', '同乗', '普通車');
+      }
+    });
+  }
+
   showModal('admin-edit-entry-modal');
 }
 
-// 編集モーダル内用：他参加者カード追加
+// 編集モーダル内：他参加者カード追加
 function addEditOtherPlayerCard(fullName, transport, carType, rowIndex) {
   var container = document.getElementById('edit-other-players-container');
   if (!container) return;
@@ -2176,18 +2199,102 @@ function addEditOtherPlayerCard(fullName, transport, carType, rowIndex) {
   card.innerHTML = html;
   container.appendChild(card);
 
-  // 移動手段変更時の車種プルダウン切り替え
   var selTrans = card.querySelector('.edit-op-transport');
   var wrapCar = card.querySelector('.edit-op-car-wrap');
   selTrans.onchange = function() {
     wrapCar.classList.toggle('hidden', this.value !== '自車');
   };
 
-  // 削除ボタン
   card.querySelector('.btn-del-edit-op').onclick = function() {
     if (rowIndex) {
       editDeletedRowIndices.push(Number(rowIndex));
     }
+    card.remove();
+  };
+}
+
+// ★★★ 編集モーダル内用：同伴者カード追加 ★★★
+function addEditCompanionCard(fullName, role, count, transport, carType) {
+  var container = document.getElementById('edit-companions-container');
+  if (!container) return;
+
+  fullName = fullName || '';
+  role = role || '家族';
+  count = count || '1名';
+  transport = transport || '同乗';
+  carType = carType || '普通車';
+
+  var isCar = transport === '自車';
+  var card = document.createElement('div');
+  card.className = 'edit-companion-item';
+  card.style.background = 'rgba(15,23,42,0.7)';
+  card.style.border = '1px dashed rgba(6,182,212,0.35)';
+  card.style.borderRadius = '6px';
+  card.style.padding = '8px';
+  card.style.marginBottom = '6px';
+
+  var html = '';
+  html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px;">';
+  html += '<input type="text" class="edit-comp-name" value="' + escapeHtml(fullName) + '" placeholder="お名前（例: 内宮花子、山本さん）" required style="flex:1; height:34px; padding:4px 8px; font-size:12.5px;">';
+  html += '<button type="button" class="btn-action-small btn-del-edit-comp" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; height:34px; padding:0 8px;">✕ 削除</button>';
+  html += '</div>';
+
+  html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px;">';
+  html += '<div>';
+  html += '<label style="font-size:10px; color:#cbd5e1; margin-bottom:2px;">役割・続柄</label>';
+  html += '<select class="edit-comp-role" style="height:32px; padding:2px 6px; font-size:11.5px;">';
+  html += '<option value="家族" ' + (role === '家族' ? 'selected' : '') + '>家族</option>';
+  html += '<option value="スタッフ" ' + (role === 'スタッフ' ? 'selected' : '') + '>スタッフ</option>';
+  html += '<option value="カメラマン" ' + (role === 'カメラマン' ? 'selected' : '') + '>カメラマン</option>';
+  html += '<option value="マネージャー" ' + (role === 'マネージャー' ? 'selected' : '') + '>マネージャー</option>';
+  html += '<option value="トレーナー" ' + (role === 'トレーナー' ? 'selected' : '') + '>トレーナー</option>';
+  html += '<option value="友人・知人" ' + (role === '友人・知人' ? 'selected' : '') + '>友人・知人</option>';
+  html += '<option value="その他" ' + (role === 'その他' ? 'selected' : '') + '>その他</option>';
+  html += '</select>';
+  html += '</div>';
+
+  html += '<div>';
+  html += '<label style="font-size:10px; color:var(--cyan); margin-bottom:2px;">人数</label>';
+  html += '<select class="edit-comp-count" style="height:32px; padding:2px 6px; font-size:11.5px; border-color:var(--cyan); color:#67e8f9;">';
+  html += '<option value="1名" ' + (count === '1名' ? 'selected' : '') + '>1名</option>';
+  html += '<option value="2名" ' + (count === '2名' ? 'selected' : '') + '>2名</option>';
+  html += '<option value="3名" ' + (count === '3名' ? 'selected' : '') + '>3名</option>';
+  html += '<option value="4名" ' + (count === '4名' ? 'selected' : '') + '>4名</option>';
+  html += '<option value="5名以上" ' + (count === '5名以上' ? 'selected' : '') + '>5名以上</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">';
+  html += '<div>';
+  html += '<label style="font-size:10px; color:#cbd5e1; margin-bottom:2px;">移動手段</label>';
+  html += '<select class="edit-comp-transport" style="height:32px; padding:2px 6px; font-size:11.5px;">';
+  html += '<option value="同乗" ' + (transport === '同乗' ? 'selected' : '') + '>🤝 代表者と同乗</option>';
+  html += '<option value="自車" ' + (transport === '自車' ? 'selected' : '') + '>🚗 自車</option>';
+  html += '<option value="その他" ' + (transport === 'その他' ? 'selected' : '') + '>🚌 その他</option>';
+  html += '</select>';
+  html += '</div>';
+
+  html += '<div class="edit-comp-car-wrap ' + (isCar ? '' : 'hidden') + '">';
+  html += '<label style="font-size:10px; color:#cbd5e1; margin-bottom:2px;">車種</label>';
+  html += '<select class="edit-comp-car-type" style="height:32px; padding:2px 6px; font-size:11.5px;">';
+  html += '<option value="普通車" ' + (carType === '普通車' ? 'selected' : '') + '>普通車</option>';
+  html += '<option value="軽自動車" ' + (carType === '軽自動車' ? 'selected' : '') + '>軽自動車</option>';
+  html += '<option value="その他" ' + (carType === 'その他' ? 'selected' : '') + '>その他</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '</div>';
+
+  card.innerHTML = html;
+  container.appendChild(card);
+
+  var selTrans = card.querySelector('.edit-comp-transport');
+  var wrapCar = card.querySelector('.edit-comp-car-wrap');
+  selTrans.onchange = function() {
+    wrapCar.classList.toggle('hidden', this.value !== '自車');
+  };
+
+  card.querySelector('.btn-del-edit-comp').onclick = function() {
     card.remove();
   };
 }
@@ -3211,7 +3318,6 @@ function applyAdminDateFilter(targetDate) {
   });
 }
 
-// 管理者画面描画（非プレイヤーをプレイヤーの下に自動ソート）
 function renderAdminAttendanceHTML(list) {
   var container = document.getElementById('admin-data-container');
   var tabsBar = document.getElementById('admin-date-tabs-bar');
@@ -3782,11 +3888,19 @@ window.addEventListener('DOMContentLoaded', function() {
   var btnAddC = document.getElementById('btn-add-companion');
   if (btnAddC) btnAddC.onclick = function() { addCompanionCard(); };
 
-  // ★回答編集モーダル内の「＋ 参加者を追加」ボタン
+  // 回答編集モーダル内の「＋ 参加者を追加」ボタン
   var btnEditAddOp = document.getElementById('btn-edit-add-other-player');
   if (btnEditAddOp) {
     btnEditAddOp.onclick = function() {
       addEditOtherPlayerCard('', '乗り合い（同乗）', '普通車', '');
+    };
+  }
+
+  // ★回答編集モーダル内の「＋ 同伴者を追加」ボタン
+  var btnEditAddComp = document.getElementById('btn-edit-add-companion');
+  if (btnEditAddComp) {
+    btnEditAddComp.onclick = function() {
+      addEditCompanionCard('', '家族', '1名', '同乗', '普通車');
     };
   }
 
@@ -3934,7 +4048,7 @@ window.addEventListener('DOMContentLoaded', function() {
   var btnEditCancel = document.getElementById('btn-edit-entry-cancel');
   if (btnEditCancel) btnEditCancel.onclick = function() { hideModal('admin-edit-entry-modal'); };
 
-  // ★★★ 回答編集の送信（他参加者の一括上書き・新規追加・削除連動） ★★★
+  // ★★★ 回答編集の送信（他参加者＆同伴者の一括上書き・追加・削除・人数自動計算） ★★★
   var editForm = document.getElementById('admin-edit-entry-form');
   if (editForm) {
     editForm.onsubmit = function(e) {
@@ -3948,8 +4062,6 @@ window.addEventListener('DOMContentLoaded', function() {
       var carTypeVal = document.getElementById('edit-car-type').value;
       var customCarName = document.getElementById('edit-custom-car-name').value.trim();
       var shareLeader = document.getElementById('edit-share-leader').value.trim();
-      var companionCount = document.getElementById('edit-companion-count').value.trim() || '0名';
-      var companionNames = document.getElementById('edit-companion-names').value.trim() || 'なし';
       var noteVal = document.getElementById('edit-note').value.trim();
 
       if (!rawName || !dateVal) {
@@ -3969,7 +4081,7 @@ window.addEventListener('DOMContentLoaded', function() {
       if (cat === "その他") extraNote = "区分:その他";
       var fullNote = noteVal ? (extraNote ? extraNote + " " + noteVal : noteVal) : extraNote;
 
-      // 編集モーダル内の他参加者を収集
+      // 1. 他参加者（プレイヤー）の収集
       var updatedOtherPlayers = [];
       var newOtherPlayers = [];
 
@@ -3998,8 +4110,32 @@ window.addEventListener('DOMContentLoaded', function() {
         }
       });
 
+      // 2. ★同伴者カードの収集・人数自動計算・内訳整形
+      var compItems = [];
+      var totalCompCount = 0;
+
+      document.querySelectorAll('.edit-companion-item').forEach(function(item) {
+        var cName = item.querySelector('.edit-comp-name').value.trim();
+        var cRole = item.querySelector('.edit-comp-role').value;
+        var cCountStr = item.querySelector('.edit-comp-count').value;
+        var cTrans = item.querySelector('.edit-comp-transport').value;
+        var cCar = cTrans === '自車' ? item.querySelector('.edit-comp-car-type').value : '';
+
+        if (!cName) return;
+
+        var numMatch = cCountStr.match(/(\d+)/);
+        var headcount = numMatch ? parseInt(numMatch[1], 10) : 1;
+        totalCompCount += headcount;
+
+        var transTag = cTrans === '自車' ? '[自車:' + cCar + ']' : '[' + cTrans + ']';
+        compItems.push(cName + '(' + cRole + ' ' + headcount + '名' + transTag + ')');
+      });
+
+      var finalCompCountStr = totalCompCount > 0 ? totalCompCount + "名" : "0名";
+      var finalCompNamesStr = compItems.length > 0 ? compItems.join('、') : "なし";
+
       hideModal('admin-edit-entry-modal');
-      showProgressModal("回答・他参加者情報を更新中...");
+      showProgressModal("回答・参加者情報を更新中...");
 
       fetch(GAS_URL, {
         method: "POST",
@@ -4014,8 +4150,8 @@ window.addEventListener('DOMContentLoaded', function() {
           transport: transVal,
           carType: transVal === "自車" ? carTypeVal : "",
           carLeader: finalLeader,
-          companionCount: companionCount,
-          companionNames: companionNames,
+          companionCount: finalCompCountStr,
+          companionNames: finalCompNamesStr,
           note: fullNote,
           deletedRows: editDeletedRowIndices,
           updatedOtherPlayers: updatedOtherPlayers,
@@ -4023,7 +4159,6 @@ window.addEventListener('DOMContentLoaded', function() {
         })
       }).then(function() {
         finishProgressModal("更新完了！", function() {
-          // 最新回答をサーバーから再取得して整合性を完全同期
           fetchAdminData(true);
         });
       }).catch(function() {
