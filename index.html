@@ -250,7 +250,6 @@
     flex-shrink: 0;
   }
 
-  /* 変更・取消と同規格のステータスバッジ */
   .badge-user-status {
     font-size: 11px;
     height: 23px;
@@ -488,7 +487,7 @@
     font-weight: bold;
   }
 
-  /* 管理者カレンダー用ドット表示（フラット丸印） */
+  /* 管理者カレンダー用ドット表示 */
   .admin-cal-dot {
     width: 6px;
     height: 6px;
@@ -634,7 +633,7 @@
     padding: 24px;
     width: 240px;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
     margin: auto;
   }
   .hourglass-icon {
@@ -1330,7 +1329,7 @@
   <div class="tab-nav">
     <button type="button" class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">✍️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column" onclick="switchTab('column')">📜 注意事項</button>
-    <button type="button" class="tab-btn" id="tab-btn-status" onclick="switchTab('status')">⚙️️ セット稼働状況</button>
+    <button type="button" class="tab-btn" id="tab-btn-status" onclick="switchTab('status')">⚙ セット稼働状況</button>
   </div>
 
   <!-- 1. 参加送信フォーム -->
@@ -1427,7 +1426,7 @@
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
-        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
@@ -1797,7 +1796,7 @@
 
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" onclick="hideModal('merge-car-modal')" style="border:1px solid var(--border);">キャンセル</button>
-      <button type="submit" class="btn-submit" onclick="submitMergeCar()" style="margin:0; padding:8px;">統合する</button>
+      <button type="button" class="btn-submit" onclick="submitMergeCar()" style="margin:0; padding:8px;">統合する</button>
     </div>
   </div>
 </div>
@@ -2109,9 +2108,13 @@ function renderMyAttendanceList(userName) {
     return;
   }
 
+  // 空白の差異（半角/全角/スペース有無）を無視して照合
+  var cleanTargetNorm = targetName.replace(/\s+/g, '');
+
   var myRecords = registeredRecords.filter(function(r) {
-    var cleanRName = String(r.name || '').trim();
-    return cleanRName === targetName || cleanRName.indexOf(targetName + '（') === 0;
+    var rawRName = String(r.name || '');
+    var cleanRNorm = rawRName.replace(/\s+/g, '');
+    return cleanRNorm === cleanTargetNorm || cleanRNorm.indexOf(cleanTargetNorm + '（') === 0;
   });
 
   if (myRecords.length === 0) {
@@ -4362,7 +4365,7 @@ function clearAllData() {
       .then(function() {
         finishProgressModal("全件削除完了！", function() {
           registeredRecords = [];
-          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
+          try { localStorage.removeItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
           fetchAdminData(true);
           var user = localStorage.getItem('uchimiya_auth_user');
           if (user) renderMyAttendanceList(user);
@@ -4592,12 +4595,13 @@ function submitAttendance(e) {
 
   for (var k = 0; k < allSubmittedNames.length; k++) {
     var curName = allSubmittedNames[k];
+    var curNameNorm = curName.replace(/\s+/g, '');
     for (var aIdx = 0; aIdx < arr.length; aIdx++) {
       var dStr = arr[aIdx];
       var isDup = registeredRecords.some(function(r) {
-        var rName = String(r.name || '').trim();
+        var rNameNorm = String(r.name || '').replace(/\s+/g, '');
         var rDate = normalizeDateKey(r.date);
-        return rName === curName && rDate === normalizeDateKey(dStr);
+        return rNameNorm === curNameNorm && rDate === normalizeDateKey(dStr);
       });
       if (isDup) {
         alert("【重複回答アラート】\n「" + curName + "」さんは既に " + formatDateLabel(dStr) + " に回答登録されています。\n同じ日程で二重に登録することはできません。");
@@ -4780,6 +4784,19 @@ window.addEventListener('DOMContentLoaded', function() {
   checkGateAccess();
 
   setTimeout(function() {
+    // サーバーから各日程の最新ステータスを取得（双方向同期）
+    fetch(GAS_URL + "?type=date_statuses&t=" + Date.now())
+      .then(function(res) { return res.json(); })
+      .then(function(remoteStatuses) {
+        if (remoteStatuses && typeof remoteStatuses === 'object') {
+          dateStatusMap = remoteStatuses;
+          try { localStorage.setItem('uchimiya_date_status_map', JSON.stringify(dateStatusMap)); } catch(e){}
+          var user = localStorage.getItem('uchimiya_auth_user');
+          if (user) renderMyAttendanceList(user);
+          renderAdminCalendar();
+        }
+      }).catch(function() {});
+
     fetch(GAS_URL + "?type=obstacles&t=" + Date.now())
       .then(function(res) { return res.json(); })
       .then(function(remoteList) {
