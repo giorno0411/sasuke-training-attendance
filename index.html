@@ -242,9 +242,10 @@
     justify-content: space-between;
     transition: opacity 0.2s, filter 0.2s;
   }
+  /* 非開催時はさらに薄く */
   .my-entry-card.is-canceled {
-    opacity: 0.38;
-    filter: grayscale(85%);
+    opacity: 0.22 !important;
+    filter: grayscale(100%) !important;
   }
   .my-entry-top {
     display: flex;
@@ -266,7 +267,6 @@
     flex-shrink: 0;
   }
 
-  /* 変更・取消と同規格のステータスバッジ */
   .badge-user-status {
     font-size: 11px;
     height: 23px;
@@ -483,6 +483,7 @@
   .mini-cal-day {
     aspect-ratio: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     font-size: 12px;
@@ -491,6 +492,7 @@
     background: rgba(30, 41, 59, 0.5);
     border: 1px solid transparent;
     cursor: pointer;
+    position: relative;
   }
   .mini-cal-day.disabled { opacity: 0.18; cursor: not-allowed; background: transparent; }
   .mini-cal-day.today { border-color: #38bdf8; }
@@ -500,6 +502,18 @@
     color: #fff !important;
     font-weight: bold;
   }
+
+  /* 管理者カレンダー用ドット表示 */
+  .admin-cal-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    margin-top: 1px;
+  }
+  .admin-cal-dot.active { background: #10b981; }
+  .admin-cal-dot.canceled { background: #ef4444; }
+  .admin-cal-dot.tuning { background: #f59e0b; }
+
   .mini-cal-footer {
     display: flex;
     justify-content: space-between;
@@ -517,6 +531,29 @@
     font-size: 11px;
     font-weight: bold;
     cursor: pointer;
+  }
+
+  /* 管理者用インラインカレンダーパネル */
+  .admin-cal-panel {
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .admin-cal-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(30, 41, 59, 0.7);
+    cursor: pointer;
+    user-select: none;
+  }
+  .admin-cal-panel-body {
+    padding: 10px;
+    border-top: 1px solid var(--border);
+    display: none;
   }
 
   .day-config-card {
@@ -885,45 +922,49 @@
     margin-bottom: 22px;
     transition: opacity 0.2s, filter 0.2s;
   }
-  .admin-date-group.is-canceled { opacity: 0.38; filter: grayscale(85%); }
+  /* 管理者側も非開催時はさらに薄く */
+  .admin-date-group.is-canceled {
+    opacity: 0.22 !important;
+    filter: grayscale(100%) !important;
+  }
 
-  /* 管理者日程ヘッダー（1行スッキリ化） */
+  /* 管理者日程ヘッダー（上下2段に整理） */
   .admin-date-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     background: rgba(30, 41, 59, 0.95);
     padding: 8px 10px;
     border-radius: 8px;
-    font-size: 13px;
-    font-weight: bold;
     border-left: 4px solid var(--accent);
     margin-bottom: 8px;
-    flex-wrap: nowrap;
-    gap: 6px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .admin-date-header::-webkit-scrollbar { display: none; }
-  .admin-head-left-bar {
     display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .admin-head-row-top {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 6px;
-    flex-shrink: 0;
   }
-  .admin-head-badges { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+  .admin-head-row-bottom {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    padding-top: 4px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  }
 
   /* 開催 / 非開催 / 調整中 トグル */
   .status-toggle-box {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 5px;
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
-    padding: 2px 6px;
+    padding: 2px 7px;
     border-radius: 5px;
-    font-size: 10.5px;
+    font-size: 11px;
     height: 24px;
     line-height: 1;
     box-sizing: border-box;
@@ -1328,7 +1369,7 @@
           <input type="text" id="field-name" placeholder="例：内宮 修造" required>
         </div>
 
-        <!-- 合トレ参加希望日程（先に配置） -->
+        <!-- 合トレ参加希望日程 -->
         <div class="form-group">
           <label>合トレ参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" id="date-picker-bar" onclick="openCalendarPopup()">
@@ -1339,7 +1380,7 @@
 
         <div id="days-config-container"></div>
 
-        <!-- 他参加者（プレイヤー）氏名（後に配置） -->
+        <!-- 他参加者（プレイヤー）氏名 -->
         <div class="form-group">
           <label>他参加者（プレイヤー）氏名</label>
           <p id="player-instruction-text" style="display:none; font-size:11px; color:var(--text-sub); margin:0 0 8px 0; line-height:1.5;">
@@ -1383,7 +1424,7 @@
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
-        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️️ 現在のセット稼働状況</h2>
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
@@ -1409,6 +1450,32 @@
             <span id="admin-new-records-alert" style="display:none; font-size:11px; background:#ef4444; color:#fff; padding:2px 7px; border-radius:10px; font-weight:normal;">🔴 新規回答あり</span>
           </h2>
           <button type="button" class="tab-btn" id="btn-refresh-admin" onclick="fetchAdminData(true)" style="flex:none; padding:5px 12px; border:1px solid var(--border); font-size:11.5px; border-radius:6px;">🔄 最新化</button>
+        </div>
+
+        <!-- 管理者用カレンダーパネル（予定が一目でわかる） -->
+        <div class="admin-cal-panel">
+          <div class="admin-cal-panel-header" id="btn-toggle-admin-cal" onclick="toggleAdminCalPanel()">
+            <span style="font-size:12.5px; font-weight:bold; color:#38bdf8; display:flex; align-items:center; gap:6px;">
+              <span>📅 開催予定カレンダー（全体把握）</span>
+            </span>
+            <span id="admin-cal-toggle-arrow" style="font-size:11px; color:var(--text-sub);">▼ 開く</span>
+          </div>
+          <div class="admin-cal-panel-body" id="admin-cal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <button type="button" class="mini-cal-nav-btn" onclick="prevAdminCalMonth(event)">‹ 前月</button>
+              <div style="font-size:12.5px; font-weight:bold; color:#f8fafc;" id="admin-cal-month-title"></div>
+              <button type="button" class="mini-cal-nav-btn" onclick="nextAdminCalMonth(event)">翌月 ›</button>
+            </div>
+            <div class="mini-cal-weekdays">
+              <span class="sun">日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span class="sat">土</span>
+            </div>
+            <div class="mini-cal-grid" id="admin-cal-grid"></div>
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:8px; font-size:10.5px; color:#94a3b8;">
+              <span style="display:flex; align-items:center; gap:3px;"><span class="admin-cal-dot active"></span>開催</span>
+              <span style="display:flex; align-items:center; gap:3px;"><span class="admin-cal-dot tuning"></span>調整中</span>
+              <span style="display:flex; align-items:center; gap:3px;"><span class="admin-cal-dot canceled"></span>非開催</span>
+            </div>
+          </div>
         </div>
 
         <div class="admin-date-tabs-bar" id="admin-date-tabs-bar"></div>
@@ -1707,7 +1774,7 @@
         <div id="edit-companions-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
-      <!-- 備考・連絡事項（縦スクロール対応） -->
+      <!-- 備考・連絡事項 -->
       <div class="compact-field-group" style="margin-bottom:14px;">
         <label>備考・連絡事項</label>
         <textarea id="edit-note" rows="2" placeholder="備考" style="max-height:120px; overflow-y:auto; resize:vertical; font-size:13px; line-height:1.4; padding:8px 10px;"></textarea>
@@ -1775,7 +1842,7 @@
 
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" onclick="hideModal('feedback-modal')" style="border:1px solid var(--border);">キャンセル</button>
-      <button type="button" class="btn-submit" onclick="submitFeedback()" style="margin:0; padding:8px;">送信する</button>
+      <button type="submit" class="btn-submit" onclick="submitFeedback()" style="margin:0; padding:8px;">送信する</button>
     </div>
   </div>
 </div>
@@ -1870,6 +1937,10 @@ var calMonth = new Date().getMonth();
 var selectedDates = new Set();
 var registeredRecords = [];
 
+/* 管理者専用カレンダー用の年月 */
+var adminCalYear = new Date().getFullYear();
+var adminCalMonth = new Date().getMonth();
+
 var dateStatusMap = {};
 try {
   var savedStatus = localStorage.getItem('uchimiya_date_status_map');
@@ -1906,27 +1977,36 @@ var currentAdminSelectedDate = 'ALL';
 
 var editDeletedRowIndices = [];
 
-/* 新規回答検知トラッキング */
+/* 改善版：新着回答の検知・通知 */
 function checkNewAttendanceAlert(list) {
   if (!list || !Array.isArray(list)) return;
-  var lastSeenMaxRow = Number(localStorage.getItem('uchimiya_admin_last_seen_row') || 0);
   
-  var newItems = list.filter(function(item) {
-    return Number(item.rowIndex || 0) > lastSeenMaxRow;
+  var seenIds = [];
+  try {
+    var rawSeen = localStorage.getItem('uchimiya_admin_seen_ids');
+    if (rawSeen) seenIds = JSON.parse(rawSeen);
+  } catch(e) {}
+
+  var newCount = 0;
+  list.forEach(function(item) {
+    var uid = (item.rowIndex || '') + "_" + (item.name || '') + "_" + normalizeDateKey(item.date);
+    if (!seenIds.includes(uid)) {
+      newCount++;
+    }
   });
 
   var dot = document.getElementById('header-admin-new-dot');
   var badge = document.getElementById('admin-sub-new-badge');
   var alertBar = document.getElementById('admin-new-records-alert');
 
-  if (newItems.length > 0) {
+  if (newCount > 0) {
     if (dot) dot.style.display = 'block';
     if (badge) {
-      badge.innerText = newItems.length + "件新着";
+      badge.innerText = newCount + "件新着";
       badge.style.display = 'inline-block';
     }
     if (alertBar) {
-      alertBar.innerText = "🔴 新着 " + newItems.length + " 件";
+      alertBar.innerText = "🔴 新着 " + newCount + " 件";
       alertBar.style.display = 'inline-block';
     }
   } else {
@@ -1938,12 +2018,12 @@ function checkNewAttendanceAlert(list) {
 
 function markAttendanceSeen() {
   if (registeredRecords && registeredRecords.length > 0) {
-    var maxRow = 0;
-    registeredRecords.forEach(function(r) {
-      var rw = Number(r.rowIndex || 0);
-      if (rw > maxRow) maxRow = rw;
+    var allIds = registeredRecords.map(function(item) {
+      return (item.rowIndex || '') + "_" + (item.name || '') + "_" + normalizeDateKey(item.date);
     });
-    localStorage.setItem('uchimiya_admin_last_seen_row', String(maxRow));
+    try {
+      localStorage.setItem('uchimiya_admin_seen_ids', JSON.stringify(allIds));
+    } catch(e) {}
   }
   var dot = document.getElementById('header-admin-new-dot');
   var badge = document.getElementById('admin-sub-new-badge');
@@ -2115,7 +2195,7 @@ function renderMyAttendanceList(userName) {
     var hasNote = rec.note && rec.note.trim() !== '';
 
     var dKey = normalizeDateKey(rec.date);
-    var dateStatus = dateStatusMap[dKey] || 'tuning'; // デフォルトは調整中
+    var dateStatus = dateStatusMap[dKey] || 'tuning';
 
     var statusBadgeHtml = '';
     var isCanceledCard = (dateStatus === 'canceled');
@@ -2133,8 +2213,15 @@ function renderMyAttendanceList(userName) {
     html += '<div class="my-entry-date">📅 ' + formatDateLabel(rec.date) + '</div>';
     html += '<div class="my-entry-actions">';
     html += statusBadgeHtml;
-    html += '<button type="button" class="btn-my-edit" data-row="' + rec.rowIndex + '">✏️ 変更</button>';
-    html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️ 取消</button>';
+    
+    // 非開催の場合と通常時でボタンの文言を分かりやすく表示
+    if (isCanceledCard) {
+      html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️ この回答を削除</button>';
+    } else {
+      html += '<button type="button" class="btn-my-edit" data-row="' + rec.rowIndex + '">✏️ 変更</button>';
+      html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️ 取消</button>';
+    }
+    
     html += '</div></div>';
 
     html += '<div style="font-size:11.5px; color:#cbd5e1; display:flex; flex-direction:column; gap:3px;">';
@@ -2164,8 +2251,9 @@ function renderMyAttendanceList(userName) {
     btn.onclick = function() {
       var row = Number(this.getAttribute('data-row'));
       var d = this.getAttribute('data-date');
-      if (confirm("【参加取り消しの確認】\n" + formatDateLabel(d) + " の合トレ参加を取り消しますか？\n（取り消しは管理者にLINE通知されます）")) {
-        showProgressModal("参加を取り消し中...");
+      var confirmMsg = "【参加取り消しの確認】\n" + formatDateLabel(d) + " の回答を削除しますか？\n（管理者にLINE通知されます）";
+      if (confirm(confirmMsg)) {
+        showProgressModal("回答を削除中...");
         fetch(GAS_URL, {
           method: "POST",
           mode: "no-cors",
@@ -2177,7 +2265,7 @@ function renderMyAttendanceList(userName) {
             date: formatDateLabel(d)
           })
         }).then(function() {
-          finishProgressModal("取り消しが完了しました！", function() {
+          finishProgressModal("削除が完了しました！", function() {
             registeredRecords = registeredRecords.filter(function(r) { return Number(r.rowIndex) !== row; });
             try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
             renderMyAttendanceList(targetName);
@@ -2597,6 +2685,91 @@ function renderCalendar() {
 
   var countEl = document.getElementById('cal-popup-count');
   if (countEl) countEl.innerText = selectedDates.size + "日選択中";
+}
+
+/* 管理者専用カレンダーパネル */
+function toggleAdminCalPanel() {
+  var body = document.getElementById('admin-cal-content');
+  var arrow = document.getElementById('admin-cal-toggle-arrow');
+  if (!body) return;
+  var isHidden = body.style.display === 'none' || body.style.display === '';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (arrow) arrow.innerText = isHidden ? '▲ 閉じる' : '▼ 開く';
+  if (isHidden) renderAdminCalendar();
+}
+
+function prevAdminCalMonth(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  adminCalMonth--;
+  if (adminCalMonth < 0) { adminCalMonth = 11; adminCalYear--; }
+  renderAdminCalendar();
+}
+
+function nextAdminCalMonth(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  adminCalMonth++;
+  if (adminCalMonth > 11) { adminCalMonth = 0; adminCalYear++; }
+  renderAdminCalendar();
+}
+
+function renderAdminCalendar() {
+  var title = document.getElementById('admin-cal-month-title');
+  if (title) title.innerText = adminCalYear + "年 " + (adminCalMonth + 1) + "月";
+  var grid = document.getElementById('admin-cal-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  var firstDayIndex = new Date(adminCalYear, adminCalMonth, 1).getDay();
+  var daysInMonth = new Date(adminCalYear, adminCalMonth + 1, 0).getDate();
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // 予約がある日を抽出
+  var eventDates = {};
+  registeredRecords.forEach(function(r) {
+    var k = normalizeDateKey(r.date);
+    eventDates[k] = true;
+  });
+
+  for (var i = 0; i < firstDayIndex; i++) {
+    var empty = document.createElement('div');
+    grid.appendChild(empty);
+  }
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    (function(dayNum) {
+      var cellDate = new Date(adminCalYear, adminCalMonth, dayNum);
+      cellDate.setHours(0, 0, 0, 0);
+
+      var mm = String(adminCalMonth + 1).padStart(2, '0');
+      var dd = String(dayNum).padStart(2, '0');
+      var dateStr = adminCalYear + "-" + mm + "-" + dd;
+
+      var cell = document.createElement('div');
+      cell.className = 'mini-cal-day';
+      cell.innerText = dayNum;
+
+      if (cellDate.getTime() === today.getTime()) {
+        cell.classList.add('today');
+      }
+
+      if (eventDates[dateStr]) {
+        var st = dateStatusMap[dateStr] || 'tuning';
+        var dot = document.createElement('span');
+        dot.className = 'admin-cal-dot ' + (st === 'active' ? 'active' : (st === 'canceled' ? 'canceled' : 'tuning'));
+        cell.appendChild(dot);
+
+        cell.title = formatDateLabel(dateStr) + " (クリックで絞り込み)";
+        cell.onclick = function() {
+          applyAdminDateFilter(dateStr);
+          window.scrollTo({ top: 180, behavior: 'smooth' });
+        };
+      }
+
+      grid.appendChild(cell);
+    })(d);
+  }
 }
 
 function updateTriggerDisplay() {
@@ -3463,6 +3636,9 @@ function toggleDateExecutionStatus(date, status) {
   var user = localStorage.getItem('uchimiya_auth_user');
   if (user) renderMyAttendanceList(user);
 
+  // 管理者カレンダーも再描画
+  renderAdminCalendar();
+
   // サーバーへ同期
   fetch(GAS_URL, {
     method: "POST",
@@ -3658,9 +3834,11 @@ function renderAdminAttendanceHTML(list) {
 
     html += '<div class="admin-date-group ' + (isDateCanceled ? 'is-canceled' : '') + '" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
-    html += '<div class="admin-head-left-bar">';
-    html += '<span>📅 ' + formatDateLabel(date) + '</span>';
     
+    // 上段：日付、ステータストグル、ゴミ箱ボタン
+    html += '<div class="admin-head-row-top">';
+    html += '<span style="font-weight:800; font-size:13.5px;">📅 ' + formatDateLabel(date) + '</span>';
+    html += '<div style="display:flex; align-items:center; gap:6px;">';
     html += '<div class="status-toggle-box">';
     html += '<label class="status-toggle-label" style="color:#34d399;">';
     html += '<input type="radio" name="exec-status-' + date + '" value="active" ' + (currentExecStatus === 'active' ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'active\')"> 開催';
@@ -3672,11 +3850,11 @@ function renderAdminAttendanceHTML(list) {
     html += '<input type="radio" name="exec-status-' + date + '" value="tuning" ' + (currentExecStatus === 'tuning' ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'tuning\')"> 調整中';
     html += '</label>';
     html += '</div>';
-
     html += '<button type="button" class="btn-del-entire-date-icon" data-date="' + date + '" title="この日の回答データを全件削除">🗑️</button>';
+    html += '</div></div>';
 
-    html += '</div>';
-    html += '<div class="admin-head-badges">';
+    // 下段：改行された人数内訳バッジ
+    html += '<div class="admin-head-row-bottom">';
     html += '<span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">プレイヤー: ' + playerTotal + '名</span>';
     if (staffTotal > 0) {
       html += '<span style="font-size:10px; background:#eab308; color:#000; padding:2px 6px; border-radius:10px; font-weight:bold; white-space:nowrap;">ロケ班: ' + staffTotal + '名</span>';
@@ -3687,7 +3865,7 @@ function renderAdminAttendanceHTML(list) {
     if (otherTotal > 0) {
       html += '<span style="font-size:10px; background:#334155; color:#cbd5e1; padding:2px 6px; border-radius:10px; white-space:nowrap;">他: ' + otherTotal + '名</span>';
     }
-    html += '<span style="font-size:10px; background:#10b981; color:#fff; padding:2px 7px; border-radius:10px; font-weight:bold; white-space:nowrap;">計: ' + grandTotalPeople + '名</span>';
+    html += '<span style="font-size:10px; background:#10b981; color:#fff; padding:2px 7px; border-radius:10px; font-weight:bold; white-space:nowrap; margin-left:auto;">計: ' + grandTotalPeople + '名</span>';
     html += '</div></div>';
 
     html += '<div class="admin-card-stats">';
@@ -3803,6 +3981,8 @@ function renderAdminAttendanceHTML(list) {
   container.innerHTML = html;
   applyAdminDateFilter(currentAdminSelectedDate);
 
+  renderAdminCalendar();
+
   initSwipeActions(container);
 
   container.querySelectorAll('.btn-del-entire-date-icon').forEach(function(btn) {
@@ -3819,7 +3999,7 @@ function renderAdminAttendanceHTML(list) {
         rows.push(Number(b.getAttribute('data-row')));
       });
 
-      if (!confirm("【警告】\n" + formatDateLabel(d) + " の回答データ（計 " + rows.length + " 件）をすべて削除しますか？\n※失注・中止等で一括リセットする場合に実行してください。")) {
+      if (!confirm("【警告】\n" + formatDateLabel(d) + " の回答データ（計 " + rows.length + " 件）をすべて削除しますか？\n※一括リセットする場合に実行してください。")) {
         return;
       }
 
