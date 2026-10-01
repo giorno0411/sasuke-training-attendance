@@ -355,7 +355,7 @@
     white-space: nowrap;
   }
 
-  /* ★安全なモーダル設計（閉時は絶対に存在せず、開時だけ上下中央にゆとり配置） */
+  /* 安全なモーダル設計 */
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -369,7 +369,7 @@
     box-sizing: border-box;
   }
 
-  /* ★上下突っ切り防止：画面高さの78%以内に制限し、中身だけスクロール */
+  /* 上下突っ切り防止：画面高さの78%以内に制限し、中身だけスクロール */
   .modal-content {
     background: #161f30;
     border: 1px solid var(--border);
@@ -1265,7 +1265,7 @@
           <label>合トレ参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" id="date-picker-bar" onclick="openCalendarPopup()">
             <div id="date-picker-display" class="date-bar-text">📅 合トレ参加希望日程をタップして選択...</div>
-            <span style="font-size:18px;">🗓️</span>
+            <span style="font-size:18px;">🗓</span>
           </div>
         </div>
 
@@ -1605,18 +1605,18 @@
 
       <!-- 他参加者（プレイヤー）の追加・削除・編集エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(239,68,68,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold;">🏃 他参加者（プレイヤー）の変更・追加</label>
-          <button type="button" class="tab-btn" onclick="addEditOtherPlayerCard('', '乗り合い（同乗）', '普通車', '')" style="padding:2px 8px; font-size:11px; color:#fca5a5; border:1px solid rgba(239,68,68,0.5);">＋ 参加者を追加</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+          <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold; flex:1 1 180px;">🏃 他参加者（プレイヤー）の変更・追加</label>
+          <button type="button" class="tab-btn" onclick="addEditOtherPlayerCard('', '乗り合い（同乗）', '普通車', '')" style="padding:4px 10px; font-size:11px; color:#fca5a5; border:1px solid rgba(239,68,68,0.5); flex-shrink:0; margin-left:auto;">＋ 参加者を追加</button>
         </div>
         <div id="edit-other-players-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
       <!-- 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(6,182,212,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold;">👥 同伴者（見学等・非プレイヤー）</label>
-          <button type="button" class="tab-btn" onclick="addEditCompanionCard('', '家族', '1名', '同乗', '普通車')" style="padding:2px 8px; font-size:11px; color:#67e8f9; border:1px solid rgba(6,182,212,0.5);">＋ 同伴者を追加</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+          <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold; flex:1 1 180px;">👥 同伴者（見学等・非プレイヤー）</label>
+          <button type="button" class="tab-btn" onclick="addEditCompanionCard('', '家族', '1名', '同乗', '普通車')" style="padding:4px 10px; font-size:11px; color:#67e8f9; border:1px solid rgba(6,182,212,0.5); flex-shrink:0; margin-left:auto;">＋ 同伴者を追加</button>
         </div>
         <div id="edit-companions-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
@@ -3570,7 +3570,7 @@ function renderAdminAttendanceHTML(list) {
       html += '<input type="checkbox" class="contacted-checkbox" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" ' + (isContacted ? 'checked' : '') + '> 連絡済';
       html += '</label>';
       html += '</div>';
-      html += '<button type="button" class="action-pill-btn btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏️️ 編集</button>';
+      html += '<button type="button" class="action-pill-btn btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏ 編集</button>';
       html += '</div></div>';
 
       html += '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px;">';
@@ -4063,7 +4063,7 @@ function clearAllData() {
       .then(function() {
         finishProgressModal("全件削除完了！", function() {
           registeredRecords = [];
-          try { localStorage.removeItem('uchimiya_cached_records'); } catch(e){}
+          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
           fetchAdminData(true);
           var user = localStorage.getItem('uchimiya_auth_user');
           if (user) renderMyAttendanceList(user);
