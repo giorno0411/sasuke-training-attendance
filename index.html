@@ -488,7 +488,7 @@
     font-weight: bold;
   }
 
-  /* 管理者カレンダー用ドット表示（サイズ拡大） */
+  /* 管理者カレンダー用ドット表示（ネオン削除・フラット丸印） */
   .admin-cal-dot {
     width: 6px;
     height: 6px;
@@ -496,9 +496,9 @@
     margin-top: 2px;
     flex-shrink: 0;
   }
-  .admin-cal-dot.active { background: #10b981; box-shadow: 0 0 4px #10b981; }
-  .admin-cal-dot.canceled { background: #ef4444; box-shadow: 0 0 4px #ef4444; }
-  .admin-cal-dot.tuning { background: #f59e0b; box-shadow: 0 0 4px #f59e0b; }
+  .admin-cal-dot.active { background: #10b981; }
+  .admin-cal-dot.canceled { background: #ef4444; }
+  .admin-cal-dot.tuning { background: #f59e0b; }
 
   .mini-cal-footer {
     display: flex;
@@ -1330,7 +1330,7 @@
   <div class="tab-nav">
     <button type="button" class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">✍️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column" onclick="switchTab('column')">📜 注意事項</button>
-    <button type="button" class="tab-btn" id="tab-btn-status" onclick="switchTab('status')">⚙️️ セット稼働状況</button>
+    <button type="button" class="tab-btn" id="tab-btn-status" onclick="switchTab('status')">⚙️ セット稼働状況</button>
   </div>
 
   <!-- 1. 参加送信フォーム -->
@@ -1427,7 +1427,7 @@
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
-        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙ 現在のセット稼働状況</h2>
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
@@ -3792,7 +3792,7 @@ function renderAdminAttendanceHTML(list) {
     html += '<button type="button" class="btn-del-entire-date-icon" data-date="' + date + '" title="この日の回答データを全件削除">🗑️</button>';
     html += '</div></div>';
 
-    // 下段：人数内訳バッジ（文字サイズ・太さ統一・詰めて配置）
+    // 下段：人数内訳バッジ（各枠のすぐ右隣に詰めて配置）
     html += '<div class="admin-head-row-bottom">';
     html += '<span class="admin-count-badge" style="background:var(--accent); color:#fff;">プレイヤー: ' + playerTotal + '名</span>';
     if (staffTotal > 0) {
@@ -3804,7 +3804,7 @@ function renderAdminAttendanceHTML(list) {
     if (otherTotal > 0) {
       html += '<span class="admin-count-badge" style="background:#334155; color:#cbd5e1;">他: ' + otherTotal + '名</span>';
     }
-    html += '<span class="admin-count-badge" style="background:#10b981; color:#fff; margin-left:auto;">計: ' + grandTotalPeople + '名</span>';
+    html += '<span class="admin-count-badge" style="background:#10b981; color:#fff;">計: ' + grandTotalPeople + '名</span>';
     html += '</div></div>';
 
     html += '<div class="admin-card-stats">';
