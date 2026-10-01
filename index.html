@@ -400,7 +400,6 @@
     white-space: nowrap;
   }
 
-  /* 安全なモーダル設計 */
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -487,7 +486,6 @@
     font-weight: bold;
   }
 
-  /* 管理者カレンダー用ドット表示（フラット丸印） */
   .admin-cal-dot {
     width: 6px;
     height: 6px;
@@ -518,7 +516,6 @@
     cursor: pointer;
   }
 
-  /* 管理者用インラインカレンダーパネル */
   .admin-cal-panel {
     background: rgba(15, 23, 42, 0.95);
     border: 1px solid rgba(56, 189, 248, 0.35);
@@ -907,7 +904,6 @@
     margin-bottom: 22px;
   }
 
-  /* 管理者日程ヘッダー（上下2段に整理・改行防止） */
   .admin-date-header {
     background: rgba(30, 41, 59, 0.95);
     padding: 8px 10px;
@@ -948,7 +944,6 @@
     border-top: 1px dashed rgba(255, 255, 255, 0.08);
   }
 
-  /* バッジスタイル統一（フォントサイズ・太さ共通化） */
   .admin-count-badge {
     font-size: 11px;
     font-weight: bold;
@@ -959,7 +954,6 @@
     align-items: center;
   }
 
-  /* 開催 / 非開催 / 調整中 トグル */
   .status-toggle-box {
     display: inline-flex;
     align-items: center;
@@ -989,7 +983,6 @@
   }
   .status-toggle-label input { margin: 0; vertical-align: middle; cursor: pointer; }
 
-  /* ゴミ箱マークのみの削除ボタン */
   .btn-del-entire-date-icon {
     background: rgba(239, 68, 68, 0.18);
     border: 1px solid rgba(239, 68, 68, 0.45);
@@ -1448,7 +1441,7 @@
           <button type="button" class="tab-btn" id="btn-refresh-admin" onclick="fetchAdminData(true)" style="flex:none; padding:5px 12px; border:1px solid var(--border); font-size:11.5px; border-radius:6px;">🔄 最新化</button>
         </div>
 
-        <!-- 管理者用カレンダーパネル（全体把握・タップで絞り込み） -->
+        <!-- 管理者用カレンダーパネル -->
         <div class="admin-cal-panel">
           <div class="admin-cal-panel-header" id="btn-toggle-admin-cal" onclick="toggleAdminCalPanel()">
             <span style="font-size:12.5px; font-weight:bold; color:#38bdf8; display:flex; align-items:center; gap:6px;">
@@ -1686,7 +1679,7 @@
 <!-- 回答内容の修正・編集モーダル -->
 <div id="admin-edit-entry-modal" class="modal-overlay" style="display:none;">
   <div class="modal-content" onclick="event.stopPropagation()">
-    <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️️ 回答内容の修正・変更</h3>
+    <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏ 回答内容の修正・変更</h3>
     <form id="admin-edit-entry-form" onsubmit="submitEditEntry(event)">
       <input type="hidden" id="edit-row-index">
 
@@ -1933,7 +1926,6 @@ var calMonth = new Date().getMonth();
 var selectedDates = new Set();
 var registeredRecords = [];
 
-/* 管理者専用カレンダー用の年月初期化 */
 var adminCalYear = new Date().getFullYear();
 var adminCalMonth = new Date().getMonth();
 
@@ -2108,7 +2100,6 @@ function renderMyAttendanceList(userName) {
     return;
   }
 
-  // 照合時はスペースを無視して比較（山田太郎 ＝ 山田 太郎）
   var cleanTargetNorm = targetName.replace(/\s+/g, '');
 
   var myRecords = registeredRecords.filter(function(r) {
@@ -2222,7 +2213,6 @@ function renderMyAttendanceList(userName) {
   });
 }
 
-// サーバーから日程ステータスを取得して確実に全端末で共有する関数
 function fetchDateStatuses(callback) {
   fetch(GAS_URL + "?type=date_statuses&t=" + Date.now())
     .then(function(res) { return res.json(); })
@@ -3601,7 +3591,8 @@ function loadRemoteFeedbacks() {
 
 // 確実にサーバーに保存するGET方式でのステータス更新
 function toggleDateExecutionStatus(date, status) {
-  dateStatusMap[date] = status;
+  var dKey = normalizeDateKey(date);
+  dateStatusMap[dKey] = status;
   try { localStorage.setItem('uchimiya_date_status_map', JSON.stringify(dateStatusMap)); } catch(e) {}
   
   var user = localStorage.getItem('uchimiya_auth_user');
@@ -3609,8 +3600,7 @@ function toggleDateExecutionStatus(date, status) {
 
   renderAdminCalendar();
 
-  // CORSエラーやPOST制限を完全に避けてGETパラメータで確実にサーバー保存
-  fetch(GAS_URL + "?type=update_date_status&date=" + encodeURIComponent(date) + "&status=" + encodeURIComponent(status) + "&t=" + Date.now())
+  fetch(GAS_URL + "?type=update_date_status&date=" + encodeURIComponent(dKey) + "&status=" + encodeURIComponent(status) + "&t=" + Date.now())
     .catch(function(e) {
       console.warn("Status update fallback:", e);
     });
@@ -3653,7 +3643,6 @@ function renderAdminAttendanceHTML(list) {
   var deduplicatedMap = new Map();
   list.forEach(function(item) {
     var rawName = String(item.name || '');
-    // 重複除去キー生成時のみスペースを揃えるが、表示・保持する名前は元のままにする
     var pKey = normalizeDateKey(item.date) + "___" + rawName.replace(/\s+/g, '');
     if (!deduplicatedMap.has(pKey) || (item.rowIndex > deduplicatedMap.get(pKey).rowIndex)) {
       deduplicatedMap.set(pKey, item);
@@ -3710,7 +3699,7 @@ function renderAdminAttendanceHTML(list) {
     var carpoolOriginalKeys = {};
     var countedCarsMap = new Map();
 
-    var currentExecStatus = dateStatusMap[date] || 'tuning';
+    var currentExecStatus = dateStatusMap[normalizeDateKey(date)] || 'tuning';
 
     members.forEach(function(m) {
       var isCompanionVehicle = String(m.name).includes('（同伴:') || String(m.name).includes('（同伴）');
@@ -3799,7 +3788,7 @@ function renderAdminAttendanceHTML(list) {
     html += '<div class="admin-date-group" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
     
-    // 上段：日付、ステータストグル、ゴミ箱ボタン
+    // 上段：日付（改行防止）、ステータストグル、ゴミ箱ボタン
     html += '<div class="admin-head-row-top">';
     html += '<span class="admin-head-date-label">📅 ' + formatDateLabel(date) + '</span>';
     html += '<div class="admin-head-actions-wrap">';
@@ -4303,7 +4292,6 @@ function submitEditEntry(e) {
   document.querySelectorAll('.edit-other-player-item').forEach(function(item) {
     var last = item.querySelector('.edit-op-last').value.trim();
     var first = item.querySelector('.edit-op-first').value.trim();
-    // 姓名の間に確実にスペースを入れる
     var opName = last + (first ? ' ' + first : '');
     var opTrans = item.querySelector('.edit-op-transport').value;
     var opCar = opTrans === '自車' ? item.querySelector('.edit-op-car-type').value : '';
@@ -4572,7 +4560,6 @@ function submitAttendance(e) {
     return;
   }
   
-  // 入力されたスペース（全角・半角）を保持
   var primaryName = (document.getElementById('field-name').value || '').trim();
   if (!primaryName) {
     alert("参加者（プレイヤー）氏名を入力してください。");
@@ -4584,7 +4571,6 @@ function submitAttendance(e) {
   document.querySelectorAll('.other-player-card').forEach(function(c) {
     var last = c.querySelector('.field-other-player-last').value.trim();
     var first = c.querySelector('.field-other-player-first').value.trim();
-    // 姓と名の間に半角スペースを確実に挿入して保持
     var full = last + (first ? ' ' + first : '');
     var t = c.querySelector('.field-other-player-transport').value;
     var ct = t === '自車' ? c.querySelector('.field-other-player-car-type').value : '';
@@ -4788,7 +4774,6 @@ function submitAttendance(e) {
       renderDaysConfigCards();
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-      // 送信完了後に最新データを再取得
       fetch(GAS_URL + "?type=attendance&t=" + Date.now())
         .then(function(res) { return res.json(); })
         .then(function(list) {
@@ -4813,7 +4798,6 @@ window.addEventListener('DOMContentLoaded', function() {
   checkGateAccess();
 
   setTimeout(function() {
-    // 起動時にステータスをサーバーから一括取得
     fetchDateStatuses();
 
     fetch(GAS_URL + "?type=obstacles&t=" + Date.now())
