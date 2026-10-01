@@ -37,6 +37,7 @@
     background-repeat: no-repeat;
     color: var(--text);
     padding: 12px;
+    padding-bottom: 60px;
     display: flex;
     justify-content: center;
     min-height: 100vh;
@@ -201,7 +202,6 @@
     display: none;
   }
 
-  /* 横スライドラッパー */
   .my-attendance-scroll-wrap {
     display: flex;
     gap: 10px;
@@ -295,9 +295,9 @@
     border: 1px dashed var(--accent);
     color: #fca5a5;
     width: 100%;
-    padding: 9px;
+    padding: 10px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: bold;
     display: flex;
     justify-content: center;
@@ -311,9 +311,9 @@
     border: 1px dashed var(--cyan);
     color: #67e8f9;
     width: 100%;
-    padding: 9px;
+    padding: 10px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: bold;
     display: flex;
     justify-content: center;
@@ -355,17 +355,18 @@
     white-space: nowrap;
   }
 
+  /* ★★★ 画面を塞がない安全なモーダル設定（非表示時は pointer-events: none） ★★★ */
   .modal-overlay {
     display: none;
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(0,0,0,0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     justify-content: center;
     align-items: center;
     z-index: 100000;
-    padding: 12px;
+    padding: 20px 14px;
     box-sizing: border-box;
   }
 
@@ -376,13 +377,13 @@
     padding: 18px;
     width: 100%;
     max-width: 440px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-    max-height: 90vh;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.75);
+    max-height: 85vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
   }
 
-  /* ミニカレンダー */
   .mini-cal-box {
     background: #151d2c;
     border: 1px solid var(--border);
@@ -691,7 +692,6 @@
     color: #fca5a5;
   }
 
-  /* 管理者画面: 日程スティッキーバー */
   .admin-date-tabs-bar {
     position: sticky;
     top: 0;
@@ -726,7 +726,6 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
-  /* 右下固定「受付追加」ボタン */
   .fab-admin-add {
     position: fixed;
     bottom: 22px;
@@ -754,7 +753,6 @@
   .fab-admin-add:hover { background: #b91c1c; }
   .fab-admin-add:active { transform: scale(0.96); background: #991b1b; }
 
-  /* 最上部：届いた要望クイック確認パネル */
   .feedback-quick-panel {
     background: rgba(15, 23, 42, 0.95);
     border: 1px solid rgba(56, 189, 248, 0.4);
@@ -794,7 +792,6 @@
     display: block;
   }
 
-  /* 要望縦スクロール */
   .feedback-vertical-wrap {
     display: flex;
     flex-direction: column;
@@ -841,7 +838,6 @@
   }
   .admin-head-badges { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 
-  /* 開催・中止トグル */
   .status-toggle-box {
     display: inline-flex;
     align-items: center;
@@ -871,7 +867,6 @@
   }
   .status-toggle-label input { margin: 0; vertical-align: middle; cursor: pointer; }
 
-  /* 開催・中止の右横：日別一括削除ゴミ箱 */
   .btn-del-entire-date {
     background: rgba(239, 68, 68, 0.18);
     border: 1px solid rgba(239, 68, 68, 0.45);
@@ -923,7 +918,6 @@
   }
   .car-breakdown-item { margin-bottom: 3px; color: #cbd5e1; line-height: 1.4; }
 
-  /* iPhone風左スワイプ削除ラッパー */
   .swipe-item-container {
     position: relative;
     overflow: hidden;
@@ -982,7 +976,6 @@
     min-width: 0;
   }
 
-  /* 名前：16px・太字で視認性統一 */
   .member-name {
     font-family: inherit;
     font-size: 16px;
@@ -995,7 +988,6 @@
   .name-player { color: #ffffff !important; }
   .name-non-player { color: #94a3b8 !important; }
 
-  /* 連絡済＆編集（横並び） */
   .member-right-side {
     display: flex;
     align-items: center;
@@ -1003,7 +995,6 @@
     flex-shrink: 0;
   }
 
-  /* 交通手段バッジ */
   .badge-transport {
     font-size: 11px;
     padding: 3px 8px;
@@ -1061,7 +1052,6 @@
     cursor: pointer;
   }
 
-  /* 連絡済＆編集（高さ26px） */
   .action-pill-btn {
     font-size: 11px;
     height: 26px;
@@ -1213,7 +1203,7 @@
   </header>
 
   <div class="tab-nav">
-    <button type="button" class="tab-btn active" id="tab-btn-form">✍️️ 合トレ参加回答</button>
+    <button type="button" class="tab-btn active" id="tab-btn-form">✍️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column">📜 注意事項</button>
     <button type="button" class="tab-btn" id="tab-btn-status">⚙️ セット稼働状況</button>
   </div>
@@ -1233,7 +1223,7 @@
       <span class="auth-user-reauth" id="btn-reset-auth">コード再入力</span>
     </div>
 
-    <!-- 回答者自身の回答確認・編集・取消パネル（初期は閉じた状態＆横スライド） -->
+    <!-- 回答者自身の回答確認・編集・取消パネル -->
     <div class="my-attendance-panel" id="my-attendance-panel" style="display:none;">
       <div class="my-attendance-header" id="btn-toggle-my-attendance">
         <div class="my-attendance-title">
@@ -1332,7 +1322,6 @@
           <button type="button" class="tab-btn" id="btn-refresh-admin" style="flex:none; padding:5px 12px; border:1px solid var(--border); font-size:11.5px; border-radius:6px;">🔄 最新化</button>
         </div>
 
-        <!-- 日程クイック切り替えスティッキーバー -->
         <div class="admin-date-tabs-bar" id="admin-date-tabs-bar"></div>
 
         <div style="font-size:11px; color:var(--text-sub); margin-bottom:8px; display:flex; align-items:center; gap:4px;">
@@ -1381,7 +1370,6 @@
           <button type="button" class="tab-btn" id="btn-reload-obs" style="flex:none; padding:5px 10px; border:1px solid var(--border);">🔄 再読込</button>
         </div>
 
-        <!-- 最上部：届いた要望（縦スクロールで長文も自然に読めるパネル） -->
         <div class="feedback-quick-panel">
           <div class="feedback-quick-header" id="btn-toggle-feedbacks">
             <div class="feedback-quick-title">
@@ -1453,7 +1441,7 @@
     <input type="password" id="admin-pin-input" inputmode="text" autocomplete="off" placeholder="パスワードを入力" style="margin-bottom:12px;">
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" id="btn-admin-cancel" style="border:1px solid var(--border);">キャンセル</button>
-      <button type="button" class="btn-submit" id="btn-admin-login" style="margin:0; padding:8px;">ログイン</button>
+      <button type="submit" class="btn-submit" id="btn-admin-login" style="margin:0; padding:8px;">ログイン</button>
     </div>
   </div>
 </div>
@@ -1543,7 +1531,7 @@
   </div>
 </div>
 
-<!-- ★★★ 回答内容の修正・編集モーダル（他参加者＆同伴者の動的追加・編集・削除に完全対応） ★★★ -->
+<!-- 回答内容の修正・編集モーダル -->
 <div id="admin-edit-entry-modal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️ 回答内容の修正・変更</h3>
@@ -1621,7 +1609,7 @@
         <div id="edit-other-players-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
-      <!-- ★★★ 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア ★★★ -->
+      <!-- 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(6,182,212,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold;">👥 同伴者（見学等・非プレイヤー）</label>
@@ -2063,7 +2051,6 @@ function refreshMyAttendanceView() {
     });
 }
 
-// ★★★ 回答編集モーダルオープン（他参加者＆同伴者を自動展開） ★★★
 function openEditModalByRow(row) {
   var target = registeredRecords.find(function(r) { return Number(r.rowIndex) === row; });
   if (!target) return;
@@ -2102,7 +2089,6 @@ function openEditModalByRow(row) {
   document.getElementById('edit-car-settings').classList.toggle('hidden', !isCar);
   document.getElementById('edit-share-settings').classList.toggle('hidden', !isShare);
 
-  // 1. 他参加者（プレイヤー）の展開
   var opContainer = document.getElementById('edit-other-players-container');
   opContainer.innerHTML = '';
 
@@ -2117,7 +2103,6 @@ function openEditModalByRow(row) {
     addEditOtherPlayerCard(cr.name, cr.transport, cr.carType, cr.rowIndex);
   });
 
-  // 2. ★同伴者（非プレイヤー）カードの自動展開
   var compContainer = document.getElementById('edit-companions-container');
   compContainer.innerHTML = '';
 
@@ -2125,7 +2110,6 @@ function openEditModalByRow(row) {
   if (rawCompNames && rawCompNames !== 'なし') {
     var compItems = rawCompNames.split('、');
     compItems.forEach(function(itemStr) {
-      // 例: "内宮花子(家族 1名[自車:普通車])" または "山本さん(スタッフ 2名[乗り合い])"
       var m = itemStr.match(/^(.*?)\((.*?)\s+(\d+名)(?:\[(.*?)\])?\)$/);
       if (m) {
         var cName = m[1].trim();
@@ -2151,7 +2135,6 @@ function openEditModalByRow(row) {
   showModal('admin-edit-entry-modal');
 }
 
-// 編集モーダル内：他参加者カード追加
 function addEditOtherPlayerCard(fullName, transport, carType, rowIndex) {
   var container = document.getElementById('edit-other-players-container');
   if (!container) return;
@@ -2173,7 +2156,7 @@ function addEditOtherPlayerCard(fullName, transport, carType, rowIndex) {
   var html = '';
   html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px;">';
   html += '<input type="text" class="edit-op-name" value="' + escapeHtml(fullName) + '" placeholder="お名前（例: 田中 太郎）" required style="flex:1; height:34px; padding:4px 8px; font-size:12.5px;">';
-  html += '<button type="button" class="btn-action-small btn-del-edit-op" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; height:34px; padding:0 8px;">✕ 削除</button>';
+  html += '<button type="button" class="btn-action-small btn-del-edit-op" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; height:34px; padding:0 8px; cursor:pointer; border-radius:5px;">✕ 削除</button>';
   html += '</div>';
 
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">';
@@ -2213,7 +2196,6 @@ function addEditOtherPlayerCard(fullName, transport, carType, rowIndex) {
   };
 }
 
-// ★★★ 編集モーダル内用：同伴者カード追加 ★★★
 function addEditCompanionCard(fullName, role, count, transport, carType) {
   var container = document.getElementById('edit-companions-container');
   if (!container) return;
@@ -2236,7 +2218,7 @@ function addEditCompanionCard(fullName, role, count, transport, carType) {
   var html = '';
   html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px;">';
   html += '<input type="text" class="edit-comp-name" value="' + escapeHtml(fullName) + '" placeholder="お名前（例: 内宮花子、山本さん）" required style="flex:1; height:34px; padding:4px 8px; font-size:12.5px;">';
-  html += '<button type="button" class="btn-action-small btn-del-edit-comp" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; height:34px; padding:0 8px;">✕ 削除</button>';
+  html += '<button type="button" class="btn-action-small btn-del-edit-comp" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; height:34px; padding:0 8px; cursor:pointer; border-radius:5px;">✕ 削除</button>';
   html += '</div>';
 
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px;">';
@@ -3370,7 +3352,6 @@ function renderAdminAttendanceHTML(list) {
   sortedDates.forEach(function(date) {
     var rawMembers = groups[date];
 
-    // 選手（プレイヤー）が上、非プレイヤー（ロケ班・同伴・その他）が下になるよう整列
     var members = rawMembers.slice().sort(function(a, b) {
       var isNonA = String(a.name).includes('（同伴:') || String(a.name).includes('（同伴）') || String(a.name).includes('（ロケ班）') || String(a.name).includes('（番組スタッフ）') || String(a.note).includes('区分:その他');
       var isNonB = String(b.name).includes('（同伴:') || String(b.name).includes('（同伴）') || String(b.name).includes('（ロケ班）') || String(b.name).includes('（番組スタッフ）') || String(b.note).includes('区分:その他');
@@ -3720,7 +3701,6 @@ function renderAdminAttendanceHTML(list) {
   });
 }
 
-// iPhone風スワイプ削除
 function initSwipeActions(container) {
   var containers = container.querySelectorAll('.swipe-item-container');
   var activeCard = null;
@@ -3831,89 +3811,64 @@ function fetchAdminData(forceRefresh) {
     });
 }
 
+// 安全なイベント登録ヘルパー
+function addClick(id, handler) {
+  var el = document.getElementById(id);
+  if (el) el.onclick = handler;
+}
+
 window.addEventListener('DOMContentLoaded', function() {
   updateTriggerDisplay();
   renderRulesDisplay();
   renderStageGroups();
   checkGateAccess();
 
-  var btnGate = document.getElementById('btn-gate-verify');
-  if (btnGate) btnGate.onclick = verifyGateCode;
-  var btnReset = document.getElementById('btn-reset-auth');
-  if (btnReset) btnReset.onclick = resetUserAuth;
+  addClick('btn-gate-verify', verifyGateCode);
+  addClick('btn-reset-auth', resetUserAuth);
 
-  // 「あなたの回答・予約状況」の開閉トグル
-  var toggleMyAtt = document.getElementById('btn-toggle-my-attendance');
-  var myAttBody = document.getElementById('my-attendance-content');
-  var myAttArrow = document.getElementById('my-attendance-toggle-arrow');
-  if (toggleMyAtt && myAttBody) {
-    toggleMyAtt.onclick = function() {
-      var isHidden = myAttBody.style.display === 'none' || myAttBody.style.display === '';
-      myAttBody.style.display = isHidden ? 'block' : 'none';
-      if (myAttArrow) myAttArrow.innerText = isHidden ? '▲ 閉じる' : '▼ 開く';
-    };
-  }
+  addClick('btn-toggle-my-attendance', function() {
+    var myAttBody = document.getElementById('my-attendance-content');
+    var myAttArrow = document.getElementById('my-attendance-toggle-arrow');
+    if (!myAttBody) return;
+    var isHidden = myAttBody.style.display === 'none' || myAttBody.style.display === '';
+    myAttBody.style.display = isHidden ? 'block' : 'none';
+    if (myAttArrow) myAttArrow.innerText = isHidden ? '▲ 閉じる' : '▼ 開く';
+  });
 
-  var tbf = document.getElementById('tab-btn-form');
-  if (tbf) tbf.onclick = function() { switchTab('form'); };
-  var tbc = document.getElementById('tab-btn-column');
-  if (tbc) tbc.onclick = function() { switchTab('column'); };
-  var tbs = document.getElementById('tab-btn-status');
-  if (tbs) tbs.onclick = function() { switchTab('status'); };
+  addClick('tab-btn-form', function() { switchTab('form'); });
+  addClick('tab-btn-column', function() { switchTab('column'); });
+  addClick('tab-btn-status', function() { switchTab('status'); });
 
-  var btnSubAtt = document.getElementById('admin-sub-btn-att');
-  if (btnSubAtt) btnSubAtt.onclick = function() { switchAdminSubTab('attendance'); };
-  var btnSubRules = document.getElementById('admin-sub-btn-rules');
-  if (btnSubRules) btnSubRules.onclick = function() { switchAdminSubTab('rules'); };
-  var btnSubObs = document.getElementById('admin-sub-btn-obs');
-  if (btnSubObs) btnSubObs.onclick = function() { switchAdminSubTab('obstacles'); };
+  addClick('admin-sub-btn-att', function() { switchAdminSubTab('attendance'); });
+  addClick('admin-sub-btn-rules', function() { switchAdminSubTab('rules'); });
+  addClick('admin-sub-btn-obs', function() { switchAdminSubTab('obstacles'); });
 
-  var bar = document.getElementById('date-picker-bar');
-  if (bar) bar.onclick = openCalendarPopup;
-  var calDone = document.getElementById('btn-cal-done');
-  if (calDone) calDone.onclick = closeCalendarPopup;
-  
-  var calPrev = document.getElementById('btn-cal-prev');
-  if (calPrev) calPrev.onclick = prevMonth;
-  var calNext = document.getElementById('btn-cal-next');
-  if (calNext) calNext.onclick = nextMonth;
-  
+  addClick('date-picker-bar', openCalendarPopup);
+  addClick('btn-cal-done', closeCalendarPopup);
+  addClick('btn-cal-prev', prevMonth);
+  addClick('btn-cal-next', nextMonth);
+
   var calBoxInner = document.getElementById('cal-box-inner');
   if (calBoxInner) calBoxInner.onclick = function(e) { e.stopPropagation(); };
-  var calModal = document.getElementById('cal-popup-modal');
-  if (calModal) calModal.onclick = closeCalendarPopup;
+  addClick('cal-popup-modal', closeCalendarPopup);
 
-  var btnAddP = document.getElementById('btn-add-player');
-  if (btnAddP) btnAddP.onclick = function() { addOtherPlayerCard(); };
-  var btnAddC = document.getElementById('btn-add-companion');
-  if (btnAddC) btnAddC.onclick = function() { addCompanionCard(); };
+  addClick('btn-add-player', function() { addOtherPlayerCard(); });
+  addClick('btn-add-companion', function() { addCompanionCard(); });
 
-  // 回答編集モーダル内の「＋ 参加者を追加」ボタン
-  var btnEditAddOp = document.getElementById('btn-edit-add-other-player');
-  if (btnEditAddOp) {
-    btnEditAddOp.onclick = function() {
-      addEditOtherPlayerCard('', '乗り合い（同乗）', '普通車', '');
-    };
-  }
+  addClick('btn-edit-add-other-player', function() {
+    addEditOtherPlayerCard('', '乗り合い（同乗）', '普通車', '');
+  });
+  addClick('btn-edit-add-companion', function() {
+    addEditCompanionCard('', '家族', '1名', '同乗', '普通車');
+  });
 
-  // ★回答編集モーダル内の「＋ 同伴者を追加」ボタン
-  var btnEditAddComp = document.getElementById('btn-edit-add-companion');
-  if (btnEditAddComp) {
-    btnEditAddComp.onclick = function() {
-      addEditCompanionCard('', '家族', '1名', '同乗', '普通車');
-    };
-  }
-
-  var btnOpenAdmin = document.getElementById('btn-open-admin');
-  if (btnOpenAdmin) btnOpenAdmin.onclick = function() {
+  addClick('btn-open-admin', function() {
     showModal('admin-modal');
     var inp = document.getElementById('admin-pin-input');
     if (inp) { inp.value = ''; inp.focus(); }
-  };
-  var btnAdminCancel = document.getElementById('btn-admin-cancel');
-  if (btnAdminCancel) btnAdminCancel.onclick = function() { hideModal('admin-modal'); };
-  var btnAdminLogin = document.getElementById('btn-admin-login');
-  if (btnAdminLogin) btnAdminLogin.onclick = function() {
+  });
+  addClick('btn-admin-cancel', function() { hideModal('admin-modal'); });
+  addClick('btn-admin-login', function() {
     var val = (document.getElementById('admin-pin-input').value || '').trim();
     if (val === ADMIN_PIN) {
       hideModal('admin-modal');
@@ -3931,7 +3886,7 @@ window.addEventListener('DOMContentLoaded', function() {
       alert("パスワードが正しくありません。");
       hideModal('admin-modal');
     }
-  };
+  });
 
   function openManualAddModalCommon() {
     var targetDate = "";
@@ -3956,11 +3911,8 @@ window.addEventListener('DOMContentLoaded', function() {
     showModal('admin-add-modal');
   }
 
-  var fabAdminAddBtn = document.getElementById('fab-admin-add-btn');
-  if (fabAdminAddBtn) fabAdminAddBtn.onclick = openManualAddModalCommon;
-
-  var btnAdminAddCancel = document.getElementById('btn-admin-add-cancel');
-  if (btnAdminAddCancel) btnAdminAddCancel.onclick = function() { hideModal('admin-add-modal'); };
+  addClick('fab-admin-add-btn', openManualAddModalCommon);
+  addClick('btn-admin-add-cancel', function() { hideModal('admin-add-modal'); });
 
   var mAddTransport = document.getElementById('m-add-transport');
   if (mAddTransport) {
@@ -3972,7 +3924,6 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // 手動追加の保存
   var mAddForm = document.getElementById('admin-manual-add-form');
   if (mAddForm) {
     mAddForm.onsubmit = function(e) {
@@ -4034,7 +3985,6 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // 回答編集モーダル
   var editTransport = document.getElementById('edit-transport');
   if (editTransport) {
     editTransport.onchange = function() {
@@ -4045,10 +3995,8 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  var btnEditCancel = document.getElementById('btn-edit-entry-cancel');
-  if (btnEditCancel) btnEditCancel.onclick = function() { hideModal('admin-edit-entry-modal'); };
+  addClick('btn-edit-entry-cancel', function() { hideModal('admin-edit-entry-modal'); });
 
-  // ★★★ 回答編集の送信（他参加者＆同伴者の一括上書き・追加・削除・人数自動計算） ★★★
   var editForm = document.getElementById('admin-edit-entry-form');
   if (editForm) {
     editForm.onsubmit = function(e) {
@@ -4081,7 +4029,6 @@ window.addEventListener('DOMContentLoaded', function() {
       if (cat === "その他") extraNote = "区分:その他";
       var fullNote = noteVal ? (extraNote ? extraNote + " " + noteVal : noteVal) : extraNote;
 
-      // 1. 他参加者（プレイヤー）の収集
       var updatedOtherPlayers = [];
       var newOtherPlayers = [];
 
@@ -4110,7 +4057,6 @@ window.addEventListener('DOMContentLoaded', function() {
         }
       });
 
-      // 2. ★同伴者カードの収集・人数自動計算・内訳整形
       var compItems = [];
       var totalCompCount = 0;
 
@@ -4167,10 +4113,8 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  var btnRefresh = document.getElementById('btn-refresh-admin');
-  if (btnRefresh) btnRefresh.onclick = function() { fetchAdminData(true); };
-  var btnClearAll = document.getElementById('btn-clear-all-data');
-  if (btnClearAll) btnClearAll.onclick = function() {
+  addClick('btn-refresh-admin', function() { fetchAdminData(true); });
+  addClick('btn-clear-all-data', function() {
     if (confirm("本当にすべての回答データを削除しますか？\n（この操作は元に戻せません）")) {
       showProgressModal("全データをリセット中...");
       fetch(GAS_URL + "?type=clear_all&t=" + Date.now())
@@ -4184,14 +4128,13 @@ window.addEventListener('DOMContentLoaded', function() {
           });
         });
     }
-  };
+  });
 
-  var btnAddRuleSec = document.getElementById('btn-add-rule-sec');
-  if (btnAddRuleSec) btnAddRuleSec.onclick = function() {
+  addClick('btn-add-rule-sec', function() {
     syncRulesData();
     ruleSections.push({ title: "新しい項目", content: "注意事項の内容をここに入力してください。" });
     renderAdminRulesEditor();
-  };
+  });
   var rulesForm = document.getElementById('admin-rules-form');
   if (rulesForm) rulesForm.onsubmit = function(e) {
     e.preventDefault();
@@ -4228,60 +4171,51 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   };
 
-  var toggleFbBtn = document.getElementById('btn-toggle-feedbacks');
-  var fbContent = document.getElementById('feedback-quick-content');
-  var fbArrow = document.getElementById('feedback-toggle-arrow');
-  if (toggleFbBtn && fbContent) {
-    toggleFbBtn.onclick = function() {
-      var isVisible = fbContent.style.display !== 'none';
-      fbContent.style.display = isVisible ? 'none' : 'block';
-      if (fbArrow) fbArrow.innerText = isVisible ? '▼ 開く' : '▲ 閉じる';
-    };
-  }
+  addClick('btn-toggle-feedbacks', function() {
+    var fbContent = document.getElementById('feedback-quick-content');
+    var fbArrow = document.getElementById('feedback-toggle-arrow');
+    if (!fbContent) return;
+    var isVisible = fbContent.style.display !== 'none';
+    fbContent.style.display = isVisible ? 'none' : 'block';
+    if (fbArrow) fbArrow.innerText = isVisible ? '▼ 開く' : '▲ 閉じる';
+  });
 
-  var btnRefFeedbacks = document.getElementById('btn-refresh-feedbacks');
-  if (btnRefFeedbacks) btnRefFeedbacks.onclick = function() {
+  addClick('btn-refresh-feedbacks', function() {
     showProgressModal("要望を読み込み中...");
     loadRemoteFeedbacks();
     setTimeout(function() { finishProgressModal("更新完了！"); }, 300);
-  };
+  });
 
-  var btnCloseViewer = document.getElementById('btn-viewer-close');
-  if (btnCloseViewer) btnCloseViewer.onclick = function() { hideModal('photo-viewer-modal'); };
-  var photoModal = document.getElementById('photo-viewer-modal');
-  if (photoModal) photoModal.onclick = function() { hideModal('photo-viewer-modal'); };
+  addClick('btn-viewer-close', function() { hideModal('photo-viewer-modal'); });
+  addClick('photo-viewer-modal', function() { hideModal('photo-viewer-modal'); });
 
-  var btnFbCancel = document.getElementById('btn-feedback-cancel');
-  if (btnFbCancel) btnFbCancel.onclick = function() { hideModal('feedback-modal'); };
-  var btnFbSubmit = document.getElementById('btn-feedback-submit');
-  if (btnFbSubmit) {
-    btnFbSubmit.onclick = function() {
-      var name = (document.getElementById('feedback-user-name').value || '').trim();
-      var content = (document.getElementById('feedback-content').value || '').trim();
-      if (!content) {
-        alert("ご要望・ご意見を入力してください。");
-        return;
-      }
-      hideModal('feedback-modal');
-      showProgressModal("ご要望を送信中...");
-      fetch(GAS_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({
-          action: "submit_feedback",
-          target: currentFeedbackTarget,
-          name: name,
-          content: content,
-          date: new Date().toLocaleDateString('ja-JP')
-        })
-      }).then(function() {
-        finishProgressModal("送信完了！確認いたします。");
-      }).catch(function() {
-        finishProgressModal("送信に失敗しました");
-      });
-    };
-  }
+  addClick('btn-feedback-cancel', function() { hideModal('feedback-modal'); });
+  addClick('btn-feedback-submit', function() {
+    var name = (document.getElementById('feedback-user-name').value || '').trim();
+    var content = (document.getElementById('feedback-content').value || '').trim();
+    if (!content) {
+      alert("ご要望・ご意見を入力してください。");
+      return;
+    }
+    hideModal('feedback-modal');
+    showProgressModal("ご要望を送信中...");
+    fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "submit_feedback",
+        target: currentFeedbackTarget,
+        name: name,
+        content: content,
+        date: new Date().toLocaleDateString('ja-JP')
+      })
+    }).then(function() {
+      finishProgressModal("送信完了！確認いたします。");
+    }).catch(function() {
+      finishProgressModal("送信に失敗しました");
+    });
+  });
 
   var mergeSel = document.getElementById('merge-select-existing');
   if (mergeSel) {
@@ -4306,34 +4240,28 @@ window.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  var btnMergeCancel = document.getElementById('btn-merge-cancel');
-  if (btnMergeCancel) {
-    btnMergeCancel.onclick = function(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      hideModal('merge-car-modal');
-      return false;
-    };
-  }
+  addClick('btn-merge-cancel', function(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    hideModal('merge-car-modal');
+    return false;
+  });
   
-  var btnMergeSubmit = document.getElementById('btn-merge-submit');
-  if (btnMergeSubmit) {
-    btnMergeSubmit.onclick = function(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      var sel = document.getElementById('merge-select-existing');
-      var chosenName = sel ? sel.value : '';
-      if (!chosenName || chosenName === '__ADD_CUSTOM__') {
-        alert("統一先の号車名を選択してください。");
-        return false;
-      }
-      var cleanTarget = normalizeCarpoolKey(chosenName);
-      var key = currentMergeTarget.date + ":::" + currentMergeTarget.rawLeader;
-      carpoolMergeMap[key] = cleanTarget;
-      try { localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap)); } catch(e){}
-      hideModal('merge-car-modal');
-      fetchAdminData(false);
+  addClick('btn-merge-submit', function(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    var sel = document.getElementById('merge-select-existing');
+    var chosenName = sel ? sel.value : '';
+    if (!chosenName || chosenName === '__ADD_CUSTOM__') {
+      alert("統一先の号車名を選択してください。");
       return false;
-    };
-  }
+    }
+    var cleanTarget = normalizeCarpoolKey(chosenName);
+    var key = currentMergeTarget.date + ":::" + currentMergeTarget.rawLeader;
+    carpoolMergeMap[key] = cleanTarget;
+    try { localStorage.setItem('uchimiya_carpool_merge_map', JSON.stringify(carpoolMergeMap)); } catch(e){}
+    hideModal('merge-car-modal');
+    fetchAdminData(false);
+    return false;
+  });
 
   var form = document.getElementById('attendance-form');
   if (form) form.onsubmit = submitAttendance;
