@@ -76,6 +76,19 @@
     backdrop-filter: blur(4px);
     white-space: nowrap;
     cursor: pointer;
+    position: relative;
+  }
+
+  .admin-badge-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    border: 1px solid #ffffff;
+    display: none;
   }
 
   .tab-nav {
@@ -238,35 +251,79 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 6px;
+    gap: 6px;
   }
   .my-entry-date {
     font-weight: bold;
     color: #f8fafc;
     font-size: 13px;
+    white-space: nowrap;
   }
   .my-entry-actions {
     display: flex;
     gap: 5px;
+    align-items: center;
+    flex-shrink: 0;
   }
+
+  /* 変更・取消と同規格のステータスバッジ */
+  .badge-user-status {
+    font-size: 11px;
+    height: 23px;
+    padding: 0 7px;
+    border-radius: 4px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+  .badge-user-status.active {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    color: #34d399;
+  }
+  .badge-user-status.canceled {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #f87171;
+  }
+  .badge-user-status.tuning {
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    color: #fbbf24;
+  }
+
   .btn-my-edit {
     background: rgba(56, 189, 248, 0.2);
     border: 1px solid rgba(56, 189, 248, 0.5);
     color: #38bdf8;
     font-size: 11px;
-    padding: 3px 7px;
+    height: 23px;
+    padding: 0 7px;
     border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    white-space: nowrap;
   }
   .btn-my-cancel {
     background: rgba(239, 68, 68, 0.18);
     border: 1px solid rgba(239, 68, 68, 0.45);
     color: #f87171;
     font-size: 11px;
-    padding: 3px 7px;
+    height: 23px;
+    padding: 0 7px;
     border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    white-space: nowrap;
   }
 
   .entry-card {
@@ -374,7 +431,6 @@
     box-sizing: border-box;
   }
 
-  /* 上下突っ切り防止：画面高さの78%以内に制限し、中身だけスクロール */
   .modal-content {
     background: #161f30;
     border: 1px solid var(--border);
@@ -693,6 +749,7 @@
     cursor: pointer;
     text-align: center;
     white-space: nowrap;
+    position: relative;
   }
   .admin-sub-btn.active {
     background: rgba(239, 68, 68, 0.2);
@@ -830,6 +887,7 @@
   }
   .admin-date-group.is-canceled { opacity: 0.38; filter: grayscale(85%); }
 
+  /* 管理者日程ヘッダー（1行スッキリ化） */
   .admin-date-header {
     display: flex;
     justify-content: space-between;
@@ -841,11 +899,21 @@
     font-weight: bold;
     border-left: 4px solid var(--accent);
     margin-bottom: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .admin-head-badges { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  .admin-date-header::-webkit-scrollbar { display: none; }
+  .admin-head-left-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .admin-head-badges { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
 
+  /* 開催 / 非開催 / 調整中 トグル */
   .status-toggle-box {
     display: inline-flex;
     align-items: center;
@@ -853,9 +921,9 @@
     gap: 4px;
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
-    padding: 2px 7px;
+    padding: 2px 6px;
     border-radius: 5px;
-    font-size: 11px;
+    font-size: 10.5px;
     height: 24px;
     line-height: 1;
     box-sizing: border-box;
@@ -865,7 +933,7 @@
   .status-toggle-label {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
     cursor: pointer;
     font-weight: bold;
     margin: 0;
@@ -875,24 +943,26 @@
   }
   .status-toggle-label input { margin: 0; vertical-align: middle; cursor: pointer; }
 
-  .btn-del-entire-date {
+  /* ゴミ箱マークのみの削除ボタン */
+  .btn-del-entire-date-icon {
     background: rgba(239, 68, 68, 0.18);
     border: 1px solid rgba(239, 68, 68, 0.45);
     color: #f87171;
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 12px;
     height: 24px;
-    padding: 0 7px;
+    width: 26px;
+    padding: 0;
     border-radius: 5px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    justify-content: center;
     box-sizing: border-box;
     white-space: nowrap;
+    flex-shrink: 0;
     transition: background 0.15s;
   }
-  .btn-del-entire-date:hover { background: rgba(239, 68, 68, 0.35); }
+  .btn-del-entire-date-icon:hover { background: rgba(239, 68, 68, 0.35); }
 
   .admin-card-stats {
     display: flex;
@@ -1207,7 +1277,10 @@
 <div class="container">
   <header>
     <h1>U PARK PORTAL</h1>
-    <button type="button" class="admin-trigger" id="btn-open-admin" onclick="openAdminModal()">🔒 管理者</button>
+    <button type="button" class="admin-trigger" id="btn-open-admin" onclick="openAdminModal()">
+      <span>🔒 管理者</span>
+      <span class="admin-badge-dot" id="header-admin-new-dot"></span>
+    </button>
   </header>
 
   <div class="tab-nav">
@@ -1310,7 +1383,7 @@
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
-        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️️ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
@@ -1321,14 +1394,20 @@
   <div id="view-admin" class="hidden">
     <div class="card">
       <div class="admin-subnav">
-        <button type="button" class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 参加状況</button>
+        <button type="button" class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">
+          <span>👥 参加状況</span>
+          <span id="admin-sub-new-badge" style="display:none; background:#ef4444; color:#fff; font-size:10px; padding:1px 5px; border-radius:10px; margin-left:4px;">新着</span>
+        </button>
         <button type="button" class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
-        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️️ セット稼働状況編集</button>
+        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット稼働状況編集</button>
       </div>
 
       <div id="admin-subview-attendance">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
+          <h2 style="font-size:15px; margin:0; display:flex; align-items:center; gap:6px;">
+            <span>🔒 参加状況・車両集計</span>
+            <span id="admin-new-records-alert" style="display:none; font-size:11px; background:#ef4444; color:#fff; padding:2px 7px; border-radius:10px; font-weight:normal;">🔴 新規回答あり</span>
+          </h2>
           <button type="button" class="tab-btn" id="btn-refresh-admin" onclick="fetchAdminData(true)" style="flex:none; padding:5px 12px; border:1px solid var(--border); font-size:11.5px; border-radius:6px;">🔄 最新化</button>
         </div>
 
@@ -1696,7 +1775,7 @@
 
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" onclick="hideModal('feedback-modal')" style="border:1px solid var(--border);">キャンセル</button>
-      <button type="submit" class="btn-submit" onclick="submitFeedback()" style="margin:0; padding:8px;">送信する</button>
+      <button type="button" class="btn-submit" onclick="submitFeedback()" style="margin:0; padding:8px;">送信する</button>
     </div>
   </div>
 </div>
@@ -1826,6 +1905,53 @@ var globalProgressTimer = null;
 var currentAdminSelectedDate = 'ALL';
 
 var editDeletedRowIndices = [];
+
+/* 新規回答検知トラッキング */
+function checkNewAttendanceAlert(list) {
+  if (!list || !Array.isArray(list)) return;
+  var lastSeenMaxRow = Number(localStorage.getItem('uchimiya_admin_last_seen_row') || 0);
+  
+  var newItems = list.filter(function(item) {
+    return Number(item.rowIndex || 0) > lastSeenMaxRow;
+  });
+
+  var dot = document.getElementById('header-admin-new-dot');
+  var badge = document.getElementById('admin-sub-new-badge');
+  var alertBar = document.getElementById('admin-new-records-alert');
+
+  if (newItems.length > 0) {
+    if (dot) dot.style.display = 'block';
+    if (badge) {
+      badge.innerText = newItems.length + "件新着";
+      badge.style.display = 'inline-block';
+    }
+    if (alertBar) {
+      alertBar.innerText = "🔴 新着 " + newItems.length + " 件";
+      alertBar.style.display = 'inline-block';
+    }
+  } else {
+    if (dot) dot.style.display = 'none';
+    if (badge) badge.style.display = 'none';
+    if (alertBar) alertBar.style.display = 'none';
+  }
+}
+
+function markAttendanceSeen() {
+  if (registeredRecords && registeredRecords.length > 0) {
+    var maxRow = 0;
+    registeredRecords.forEach(function(r) {
+      var rw = Number(r.rowIndex || 0);
+      if (rw > maxRow) maxRow = rw;
+    });
+    localStorage.setItem('uchimiya_admin_last_seen_row', String(maxRow));
+  }
+  var dot = document.getElementById('header-admin-new-dot');
+  var badge = document.getElementById('admin-sub-new-badge');
+  var alertBar = document.getElementById('admin-new-records-alert');
+  if (dot) dot.style.display = 'none';
+  if (badge) badge.style.display = 'none';
+  if (alertBar) alertBar.style.display = 'none';
+}
 
 function showProgressModal(text) {
   var txt = document.getElementById('progress-status-text');
@@ -1994,21 +2120,19 @@ function renderMyAttendanceList(userName) {
     var statusBadgeHtml = '';
     var isCanceledCard = (dateStatus === 'canceled');
     if (dateStatus === 'active') {
-      statusBadgeHtml = '<span style="font-size:10.5px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:2px 7px; border-radius:10px; font-weight:bold;">🟢 開催予定</span>';
+      statusBadgeHtml = '<span class="badge-user-status active">🟢 開催</span>';
     } else if (dateStatus === 'canceled') {
-      statusBadgeHtml = '<span style="font-size:10.5px; background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:2px 7px; border-radius:10px; font-weight:bold;">🔴 中止</span>';
+      statusBadgeHtml = '<span class="badge-user-status canceled">🔴 非開催</span>';
     } else {
-      statusBadgeHtml = '<span style="font-size:10.5px; background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); padding:2px 7px; border-radius:10px; font-weight:bold;">🟡 調整中</span>';
+      statusBadgeHtml = '<span class="badge-user-status tuning">🟡 調整中</span>';
     }
 
     html += '<div class="my-entry-card ' + (isCanceledCard ? 'is-canceled' : '') + '">';
     html += '<div>';
     html += '<div class="my-entry-top">';
-    html += '<div style="display:flex; align-items:center; gap:6px;">';
     html += '<div class="my-entry-date">📅 ' + formatDateLabel(rec.date) + '</div>';
-    html += statusBadgeHtml;
-    html += '</div>';
     html += '<div class="my-entry-actions">';
+    html += statusBadgeHtml;
     html += '<button type="button" class="btn-my-edit" data-row="' + rec.rowIndex + '">✏️ 変更</button>';
     html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️ 取消</button>';
     html += '</div></div>';
@@ -2078,6 +2202,7 @@ function refreshMyAttendanceView() {
         var user = localStorage.getItem('uchimiya_auth_user');
         if (user) renderMyAttendanceList(user);
         renderAdminAttendanceHTML(registeredRecords);
+        checkNewAttendanceAlert(list);
       }
       finishProgressModal("更新完了！");
     })
@@ -2379,7 +2504,9 @@ function switchAdminSubTab(sub) {
   if (btnRules) btnRules.classList.toggle('active', sub === 'rules');
   if (btnObs) btnObs.classList.toggle('active', sub === 'obstacles');
 
-  if (sub === 'rules') {
+  if (sub === 'attendance') {
+    markAttendanceSeen();
+  } else if (sub === 'rules') {
     renderAdminRulesEditor();
   } else if (sub === 'obstacles') {
     renderAdminObstacleEditor();
@@ -3531,7 +3658,7 @@ function renderAdminAttendanceHTML(list) {
 
     html += '<div class="admin-date-group ' + (isDateCanceled ? 'is-canceled' : '') + '" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
-    html += '<div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">';
+    html += '<div class="admin-head-left-bar">';
     html += '<span>📅 ' + formatDateLabel(date) + '</span>';
     
     html += '<div class="status-toggle-box">';
@@ -3539,14 +3666,14 @@ function renderAdminAttendanceHTML(list) {
     html += '<input type="radio" name="exec-status-' + date + '" value="active" ' + (currentExecStatus === 'active' ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'active\')"> 開催';
     html += '</label>';
     html += '<label class="status-toggle-label" style="color:#f87171;">';
-    html += '<input type="radio" name="exec-status-' + date + '" value="canceled" ' + (currentExecStatus === 'canceled' ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'canceled\')"> 中止';
+    html += '<input type="radio" name="exec-status-' + date + '" value="canceled" ' + (currentExecStatus === 'canceled' ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'canceled\')"> 非開催';
     html += '</label>';
     html += '<label class="status-toggle-label" style="color:#fbbf24;">';
     html += '<input type="radio" name="exec-status-' + date + '" value="tuning" ' + (currentExecStatus === 'tuning' ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'tuning\')"> 調整中';
     html += '</label>';
     html += '</div>';
 
-    html += '<button type="button" class="btn-del-entire-date" data-date="' + date + '" title="この日の回答データを全件削除">🗑️ 中止削除</button>';
+    html += '<button type="button" class="btn-del-entire-date-icon" data-date="' + date + '" title="この日の回答データを全件削除">🗑️</button>';
 
     html += '</div>';
     html += '<div class="admin-head-badges">';
@@ -3678,7 +3805,7 @@ function renderAdminAttendanceHTML(list) {
 
   initSwipeActions(container);
 
-  container.querySelectorAll('.btn-del-entire-date').forEach(function(btn) {
+  container.querySelectorAll('.btn-del-entire-date-icon').forEach(function(btn) {
     btn.onclick = function() {
       var d = this.getAttribute('data-date');
       var group = container.querySelector('.admin-date-group[data-date="' + d + '"]');
@@ -3879,6 +4006,7 @@ function fetchAdminData(forceRefresh) {
         renderAdminAttendanceHTML(registeredRecords);
         var user = localStorage.getItem('uchimiya_auth_user');
         if (user) renderMyAttendanceList(user);
+        checkNewAttendanceAlert(list);
       }
       if (forceRefresh) finishProgressModal("更新完了！");
     })
@@ -4116,7 +4244,7 @@ function clearAllData() {
       .then(function() {
         finishProgressModal("全件削除完了！", function() {
           registeredRecords = [];
-          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
+          try { localStorage.removeItem('uchimiya_cached_records'); } catch(e){}
           fetchAdminData(true);
           var user = localStorage.getItem('uchimiya_auth_user');
           if (user) renderMyAttendanceList(user);
@@ -4517,6 +4645,7 @@ function submitAttendance(e) {
             registeredRecords = list;
             try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
             if (authUser) renderMyAttendanceList(authUser);
+            checkNewAttendanceAlert(list);
           }
         }).catch(function() {});
     });
@@ -4574,6 +4703,7 @@ window.addEventListener('DOMContentLoaded', function() {
           try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
           var user = localStorage.getItem('uchimiya_auth_user');
           if (user) renderMyAttendanceList(user);
+          checkNewAttendanceAlert(list);
         }
       }).catch(function() {});
   }, 100);
