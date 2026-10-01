@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>U PARK PORTAL</title>
 
-<!-- OGP設定 -->
 <meta property="og:title" content="U PARK PORTAL">
 <meta property="og:description" content="内宮パーク 専用ポータル">
 <meta property="og:type" content="website">
@@ -170,7 +169,6 @@
     cursor: pointer;
   }
 
-  /* 回答者自身の予約確認・編集・取消パネル */
   .my-attendance-panel {
     background: rgba(15, 23, 42, 0.95);
     border: 1px solid rgba(56, 189, 248, 0.35);
@@ -355,9 +353,9 @@
     white-space: nowrap;
   }
 
-  /* ★★★ 確実に画面タップを邪魔しない安全なモーダル設計 ★★★ */
+  /* ★★★ 確実に画面タップを邪魔しない安全なモーダル設定 ★★★ */
   .modal-overlay {
-    display: none !important; /* 初期状態は確実に完全に非表示 */
+    display: none !important;
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.85);
@@ -368,9 +366,14 @@
     z-index: 100000;
     padding: 24px 14px;
     box-sizing: border-box;
+    pointer-events: none; /* 非表示時は物理的にタップを透過 */
   }
 
-  /* ★上下突っ切り防止：画面高さの78%以内に制限し、中身だけスクロール */
+  /* 表示時（showModal実行時） */
+  .modal-overlay[style*="display: flex"] {
+    pointer-events: auto !important;
+  }
+
   .modal-content {
     background: #161f30;
     border: 1px solid var(--border);
@@ -1188,7 +1191,7 @@
 <body>
 
 <!-- 個別認証ゲートモーダル -->
-<div id="gate-modal" class="modal-overlay" style="display:none;">
+<div id="gate-modal" class="modal-overlay" style="display:none !important;">
   <div class="modal-content" style="text-align:center;">
     <div style="font-size:28px; margin-bottom:8px;">🔒</div>
     <h3 style="margin:0 0 6px 0; font-size:16px;">関係者限定アクセス</h3>
@@ -1207,7 +1210,7 @@
   </header>
 
   <div class="tab-nav">
-    <button type="button" class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">✍️️ 合トレ参加回答</button>
+    <button type="button" class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">✍️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column" onclick="switchTab('column')">📜 注意事項</button>
     <button type="button" class="tab-btn" id="tab-btn-status" onclick="switchTab('status')">⚙️ セット稼働状況</button>
   </div>
@@ -1413,7 +1416,7 @@
 </button>
 
 <!-- ミニカレンダーポップアップ -->
-<div id="cal-popup-modal" class="modal-overlay" onclick="closeCalendarPopup()">
+<div id="cal-popup-modal" class="modal-overlay" style="display:none !important;" onclick="closeCalendarPopup()">
   <div class="mini-cal-box" id="cal-box-inner" onclick="event.stopPropagation()">
     <div class="mini-cal-header">
       <button type="button" class="mini-cal-nav-btn" id="btn-cal-prev" onclick="prevMonth(event)">‹ 前月</button>
@@ -1438,7 +1441,7 @@
 </div>
 
 <!-- 管理者認証モーダル -->
-<div id="admin-modal" class="modal-overlay">
+<div id="admin-modal" class="modal-overlay" style="display:none !important;">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; font-size:15px;">🔒 管理者ログイン</h3>
     <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">管理者パスワードを入力してください。</p>
@@ -1451,7 +1454,7 @@
 </div>
 
 <!-- 手動代理追加モーダル -->
-<div id="admin-add-modal" class="modal-overlay">
+<div id="admin-add-modal" class="modal-overlay" style="display:none !important;">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#fca5a5;">＋ 手動代理追加（LINE・口頭）</h3>
     <form id="admin-manual-add-form" onsubmit="submitManualAdd(event)">
@@ -1536,7 +1539,7 @@
 </div>
 
 <!-- 回答内容の修正・編集モーダル -->
-<div id="admin-edit-entry-modal" class="modal-overlay">
+<div id="admin-edit-entry-modal" class="modal-overlay" style="display:none !important;">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️ 回答内容の修正・変更</h3>
     <form id="admin-edit-entry-form" onsubmit="submitEditEntry(event)">
@@ -1636,7 +1639,7 @@
 </div>
 
 <!-- 号車統合モーダル -->
-<div id="merge-car-modal" class="modal-overlay">
+<div id="merge-car-modal" class="modal-overlay" style="display:none !important;">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; font-size:15px;">🚗 相乗り号車の統合・名称統一</h3>
     <label style="font-size:11px; color:#cbd5e1; margin-top:8px;">統一前の号車名（参加者回答）</label>
@@ -1653,7 +1656,7 @@
 </div>
 
 <!-- 砂時計プログレスモーダル -->
-<div id="submit-progress-modal" class="modal-overlay">
+<div id="submit-progress-modal" class="modal-overlay" style="display:none !important;">
   <div class="progress-modal-box">
     <div class="hourglass-icon">⏳</div>
     <div id="progress-status-text" style="font-size:13px; font-weight:bold; color:#f8fafc;">データ処理中...</div>
@@ -1664,7 +1667,7 @@
 </div>
 
 <!-- 写真プレビューモーダル -->
-<div id="photo-viewer-modal" class="modal-overlay" onclick="hideModal('photo-viewer-modal')">
+<div id="photo-viewer-modal" class="modal-overlay" style="display:none !important;" onclick="hideModal('photo-viewer-modal')">
   <div class="modal-content" style="max-width:480px; padding:14px; text-align:center;" onclick="event.stopPropagation()">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <b id="viewer-title" style="font-size:14px; color:#f8fafc;">セット写真</b>
@@ -1675,7 +1678,7 @@
 </div>
 
 <!-- セット要望送信モーダル -->
-<div id="feedback-modal" class="modal-overlay">
+<div id="feedback-modal" class="modal-overlay" style="display:none !important;">
   <div class="modal-content" style="max-width:340px;" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; font-size:15px;">💬 セットへの要望・意見</h3>
     <p style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
