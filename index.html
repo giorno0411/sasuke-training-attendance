@@ -76,19 +76,6 @@
     backdrop-filter: blur(4px);
     white-space: nowrap;
     cursor: pointer;
-    position: relative;
-  }
-
-  .admin-badge-dot {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    width: 8px;
-    height: 8px;
-    background: #ef4444;
-    border-radius: 50%;
-    border: 1px solid #ffffff;
-    display: none;
   }
 
   .tab-nav {
@@ -240,12 +227,6 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: opacity 0.2s, filter 0.2s;
-  }
-  /* 非開催時はさらに薄く */
-  .my-entry-card.is-canceled {
-    opacity: 0.22 !important;
-    filter: grayscale(100%) !important;
   }
   .my-entry-top {
     display: flex;
@@ -259,6 +240,8 @@
     color: #f8fafc;
     font-size: 13px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .my-entry-actions {
     display: flex;
@@ -267,6 +250,7 @@
     flex-shrink: 0;
   }
 
+  /* 変更・取消と同規格のステータスバッジ */
   .badge-user-status {
     font-size: 11px;
     height: 23px;
@@ -463,30 +447,31 @@
     background: rgba(30, 41, 59, 0.9);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: 5px;
-    font-size: 11px;
+    font-size: 11.5px;
     cursor: pointer;
   }
   .mini-cal-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: bold;
     color: var(--text-sub);
     margin-bottom: 6px;
   }
   .mini-cal-weekdays .sun { color: #f87171; }
   .mini-cal-weekdays .sat { color: #60a5fa; }
-  .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
   .mini-cal-day {
     aspect-ratio: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 13.5px;
+    font-weight: bold;
     border-radius: 6px;
     user-select: none;
     background: rgba(30, 41, 59, 0.5);
@@ -503,16 +488,17 @@
     font-weight: bold;
   }
 
-  /* 管理者カレンダー用ドット表示 */
+  /* 管理者カレンダー用ドット表示（サイズ拡大） */
   .admin-cal-dot {
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    margin-top: 1px;
+    margin-top: 2px;
+    flex-shrink: 0;
   }
-  .admin-cal-dot.active { background: #10b981; }
-  .admin-cal-dot.canceled { background: #ef4444; }
-  .admin-cal-dot.tuning { background: #f59e0b; }
+  .admin-cal-dot.active { background: #10b981; box-shadow: 0 0 4px #10b981; }
+  .admin-cal-dot.canceled { background: #ef4444; box-shadow: 0 0 4px #ef4444; }
+  .admin-cal-dot.tuning { background: #f59e0b; box-shadow: 0 0 4px #f59e0b; }
 
   .mini-cal-footer {
     display: flex;
@@ -545,13 +531,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
+    padding: 9px 12px;
     background: rgba(30, 41, 59, 0.7);
     cursor: pointer;
     user-select: none;
   }
   .admin-cal-panel-body {
-    padding: 10px;
+    padding: 12px;
     border-top: 1px solid var(--border);
     display: none;
   }
@@ -786,7 +772,6 @@
     cursor: pointer;
     text-align: center;
     white-space: nowrap;
-    position: relative;
   }
   .admin-sub-btn.active {
     background: rgba(239, 68, 68, 0.2);
@@ -920,15 +905,9 @@
 
   .admin-date-group {
     margin-bottom: 22px;
-    transition: opacity 0.2s, filter 0.2s;
-  }
-  /* 管理者側も非開催時はさらに薄く */
-  .admin-date-group.is-canceled {
-    opacity: 0.22 !important;
-    filter: grayscale(100%) !important;
   }
 
-  /* 管理者日程ヘッダー（上下2段に整理） */
+  /* 管理者日程ヘッダー（上下2段に整理・改行防止） */
   .admin-date-header {
     background: rgba(30, 41, 59, 0.95);
     padding: 8px 10px;
@@ -944,14 +923,40 @@
     justify-content: space-between;
     align-items: center;
     gap: 6px;
+    width: 100%;
+  }
+  .admin-head-date-label {
+    font-weight: 800;
+    font-size: 13.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+  }
+  .admin-head-actions-wrap {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
   }
   .admin-head-row-bottom {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     flex-wrap: wrap;
     padding-top: 4px;
     border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  }
+
+  /* バッジスタイル統一（フォントサイズ・太さ共通化） */
+  .admin-count-badge {
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 8px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
   }
 
   /* 開催 / 非開催 / 調整中 トグル */
@@ -959,12 +964,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 4px;
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--border);
-    padding: 2px 7px;
+    padding: 2px 6px;
     border-radius: 5px;
-    font-size: 11px;
+    font-size: 10.5px;
     height: 24px;
     line-height: 1;
     box-sizing: border-box;
@@ -1318,10 +1323,7 @@
 <div class="container">
   <header>
     <h1>U PARK PORTAL</h1>
-    <button type="button" class="admin-trigger" id="btn-open-admin" onclick="openAdminModal()">
-      <span>🔒 管理者</span>
-      <span class="admin-badge-dot" id="header-admin-new-dot"></span>
-    </button>
+    <button type="button" class="admin-trigger" id="btn-open-admin" onclick="openAdminModal()">🔒 管理者</button>
   </header>
 
   <div class="tab-nav">
@@ -1424,7 +1426,7 @@
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
-        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️️ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
@@ -1435,24 +1437,18 @@
   <div id="view-admin" class="hidden">
     <div class="card">
       <div class="admin-subnav">
-        <button type="button" class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">
-          <span>👥 参加状況</span>
-          <span id="admin-sub-new-badge" style="display:none; background:#ef4444; color:#fff; font-size:10px; padding:1px 5px; border-radius:10px; margin-left:4px;">新着</span>
-        </button>
+        <button type="button" class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 参加状況</button>
         <button type="button" class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
         <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット稼働状況編集</button>
       </div>
 
       <div id="admin-subview-attendance">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h2 style="font-size:15px; margin:0; display:flex; align-items:center; gap:6px;">
-            <span>🔒 参加状況・車両集計</span>
-            <span id="admin-new-records-alert" style="display:none; font-size:11px; background:#ef4444; color:#fff; padding:2px 7px; border-radius:10px; font-weight:normal;">🔴 新規回答あり</span>
-          </h2>
+          <h2 style="font-size:15px; margin:0;">🔒 参加状況・車両集計</h2>
           <button type="button" class="tab-btn" id="btn-refresh-admin" onclick="fetchAdminData(true)" style="flex:none; padding:5px 12px; border:1px solid var(--border); font-size:11.5px; border-radius:6px;">🔄 最新化</button>
         </div>
 
-        <!-- 管理者用カレンダーパネル（予定が一目でわかる） -->
+        <!-- 管理者用カレンダーパネル（全体把握・タップで絞り込み） -->
         <div class="admin-cal-panel">
           <div class="admin-cal-panel-header" id="btn-toggle-admin-cal" onclick="toggleAdminCalPanel()">
             <span style="font-size:12.5px; font-weight:bold; color:#38bdf8; display:flex; align-items:center; gap:6px;">
@@ -1463,17 +1459,17 @@
           <div class="admin-cal-panel-body" id="admin-cal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <button type="button" class="mini-cal-nav-btn" onclick="prevAdminCalMonth(event)">‹ 前月</button>
-              <div style="font-size:12.5px; font-weight:bold; color:#f8fafc;" id="admin-cal-month-title"></div>
+              <div style="font-size:13px; font-weight:bold; color:#f8fafc;" id="admin-cal-month-title"></div>
               <button type="button" class="mini-cal-nav-btn" onclick="nextAdminCalMonth(event)">翌月 ›</button>
             </div>
             <div class="mini-cal-weekdays">
               <span class="sun">日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span class="sat">土</span>
             </div>
             <div class="mini-cal-grid" id="admin-cal-grid"></div>
-            <div style="display:flex; justify-content:center; gap:10px; margin-top:8px; font-size:10.5px; color:#94a3b8;">
-              <span style="display:flex; align-items:center; gap:3px;"><span class="admin-cal-dot active"></span>開催</span>
-              <span style="display:flex; align-items:center; gap:3px;"><span class="admin-cal-dot tuning"></span>調整中</span>
-              <span style="display:flex; align-items:center; gap:3px;"><span class="admin-cal-dot canceled"></span>非開催</span>
+            <div style="display:flex; justify-content:center; gap:12px; margin-top:10px; font-size:11px; color:#cbd5e1; font-weight:600;">
+              <span style="display:flex; align-items:center; gap:4px;"><span class="admin-cal-dot active"></span>開催</span>
+              <span style="display:flex; align-items:center; gap:4px;"><span class="admin-cal-dot tuning"></span>調整中</span>
+              <span style="display:flex; align-items:center; gap:4px;"><span class="admin-cal-dot canceled"></span>非開催</span>
             </div>
           </div>
         </div>
@@ -1977,62 +1973,6 @@ var currentAdminSelectedDate = 'ALL';
 
 var editDeletedRowIndices = [];
 
-/* 改善版：新着回答の検知・通知 */
-function checkNewAttendanceAlert(list) {
-  if (!list || !Array.isArray(list)) return;
-  
-  var seenIds = [];
-  try {
-    var rawSeen = localStorage.getItem('uchimiya_admin_seen_ids');
-    if (rawSeen) seenIds = JSON.parse(rawSeen);
-  } catch(e) {}
-
-  var newCount = 0;
-  list.forEach(function(item) {
-    var uid = (item.rowIndex || '') + "_" + (item.name || '') + "_" + normalizeDateKey(item.date);
-    if (!seenIds.includes(uid)) {
-      newCount++;
-    }
-  });
-
-  var dot = document.getElementById('header-admin-new-dot');
-  var badge = document.getElementById('admin-sub-new-badge');
-  var alertBar = document.getElementById('admin-new-records-alert');
-
-  if (newCount > 0) {
-    if (dot) dot.style.display = 'block';
-    if (badge) {
-      badge.innerText = newCount + "件新着";
-      badge.style.display = 'inline-block';
-    }
-    if (alertBar) {
-      alertBar.innerText = "🔴 新着 " + newCount + " 件";
-      alertBar.style.display = 'inline-block';
-    }
-  } else {
-    if (dot) dot.style.display = 'none';
-    if (badge) badge.style.display = 'none';
-    if (alertBar) alertBar.style.display = 'none';
-  }
-}
-
-function markAttendanceSeen() {
-  if (registeredRecords && registeredRecords.length > 0) {
-    var allIds = registeredRecords.map(function(item) {
-      return (item.rowIndex || '') + "_" + (item.name || '') + "_" + normalizeDateKey(item.date);
-    });
-    try {
-      localStorage.setItem('uchimiya_admin_seen_ids', JSON.stringify(allIds));
-    } catch(e) {}
-  }
-  var dot = document.getElementById('header-admin-new-dot');
-  var badge = document.getElementById('admin-sub-new-badge');
-  var alertBar = document.getElementById('admin-new-records-alert');
-  if (dot) dot.style.display = 'none';
-  if (badge) badge.style.display = 'none';
-  if (alertBar) alertBar.style.display = 'none';
-}
-
 function showProgressModal(text) {
   var txt = document.getElementById('progress-status-text');
   var bar = document.getElementById('progress-bar-inner');
@@ -2207,14 +2147,14 @@ function renderMyAttendanceList(userName) {
       statusBadgeHtml = '<span class="badge-user-status tuning">🟡 調整中</span>';
     }
 
-    html += '<div class="my-entry-card ' + (isCanceledCard ? 'is-canceled' : '') + '">';
+    html += '<div class="my-entry-card">';
     html += '<div>';
     html += '<div class="my-entry-top">';
     html += '<div class="my-entry-date">📅 ' + formatDateLabel(rec.date) + '</div>';
     html += '<div class="my-entry-actions">';
     html += statusBadgeHtml;
     
-    // 非開催の場合と通常時でボタンの文言を分かりやすく表示
+    // 非開催の場合と通常時でボタンの文言を切り替え
     if (isCanceledCard) {
       html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️ この回答を削除</button>';
     } else {
@@ -2290,7 +2230,6 @@ function refreshMyAttendanceView() {
         var user = localStorage.getItem('uchimiya_auth_user');
         if (user) renderMyAttendanceList(user);
         renderAdminAttendanceHTML(registeredRecords);
-        checkNewAttendanceAlert(list);
       }
       finishProgressModal("更新完了！");
     })
@@ -2593,7 +2532,7 @@ function switchAdminSubTab(sub) {
   if (btnObs) btnObs.classList.toggle('active', sub === 'obstacles');
 
   if (sub === 'attendance') {
-    markAttendanceSeen();
+    renderAdminCalendar();
   } else if (sub === 'rules') {
     renderAdminRulesEditor();
   } else if (sub === 'obstacles') {
@@ -2685,91 +2624,6 @@ function renderCalendar() {
 
   var countEl = document.getElementById('cal-popup-count');
   if (countEl) countEl.innerText = selectedDates.size + "日選択中";
-}
-
-/* 管理者専用カレンダーパネル */
-function toggleAdminCalPanel() {
-  var body = document.getElementById('admin-cal-content');
-  var arrow = document.getElementById('admin-cal-toggle-arrow');
-  if (!body) return;
-  var isHidden = body.style.display === 'none' || body.style.display === '';
-  body.style.display = isHidden ? 'block' : 'none';
-  if (arrow) arrow.innerText = isHidden ? '▲ 閉じる' : '▼ 開く';
-  if (isHidden) renderAdminCalendar();
-}
-
-function prevAdminCalMonth(e) {
-  if (e) { e.preventDefault(); e.stopPropagation(); }
-  adminCalMonth--;
-  if (adminCalMonth < 0) { adminCalMonth = 11; adminCalYear--; }
-  renderAdminCalendar();
-}
-
-function nextAdminCalMonth(e) {
-  if (e) { e.preventDefault(); e.stopPropagation(); }
-  adminCalMonth++;
-  if (adminCalMonth > 11) { adminCalMonth = 0; adminCalYear++; }
-  renderAdminCalendar();
-}
-
-function renderAdminCalendar() {
-  var title = document.getElementById('admin-cal-month-title');
-  if (title) title.innerText = adminCalYear + "年 " + (adminCalMonth + 1) + "月";
-  var grid = document.getElementById('admin-cal-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  var firstDayIndex = new Date(adminCalYear, adminCalMonth, 1).getDay();
-  var daysInMonth = new Date(adminCalYear, adminCalMonth + 1, 0).getDate();
-
-  var today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // 予約がある日を抽出
-  var eventDates = {};
-  registeredRecords.forEach(function(r) {
-    var k = normalizeDateKey(r.date);
-    eventDates[k] = true;
-  });
-
-  for (var i = 0; i < firstDayIndex; i++) {
-    var empty = document.createElement('div');
-    grid.appendChild(empty);
-  }
-
-  for (var d = 1; d <= daysInMonth; d++) {
-    (function(dayNum) {
-      var cellDate = new Date(adminCalYear, adminCalMonth, dayNum);
-      cellDate.setHours(0, 0, 0, 0);
-
-      var mm = String(adminCalMonth + 1).padStart(2, '0');
-      var dd = String(dayNum).padStart(2, '0');
-      var dateStr = adminCalYear + "-" + mm + "-" + dd;
-
-      var cell = document.createElement('div');
-      cell.className = 'mini-cal-day';
-      cell.innerText = dayNum;
-
-      if (cellDate.getTime() === today.getTime()) {
-        cell.classList.add('today');
-      }
-
-      if (eventDates[dateStr]) {
-        var st = dateStatusMap[dateStr] || 'tuning';
-        var dot = document.createElement('span');
-        dot.className = 'admin-cal-dot ' + (st === 'active' ? 'active' : (st === 'canceled' ? 'canceled' : 'tuning'));
-        cell.appendChild(dot);
-
-        cell.title = formatDateLabel(dateStr) + " (クリックで絞り込み)";
-        cell.onclick = function() {
-          applyAdminDateFilter(dateStr);
-          window.scrollTo({ top: 180, behavior: 'smooth' });
-        };
-      }
-
-      grid.appendChild(cell);
-    })(d);
-  }
 }
 
 function updateTriggerDisplay() {
@@ -3630,7 +3484,6 @@ function toggleDateExecutionStatus(date, status) {
   try { localStorage.setItem('uchimiya_date_status_map', JSON.stringify(dateStatusMap)); } catch(e) {}
   
   var group = document.querySelector('.admin-date-group[data-date="' + date + '"]');
-  if (group) group.classList.toggle('is-canceled', status === 'canceled');
 
   // 回答者側にも即時反映
   var user = localStorage.getItem('uchimiya_auth_user');
@@ -3746,7 +3599,6 @@ function renderAdminAttendanceHTML(list) {
     var countedCarsMap = new Map();
 
     var currentExecStatus = dateStatusMap[date] || 'tuning'; // デフォルトは調整中
-    var isDateCanceled = (currentExecStatus === 'canceled');
 
     members.forEach(function(m) {
       var isCompanionVehicle = String(m.name).includes('（同伴:') || String(m.name).includes('（同伴）');
@@ -3832,13 +3684,13 @@ function renderAdminAttendanceHTML(list) {
     var totalCars = countedCarsMap.size;
     var grandTotalPeople = playerTotal + companionTotal + staffTotal + otherTotal;
 
-    html += '<div class="admin-date-group ' + (isDateCanceled ? 'is-canceled' : '') + '" data-date="' + date + '">';
+    html += '<div class="admin-date-group" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
     
-    // 上段：日付、ステータストグル、ゴミ箱ボタン
+    // 上段：日付（改行防止・1行維持）、ステータストグル、ゴミ箱ボタン
     html += '<div class="admin-head-row-top">';
-    html += '<span style="font-weight:800; font-size:13.5px;">📅 ' + formatDateLabel(date) + '</span>';
-    html += '<div style="display:flex; align-items:center; gap:6px;">';
+    html += '<span class="admin-head-date-label">📅 ' + formatDateLabel(date) + '</span>';
+    html += '<div class="admin-head-actions-wrap">';
     html += '<div class="status-toggle-box">';
     html += '<label class="status-toggle-label" style="color:#34d399;">';
     html += '<input type="radio" name="exec-status-' + date + '" value="active" ' + (currentExecStatus === 'active' ? 'checked' : '') + ' onchange="toggleDateExecutionStatus(\'' + date + '\', \'active\')"> 開催';
@@ -3853,19 +3705,19 @@ function renderAdminAttendanceHTML(list) {
     html += '<button type="button" class="btn-del-entire-date-icon" data-date="' + date + '" title="この日の回答データを全件削除">🗑️</button>';
     html += '</div></div>';
 
-    // 下段：改行された人数内訳バッジ
+    // 下段：改行された人数内訳バッジ（文字サイズ・太さ統一・詰めて配置）
     html += '<div class="admin-head-row-bottom">';
-    html += '<span style="font-size:10px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:10px; white-space:nowrap;">プレイヤー: ' + playerTotal + '名</span>';
+    html += '<span class="admin-count-badge" style="background:var(--accent); color:#fff;">プレイヤー: ' + playerTotal + '名</span>';
     if (staffTotal > 0) {
-      html += '<span style="font-size:10px; background:#eab308; color:#000; padding:2px 6px; border-radius:10px; font-weight:bold; white-space:nowrap;">ロケ班: ' + staffTotal + '名</span>';
+      html += '<span class="admin-count-badge" style="background:#eab308; color:#000;">ロケ班: ' + staffTotal + '名</span>';
     }
     if (companionTotal > 0) {
-      html += '<span style="font-size:10px; background:#475569; color:#f1f5f9; padding:2px 6px; border-radius:10px; white-space:nowrap;">同伴: ' + companionTotal + '名</span>';
+      html += '<span class="admin-count-badge" style="background:#475569; color:#f1f5f9;">同伴: ' + companionTotal + '名</span>';
     }
     if (otherTotal > 0) {
-      html += '<span style="font-size:10px; background:#334155; color:#cbd5e1; padding:2px 6px; border-radius:10px; white-space:nowrap;">他: ' + otherTotal + '名</span>';
+      html += '<span class="admin-count-badge" style="background:#334155; color:#cbd5e1;">他: ' + otherTotal + '名</span>';
     }
-    html += '<span style="font-size:10px; background:#10b981; color:#fff; padding:2px 7px; border-radius:10px; font-weight:bold; white-space:nowrap; margin-left:auto;">計: ' + grandTotalPeople + '名</span>';
+    html += '<span class="admin-count-badge" style="background:#10b981; color:#fff; margin-left:auto;">計: ' + grandTotalPeople + '名</span>';
     html += '</div></div>';
 
     html += '<div class="admin-card-stats">';
@@ -4183,10 +4035,9 @@ function fetchAdminData(forceRefresh) {
       if (Array.isArray(list)) {
         registeredRecords = list;
         try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
-        renderAdminAttendanceHTML(registeredRecords);
         var user = localStorage.getItem('uchimiya_auth_user');
         if (user) renderMyAttendanceList(user);
-        checkNewAttendanceAlert(list);
+        renderAdminAttendanceHTML(registeredRecords);
       }
       if (forceRefresh) finishProgressModal("更新完了！");
     })
@@ -4825,7 +4676,6 @@ function submitAttendance(e) {
             registeredRecords = list;
             try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
             if (authUser) renderMyAttendanceList(authUser);
-            checkNewAttendanceAlert(list);
           }
         }).catch(function() {});
     });
@@ -4883,7 +4733,6 @@ window.addEventListener('DOMContentLoaded', function() {
           try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
           var user = localStorage.getItem('uchimiya_auth_user');
           if (user) renderMyAttendanceList(user);
-          checkNewAttendanceAlert(list);
         }
       }).catch(function() {});
   }, 100);
