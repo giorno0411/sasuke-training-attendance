@@ -1097,7 +1097,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    flex: 1;
+    flex-shrink: 1;
     min-width: 0;
   }
 
@@ -1330,7 +1330,7 @@
   <div class="tab-nav">
     <button type="button" class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">✍️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column" onclick="switchTab('column')">📜 注意事項</button>
-    <button type="button" class="tab-btn" id="tab-btn-status" onclick="switchTab('status')">⚙️ セット稼働状況</button>
+    <button type="button" class="tab-btn" id="tab-btn-status" onclick="switchTab('status')">⚙️️ セット稼働状況</button>
   </div>
 
   <!-- 1. 参加送信フォーム -->
@@ -1427,7 +1427,7 @@
   <div id="view-status" class="hidden">
     <div class="card">
       <div style="margin-bottom: 14px;">
-        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙ 現在のセット稼働状況</h2>
+        <h2 style="font-size:16px; margin:0 0 6px 0;">⚙️ 現在のセット稼働状況</h2>
         <p style="font-size:12px; color:var(--text-sub); margin:0;">当日のセットのメンテナンス状況・利用可否です。各エリアの写真を閲覧したり、要望を直接送信できます。</p>
       </div>
       <div id="stage-groups-container"></div>
@@ -1755,18 +1755,18 @@
 
       <!-- 他参加者（プレイヤー）の追加・削除・編集エリア（文字切れ解消・上下中央揃え） -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(239,68,68,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; min-height:30px;">
-          <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center;">🏃 他参加者（プレイヤー）の変更・追加</label>
-          <button type="button" class="tab-btn" onclick="addEditOtherPlayerCard('', '', '乗り合い（同乗）', '普通車', '')" style="padding:3px 10px; font-size:11px; color:#fca5a5; border:1px solid rgba(239,68,68,0.5); flex-shrink:0; white-space:nowrap; display:inline-flex; align-items:center; height:24px;">＋ 追加</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; min-height:26px;">
+          <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1;">🏃 他参加者（プレイヤー）の変更・追加</label>
+          <button type="button" class="tab-btn" onclick="addEditOtherPlayerCard('', '', '乗り合い（同乗）', '普通車', '')" style="padding:0 8px; font-size:11px; color:#fca5a5; border:1px solid rgba(239,68,68,0.5); flex-shrink:0; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; height:24px; line-height:1; margin:0;">＋ 追加</button>
         </div>
         <div id="edit-other-players-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
       <!-- 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア（文字切れ解消・上下中央揃え） -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(6,182,212,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; min-height:30px;">
-          <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center;">👥 同伴者（見学等・非プレイヤー）</label>
-          <button type="button" class="tab-btn" onclick="addEditCompanionCard('', '家族', '1名', '同乗', '普通車')" style="padding:3px 10px; font-size:11px; color:#67e8f9; border:1px solid rgba(6,182,212,0.5); flex-shrink:0; white-space:nowrap; display:inline-flex; align-items:center; height:24px;">＋ 追加</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; min-height:26px;">
+          <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1;">👥 同伴者（見学等・非プレイヤー）</label>
+          <button type="button" class="tab-btn" onclick="addEditCompanionCard('', '家族', '1名', '同乗', '普通車')" style="padding:0 8px; font-size:11px; color:#67e8f9; border:1px solid rgba(6,182,212,0.5); flex-shrink:0; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; height:24px; line-height:1; margin:0;">＋ 追加</button>
         </div>
         <div id="edit-companions-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
@@ -1797,7 +1797,7 @@
 
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" onclick="hideModal('merge-car-modal')" style="border:1px solid var(--border);">キャンセル</button>
-      <button type="button" class="btn-submit" onclick="submitMergeCar()" style="margin:0; padding:8px;">統合する</button>
+      <button type="submit" class="btn-submit" onclick="submitMergeCar()" style="margin:0; padding:8px;">統合する</button>
     </div>
   </div>
 </div>
