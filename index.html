@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>U PARK PORTAL</title>
 
 <!-- OGP設定 -->
@@ -36,16 +36,16 @@
     background-attachment: fixed;
     background-repeat: no-repeat;
     color: var(--text);
-    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(80px + env(safe-area-inset-bottom, 20px)) 12px;
+    padding: 12px;
+    padding-bottom: 90px;
     display: flex;
     justify-content: center;
     min-height: 100vh;
-    min-height: 100dvh;
     -webkit-text-size-adjust: 100%;
     overflow-x: hidden;
   }
   
-  .container { width: 100%; max-width: 580px; position: relative; z-index: 10; }
+  .container { width: 100%; max-width: 580px; position: relative; z-index: 1; }
 
   header {
     display: flex;
@@ -355,9 +355,8 @@
     white-space: nowrap;
   }
 
-  /* ★★★ 確実に画面タップを邪魔しない安全なモーダル設計 ★★★ */
+  /* 安全なモーダル設計 */
   .modal-overlay {
-    display: none;
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.85);
@@ -368,15 +367,9 @@
     z-index: 100000;
     padding: 24px 14px;
     box-sizing: border-box;
-    pointer-events: none !important; /* 非表示時は物理的に全タップを通過 */
   }
 
-  /* 開いている時だけタップ可能 */
-  .modal-overlay.is-active {
-    display: flex !important;
-    pointer-events: auto !important;
-  }
-
+  /* 上下突っ切り防止：画面高さの78%以内に制限し、中身だけスクロール */
   .modal-content {
     background: #161f30;
     border: 1px solid var(--border);
@@ -1194,7 +1187,7 @@
 <body>
 
 <!-- 個別認証ゲートモーダル -->
-<div id="gate-modal" class="modal-overlay">
+<div id="gate-modal" class="modal-overlay" style="display:none;">
   <div class="modal-content" style="text-align:center;">
     <div style="font-size:28px; margin-bottom:8px;">🔒</div>
     <h3 style="margin:0 0 6px 0; font-size:16px;">関係者限定アクセス</h3>
@@ -1252,25 +1245,23 @@
 
     <div class="card">
       <form id="attendance-form" onsubmit="submitAttendance(event)">
-        <!-- 1. 参加者（プレイヤー）氏名 -->
         <div class="form-group">
           <label>参加者（プレイヤー）氏名<span class="required">*</span></label>
           <input type="text" id="field-name" placeholder="例：内宮 修造" required>
         </div>
 
-        <!-- 2. 合トレ参加希望日程（先に配置） -->
+        <!-- 合トレ参加希望日程（先に配置） -->
         <div class="form-group">
           <label>合トレ参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" id="date-picker-bar" onclick="openCalendarPopup()">
             <div id="date-picker-display" class="date-bar-text">📅 合トレ参加希望日程をタップして選択...</div>
-            <span style="font-size:18px;">🗓️</span>
+            <span style="font-size:18px;">🗓</span>
           </div>
         </div>
 
-        <!-- 日程ごとの詳細設定枠 -->
         <div id="days-config-container"></div>
 
-        <!-- 3. 他参加者（プレイヤー）氏名（日程の下へ移動） -->
+        <!-- 他参加者（プレイヤー）氏名（後に配置） -->
         <div class="form-group">
           <label>他参加者（プレイヤー）氏名</label>
           <p id="player-instruction-text" style="display:none; font-size:11px; color:var(--text-sub); margin:0 0 8px 0; line-height:1.5;">
@@ -1282,7 +1273,6 @@
           </button>
         </div>
 
-        <!-- 4. お連れ様・同伴者（見学等の非プレイヤー） -->
         <div class="form-group">
           <label>お連れ様・同伴者（見学等の非プレイヤー）</label>
           <p id="companion-instruction-text" style="display:none; font-size:11px; color:var(--text-sub); margin:0 0 8px 0; line-height:1.5;">
@@ -1424,7 +1414,7 @@
 </button>
 
 <!-- ミニカレンダーポップアップ -->
-<div id="cal-popup-modal" class="modal-overlay" onclick="closeCalendarPopup()">
+<div id="cal-popup-modal" class="modal-overlay" style="display:none;" onclick="closeCalendarPopup()">
   <div class="mini-cal-box" id="cal-box-inner" onclick="event.stopPropagation()">
     <div class="mini-cal-header">
       <button type="button" class="mini-cal-nav-btn" id="btn-cal-prev" onclick="prevMonth(event)">‹ 前月</button>
@@ -1449,7 +1439,7 @@
 </div>
 
 <!-- 管理者認証モーダル -->
-<div id="admin-modal" class="modal-overlay">
+<div id="admin-modal" class="modal-overlay" style="display:none;">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; font-size:15px;">🔒 管理者ログイン</h3>
     <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">管理者パスワードを入力してください。</p>
@@ -1462,7 +1452,7 @@
 </div>
 
 <!-- 手動代理追加モーダル -->
-<div id="admin-add-modal" class="modal-overlay">
+<div id="admin-add-modal" class="modal-overlay" style="display:none;">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#fca5a5;">＋ 手動代理追加（LINE・口頭）</h3>
     <form id="admin-manual-add-form" onsubmit="submitManualAdd(event)">
@@ -1547,7 +1537,7 @@
 </div>
 
 <!-- 回答内容の修正・編集モーダル -->
-<div id="admin-edit-entry-modal" class="modal-overlay">
+<div id="admin-edit-entry-modal" class="modal-overlay" style="display:none;">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️ 回答内容の修正・変更</h3>
     <form id="admin-edit-entry-form" onsubmit="submitEditEntry(event)">
@@ -1615,27 +1605,28 @@
         </div>
       </div>
 
-      <!-- 他参加者（プレイヤー）の追加・削除・編集エリア（被り防止のためflex-wrapとgapを設定） -->
+      <!-- 他参加者（プレイヤー）の追加・削除・編集エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(239,68,68,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-          <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold; flex:1; min-width:140px;">🏃 他参加者（プレイヤー）の変更・追加</label>
-          <button type="button" class="tab-btn" onclick="addEditOtherPlayerCard('', '乗り合い（同乗）', '普通車', '')" style="flex:none; padding:4px 10px; font-size:11px; color:#fca5a5; border:1px solid rgba(239,68,68,0.5); border-radius:6px;">＋ 参加者を追加</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px;">
+          <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🏃 他参加者（プレイヤー）の変更・追加</label>
+          <button type="button" class="tab-btn" onclick="addEditOtherPlayerCard('', '', '乗り合い（同乗）', '普通車', '')" style="padding:3px 8px; font-size:11px; color:#fca5a5; border:1px solid rgba(239,68,68,0.5); flex-shrink:0; white-space:nowrap;">＋ 追加</button>
         </div>
         <div id="edit-other-players-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
-      <!-- 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア（被り防止のためflex-wrapとgapを設定） -->
+      <!-- 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(6,182,212,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-          <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold; flex:1; min-width:140px;">👥 同伴者（見学等・非プレイヤー）</label>
-          <button type="button" class="tab-btn" onclick="addEditCompanionCard('', '家族', '1名', '同乗', '普通車')" style="flex:none; padding:4px 10px; font-size:11px; color:#67e8f9; border:1px solid rgba(6,182,212,0.5); border-radius:6px;">＋ 同伴者を追加</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px;">
+          <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">👥 同伴者（見学等・非プレイヤー）</label>
+          <button type="button" class="tab-btn" onclick="addEditCompanionCard('', '家族', '1名', '同乗', '普通車')" style="padding:3px 8px; font-size:11px; color:#67e8f9; border:1px solid rgba(6,182,212,0.5); flex-shrink:0; white-space:nowrap;">＋ 追加</button>
         </div>
         <div id="edit-companions-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
+      <!-- 備考・連絡事項（縦スクロール対応） -->
       <div class="compact-field-group" style="margin-bottom:14px;">
         <label>備考・連絡事項</label>
-        <input type="text" id="edit-note" placeholder="備考" style="height:38px;">
+        <textarea id="edit-note" rows="2" placeholder="備考" style="max-height:120px; overflow-y:auto; resize:vertical; font-size:13px; line-height:1.4; padding:8px 10px;"></textarea>
       </div>
 
       <div style="display:flex; gap:8px;">
@@ -1647,7 +1638,7 @@
 </div>
 
 <!-- 号車統合モーダル -->
-<div id="merge-car-modal" class="modal-overlay">
+<div id="merge-car-modal" class="modal-overlay" style="display:none;">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; font-size:15px;">🚗 相乗り号車の統合・名称統一</h3>
     <label style="font-size:11px; color:#cbd5e1; margin-top:8px;">統一前の号車名（参加者回答）</label>
@@ -1658,13 +1649,13 @@
 
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" onclick="hideModal('merge-car-modal')" style="border:1px solid var(--border);">キャンセル</button>
-      <button type="submit" class="btn-submit" onclick="submitMergeCar()" style="margin:0; padding:8px;">統合する</button>
+      <button type="button" class="btn-submit" onclick="submitMergeCar()" style="margin:0; padding:8px;">統合する</button>
     </div>
   </div>
 </div>
 
 <!-- 砂時計プログレスモーダル -->
-<div id="submit-progress-modal" class="modal-overlay">
+<div id="submit-progress-modal" class="modal-overlay" style="display:none;">
   <div class="progress-modal-box">
     <div class="hourglass-icon">⏳</div>
     <div id="progress-status-text" style="font-size:13px; font-weight:bold; color:#f8fafc;">データ処理中...</div>
@@ -1675,7 +1666,7 @@
 </div>
 
 <!-- 写真プレビューモーダル -->
-<div id="photo-viewer-modal" class="modal-overlay" onclick="hideModal('photo-viewer-modal')">
+<div id="photo-viewer-modal" class="modal-overlay" style="display:none;" onclick="hideModal('photo-viewer-modal')">
   <div class="modal-content" style="max-width:480px; padding:14px; text-align:center;" onclick="event.stopPropagation()">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <b id="viewer-title" style="font-size:14px; color:#f8fafc;">セット写真</b>
@@ -1686,7 +1677,7 @@
 </div>
 
 <!-- セット要望送信モーダル -->
-<div id="feedback-modal" class="modal-overlay">
+<div id="feedback-modal" class="modal-overlay" style="display:none;">
   <div class="modal-content" style="max-width:340px;" onclick="event.stopPropagation()">
     <h3 style="margin-top:0; font-size:15px;">💬 セットへの要望・意見</h3>
     <p style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
@@ -1700,7 +1691,7 @@
 
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" onclick="hideModal('feedback-modal')" style="border:1px solid var(--border);">キャンセル</button>
-      <button type="button" class="btn-submit" onclick="submitFeedback()" style="margin:0; padding:8px;">送信する</button>
+      <button type="submit" class="btn-submit" onclick="submitFeedback()" style="margin:0; padding:8px;">送信する</button>
     </div>
   </div>
 </div>
@@ -1862,20 +1853,13 @@ function escapeHtml(str) {
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-/* ★確実に表示・非表示を切り替え、閉じた時の誤タップを防止★ */
 function showModal(id) {
   var el = document.getElementById(id);
-  if (el) {
-    el.classList.add('is-active');
-    el.style.display = 'flex';
-  }
+  if (el) el.style.display = 'flex';
 }
 function hideModal(id) {
   var el = document.getElementById(id);
-  if (el) {
-    el.classList.remove('is-active');
-    el.style.display = 'none';
-  }
+  if (el) el.style.display = 'none';
 }
 
 function checkGateAccess() {
@@ -2130,7 +2114,11 @@ function openEditModalByRow(row) {
   });
 
   companionRecords.forEach(function(cr) {
-    addEditOtherPlayerCard(cr.name, cr.transport, cr.carType, cr.rowIndex);
+    var rawCrName = String(cr.name || '').trim();
+    var parts = rawCrName.split(/\s+/);
+    var lName = parts[0] || '';
+    var fName = parts.slice(1).join(' ') || '';
+    addEditOtherPlayerCard(lName, fName, cr.transport, cr.carType, cr.rowIndex);
   });
 
   var compContainer = document.getElementById('edit-companions-container');
@@ -2179,11 +2167,12 @@ function toggleManualTransport(val) {
   document.getElementById('m-add-share-settings').classList.toggle('hidden', !isShare);
 }
 
-function addEditOtherPlayerCard(fullName, transport, carType, rowIndex) {
+function addEditOtherPlayerCard(lastName, firstName, transport, carType, rowIndex) {
   var container = document.getElementById('edit-other-players-container');
   if (!container) return;
 
-  fullName = fullName || '';
+  lastName = lastName || '';
+  firstName = firstName || '';
   transport = transport || '乗り合い（同乗）';
   carType = carType || '普通車';
   rowIndex = rowIndex || '';
@@ -2199,8 +2188,9 @@ function addEditOtherPlayerCard(fullName, transport, carType, rowIndex) {
 
   var html = '';
   html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px;">';
-  html += '<input type="text" class="edit-op-name" value="' + escapeHtml(fullName) + '" placeholder="お名前（例: 田中 太郎）" required style="flex:1; height:34px; padding:4px 8px; font-size:12.5px;">';
-  html += '<button type="button" class="btn-action-small btn-del-edit-op" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; height:34px; padding:0 8px; cursor:pointer; border-radius:5px;">✕ 削除</button>';
+  html += '<input type="text" class="edit-op-last" value="' + escapeHtml(lastName) + '" placeholder="姓（例: 田中）" required style="flex:1; height:34px; padding:4px 8px; font-size:12.5px;">';
+  html += '<input type="text" class="edit-op-first" value="' + escapeHtml(firstName) + '" placeholder="名（例: 太郎）" required style="flex:1; height:34px; padding:4px 8px; font-size:12.5px;">';
+  html += '<button type="button" class="btn-action-small btn-del-edit-op" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; height:34px; padding:0 8px; cursor:pointer; border-radius:5px; flex-shrink:0;">✕ 削除</button>';
   html += '</div>';
 
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">';
@@ -3589,7 +3579,7 @@ function renderAdminAttendanceHTML(list) {
       html += '<input type="checkbox" class="contacted-checkbox" data-date="' + date + '" data-name="' + escapeHtml(m.name) + '" ' + (isContacted ? 'checked' : '') + '> 連絡済';
       html += '</label>';
       html += '</div>';
-      html += '<button type="button" class="action-pill-btn btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏️ 編集</button>';
+      html += '<button type="button" class="action-pill-btn btn-edit-attendee" data-row="' + (m.rowIndex || 0) + '">✏ 編集</button>';
       html += '</div></div>';
 
       html += '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px;">';
@@ -3630,7 +3620,7 @@ function renderAdminAttendanceHTML(list) {
         
         if (isMerged) {
           origKeys.filter(function(ok) { return carpoolMergeMap[date + ":::" + ok]; }).forEach(function(ok) {
-            html += '<button type="button" class="btn-unmerge-car btn-do-unmerge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(ok) + '">↩️ 解除</button>';
+            html += '<button type="button" class="btn-unmerge-car btn-do-unmerge" data-date="' + escapeHtml(date) + '" data-leader="' + escapeHtml(ok) + '">↩️️ 解除</button>';
           });
         }
         html += '</div></div>';
@@ -3996,7 +3986,9 @@ function submitEditEntry(e) {
   var newOtherPlayers = [];
 
   document.querySelectorAll('.edit-other-player-item').forEach(function(item) {
-    var opName = item.querySelector('.edit-op-name').value.trim();
+    var last = item.querySelector('.edit-op-last').value.trim();
+    var first = item.querySelector('.edit-op-first').value.trim();
+    var opName = last + (first ? ' ' + first : '');
     var opTrans = item.querySelector('.edit-op-transport').value;
     var opCar = opTrans === '自車' ? item.querySelector('.edit-op-car-type').value : '';
     var opRow = item.getAttribute('data-row-index');
@@ -4082,7 +4074,7 @@ function clearAllData() {
       .then(function() {
         finishProgressModal("全件削除完了！", function() {
           registeredRecords = [];
-          try { localStorage.removeItem('uchimiya_cached_records'); } catch(e){}
+          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
           fetchAdminData(true);
           var user = localStorage.getItem('uchimiya_auth_user');
           if (user) renderMyAttendanceList(user);
