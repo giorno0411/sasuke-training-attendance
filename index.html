@@ -1265,7 +1265,7 @@
           <label>合トレ参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" id="date-picker-bar" onclick="openCalendarPopup()">
             <div id="date-picker-display" class="date-bar-text">📅 合トレ参加希望日程をタップして選択...</div>
-            <span style="font-size:18px;">🗓</span>
+            <span style="font-size:18px;">🗓️️</span>
           </div>
         </div>
 
@@ -1316,7 +1316,7 @@
       <div class="admin-subnav">
         <button type="button" class="admin-sub-btn active" id="admin-sub-btn-att" onclick="switchAdminSubTab('attendance')">👥 参加状況</button>
         <button type="button" class="admin-sub-btn" id="admin-sub-btn-rules" onclick="switchAdminSubTab('rules')">📜 注意事項編集</button>
-        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️ セット稼働状況編集</button>
+        <button type="button" class="admin-sub-btn" id="admin-sub-btn-obs" onclick="switchAdminSubTab('obstacles')">⚙️️ セット稼働状況編集</button>
       </div>
 
       <div id="admin-subview-attendance">
@@ -1605,25 +1605,26 @@
 
       <!-- 他参加者（プレイヤー）の追加・削除・編集エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(239,68,68,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-          <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold; flex:1 1 180px;">🏃 他参加者（プレイヤー）の変更・追加</label>
-          <button type="button" class="tab-btn" onclick="addEditOtherPlayerCard('', '乗り合い（同乗）', '普通車', '')" style="padding:4px 10px; font-size:11px; color:#fca5a5; border:1px solid rgba(239,68,68,0.5); flex-shrink:0; margin-left:auto;">＋ 参加者を追加</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px;">
+          <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🏃 他参加者（プレイヤー）の変更・追加</label>
+          <button type="button" class="tab-btn" onclick="addEditOtherPlayerCard('', '', '乗り合い（同乗）', '普通車', '')" style="padding:3px 8px; font-size:11px; color:#fca5a5; border:1px solid rgba(239,68,68,0.5); flex-shrink:0; white-space:nowrap;">＋ 追加</button>
         </div>
         <div id="edit-other-players-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
       <!-- 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(6,182,212,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-          <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold; flex:1 1 180px;">👥 同伴者（見学等・非プレイヤー）</label>
-          <button type="button" class="tab-btn" onclick="addEditCompanionCard('', '家族', '1名', '同乗', '普通車')" style="padding:4px 10px; font-size:11px; color:#67e8f9; border:1px solid rgba(6,182,212,0.5); flex-shrink:0; margin-left:auto;">＋ 同伴者を追加</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px;">
+          <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">👥 同伴者（見学等・非プレイヤー）</label>
+          <button type="button" class="tab-btn" onclick="addEditCompanionCard('', '家族', '1名', '同乗', '普通車')" style="padding:3px 8px; font-size:11px; color:#67e8f9; border:1px solid rgba(6,182,212,0.5); flex-shrink:0; white-space:nowrap;">＋ 追加</button>
         </div>
         <div id="edit-companions-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
+      <!-- 備考・連絡事項（縦スクロール対応） -->
       <div class="compact-field-group" style="margin-bottom:14px;">
         <label>備考・連絡事項</label>
-        <input type="text" id="edit-note" placeholder="備考" style="height:38px;">
+        <textarea id="edit-note" rows="2" placeholder="備考" style="max-height:120px; overflow-y:auto; resize:vertical; font-size:13px; line-height:1.4; padding:8px 10px;"></textarea>
       </div>
 
       <div style="display:flex; gap:8px;">
@@ -2111,7 +2112,11 @@ function openEditModalByRow(row) {
   });
 
   companionRecords.forEach(function(cr) {
-    addEditOtherPlayerCard(cr.name, cr.transport, cr.carType, cr.rowIndex);
+    var rawCrName = String(cr.name || '').trim();
+    var parts = rawCrName.split(/\s+/);
+    var lName = parts[0] || '';
+    var fName = parts.slice(1).join(' ') || '';
+    addEditOtherPlayerCard(lName, fName, cr.transport, cr.carType, cr.rowIndex);
   });
 
   var compContainer = document.getElementById('edit-companions-container');
@@ -2160,11 +2165,12 @@ function toggleManualTransport(val) {
   document.getElementById('m-add-share-settings').classList.toggle('hidden', !isShare);
 }
 
-function addEditOtherPlayerCard(fullName, transport, carType, rowIndex) {
+function addEditOtherPlayerCard(lastName, firstName, transport, carType, rowIndex) {
   var container = document.getElementById('edit-other-players-container');
   if (!container) return;
 
-  fullName = fullName || '';
+  lastName = lastName || '';
+  firstName = firstName || '';
   transport = transport || '乗り合い（同乗）';
   carType = carType || '普通車';
   rowIndex = rowIndex || '';
@@ -2180,8 +2186,9 @@ function addEditOtherPlayerCard(fullName, transport, carType, rowIndex) {
 
   var html = '';
   html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px;">';
-  html += '<input type="text" class="edit-op-name" value="' + escapeHtml(fullName) + '" placeholder="お名前（例: 田中 太郎）" required style="flex:1; height:34px; padding:4px 8px; font-size:12.5px;">';
-  html += '<button type="button" class="btn-action-small btn-del-edit-op" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; height:34px; padding:0 8px; cursor:pointer; border-radius:5px;">✕ 削除</button>';
+  html += '<input type="text" class="edit-op-last" value="' + escapeHtml(lastName) + '" placeholder="姓（例: 田中）" required style="flex:1; height:34px; padding:4px 8px; font-size:12.5px;">';
+  html += '<input type="text" class="edit-op-first" value="' + escapeHtml(firstName) + '" placeholder="名（例: 太郎）" required style="flex:1; height:34px; padding:4px 8px; font-size:12.5px;">';
+  html += '<button type="button" class="btn-action-small btn-del-edit-op" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; height:34px; padding:0 8px; cursor:pointer; border-radius:5px; flex-shrink:0;">✕ 削除</button>';
   html += '</div>';
 
   html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">';
@@ -3977,7 +3984,9 @@ function submitEditEntry(e) {
   var newOtherPlayers = [];
 
   document.querySelectorAll('.edit-other-player-item').forEach(function(item) {
-    var opName = item.querySelector('.edit-op-name').value.trim();
+    var last = item.querySelector('.edit-op-last').value.trim();
+    var first = item.querySelector('.edit-op-first').value.trim();
+    var opName = last + (first ? ' ' + first : '');
     var opTrans = item.querySelector('.edit-op-transport').value;
     var opCar = opTrans === '自車' ? item.querySelector('.edit-op-car-type').value : '';
     var opRow = item.getAttribute('data-row-index');
