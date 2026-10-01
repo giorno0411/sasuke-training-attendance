@@ -36,7 +36,7 @@
     background-attachment: fixed;
     background-repeat: no-repeat;
     color: var(--text);
-    padding: calc(14px + env(safe-area-inset-top, 0px)) 12px calc(80px + env(safe-area-inset-bottom, 20px)) 12px;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(80px + env(safe-area-inset-bottom, 20px)) 12px;
     display: flex;
     justify-content: center;
     min-height: 100vh;
@@ -315,7 +315,7 @@
     border-radius: 6px;
     font-size: 12.5px;
     font-weight: bold;
-    display: flex;
+    display: center;
     justify-content: center;
     align-items: center;
     gap: 4px;
@@ -1211,7 +1211,7 @@
   </header>
 
   <div class="tab-nav">
-    <button type="button" class="tab-btn active" id="tab-btn-form">✍️️ 合トレ参加回答</button>
+    <button type="button" class="tab-btn active" id="tab-btn-form">✍️ 合トレ参加回答</button>
     <button type="button" class="tab-btn" id="tab-btn-column">📜 注意事項</button>
     <button type="button" class="tab-btn" id="tab-btn-status">⚙️ セット稼働状況</button>
   </div>
@@ -1231,7 +1231,7 @@
       <span class="auth-user-reauth" id="btn-reset-auth">コード再入力</span>
     </div>
 
-    <!-- 回答者自身の回答確認・編集・取消パネル（初期は閉じた状態＆横スライド） -->
+    <!-- 回答者自身の回答確認・編集・取消パネル -->
     <div class="my-attendance-panel" id="my-attendance-panel" style="display:none;">
       <div class="my-attendance-header" id="btn-toggle-my-attendance">
         <div class="my-attendance-title">
@@ -1270,7 +1270,7 @@
           <label>合トレ参加希望日程（タップして選択）<span class="required">*</span></label>
           <div class="date-bar-input" id="date-picker-bar">
             <div id="date-picker-display" class="date-bar-text">📅 合トレ参加希望日程をタップして選択...</div>
-            <span style="font-size:18px;">🗓️</span>
+            <span style="font-size:18px;">🗓️️</span>
           </div>
         </div>
 
