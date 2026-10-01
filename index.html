@@ -1586,7 +1586,7 @@
     <input type="password" id="admin-pin-input" inputmode="text" autocomplete="off" placeholder="パスワードを入力" style="margin-bottom:12px;">
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" onclick="hideModal('admin-modal')" style="border:1px solid var(--border);">キャンセル</button>
-      <button type="button" class="btn-submit" onclick="submitAdminLogin()" style="margin:0; padding:8px;">ログイン</button>
+      <button type="submit" class="btn-submit" onclick="submitAdminLogin()" style="margin:0; padding:8px;">ログイン</button>
     </div>
   </div>
 </div>
@@ -2100,6 +2100,7 @@ function renderMyAttendanceList(userName) {
     return;
   }
 
+  // 照合時は全角・半角スペースを除去して確実に一致判定
   var cleanTargetNorm = targetName.replace(/\s+/g, '');
 
   var myRecords = registeredRecords.filter(function(r) {
@@ -2150,7 +2151,7 @@ function renderMyAttendanceList(userName) {
     html += statusBadgeHtml;
     
     if (isCanceledCard) {
-      html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️ この回答を削除</button>';
+      html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️️ この回答を削除</button>';
     } else {
       html += '<button type="button" class="btn-my-edit" data-row="' + rec.rowIndex + '">✏️ 変更</button>';
       html += '<button type="button" class="btn-my-cancel" data-row="' + rec.rowIndex + '" data-date="' + escapeHtml(rec.date) + '">🗑️ 取消</button>';
@@ -2644,7 +2645,6 @@ function renderCalendar() {
   if (countEl) countEl.innerText = selectedDates.size + "日選択中";
 }
 
-/* 管理者専用カレンダーパネル */
 function toggleAdminCalPanel() {
   var body = document.getElementById('admin-cal-content');
   var arrow = document.getElementById('admin-cal-toggle-arrow');
@@ -3589,7 +3589,6 @@ function loadRemoteFeedbacks() {
     });
 }
 
-// 確実にサーバーに保存するGET方式でのステータス更新
 function toggleDateExecutionStatus(date, status) {
   var dKey = normalizeDateKey(date);
   dateStatusMap[dKey] = status;
@@ -3602,7 +3601,7 @@ function toggleDateExecutionStatus(date, status) {
 
   fetch(GAS_URL + "?type=update_date_status&date=" + encodeURIComponent(dKey) + "&status=" + encodeURIComponent(status) + "&t=" + Date.now())
     .catch(function(e) {
-      console.warn("Status update fallback:", e);
+      console.warn("Status update error:", e);
     });
 }
 
@@ -3788,7 +3787,6 @@ function renderAdminAttendanceHTML(list) {
     html += '<div class="admin-date-group" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
     
-    // 上段：日付（改行防止）、ステータストグル、ゴミ箱ボタン
     html += '<div class="admin-head-row-top">';
     html += '<span class="admin-head-date-label">📅 ' + formatDateLabel(date) + '</span>';
     html += '<div class="admin-head-actions-wrap">';
@@ -3806,7 +3804,6 @@ function renderAdminAttendanceHTML(list) {
     html += '<button type="button" class="btn-del-entire-date-icon" data-date="' + date + '" title="この日の回答データを全件削除">🗑️</button>';
     html += '</div></div>';
 
-    // 下段：人数内訳バッジ
     html += '<div class="admin-head-row-bottom">';
     html += '<span class="admin-count-badge" style="background:var(--accent); color:#fff;">プレイヤー: ' + playerTotal + '名</span>';
     if (staffTotal > 0) {
@@ -4790,7 +4787,7 @@ function submitAttendance(e) {
   });
 }
 
-// ページロード時の安全初期化
+// ページロード時の初期化
 window.addEventListener('DOMContentLoaded', function() {
   updateTriggerDisplay();
   renderRulesDisplay();
