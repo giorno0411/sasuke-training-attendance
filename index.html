@@ -487,7 +487,7 @@
     font-weight: bold;
   }
 
-  /* 管理者カレンダー用ドット表示 */
+  /* 管理者カレンダー用ドット表示（フラット丸印） */
   .admin-cal-dot {
     width: 6px;
     height: 6px;
@@ -1686,7 +1686,7 @@
 <!-- 回答内容の修正・編集モーダル -->
 <div id="admin-edit-entry-modal" class="modal-overlay" style="display:none;">
   <div class="modal-content" onclick="event.stopPropagation()">
-    <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️ 回答内容の修正・変更</h3>
+    <h3 style="margin-top:0; margin-bottom:12px; font-size:15px; color:#38bdf8;">✏️️ 回答内容の修正・変更</h3>
     <form id="admin-edit-entry-form" onsubmit="submitEditEntry(event)">
       <input type="hidden" id="edit-row-index">
 
@@ -1752,7 +1752,7 @@
         </div>
       </div>
 
-      <!-- 他参加者（プレイヤー）の追加・削除・編集エリア（文字切れ解消・上下中央揃え） -->
+      <!-- 他参加者（プレイヤー）の追加・削除・編集エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(239,68,68,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; min-height:26px;">
           <label style="font-size:12px; color:#fca5a5; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1;">🏃 他参加者（プレイヤー）の変更・追加</label>
@@ -1761,7 +1761,7 @@
         <div id="edit-other-players-container" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
-      <!-- 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア（文字切れ解消・上下中央揃え） -->
+      <!-- 同伴者（非プレイヤー）の追加・削除・続柄・人数調整エリア -->
       <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(6,182,212,0.35); border-radius:8px; padding:10px; margin-bottom:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; min-height:26px;">
           <label style="font-size:12px; color:#67e8f9; margin:0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1;">👥 同伴者（見学等・非プレイヤー）</label>
@@ -1796,7 +1796,7 @@
 
     <div style="display:flex; gap:8px;">
       <button type="button" class="tab-btn" onclick="hideModal('merge-car-modal')" style="border:1px solid var(--border);">キャンセル</button>
-      <button type="button" class="btn-submit" onclick="submitMergeCar()" style="margin:0; padding:8px;">統合する</button>
+      <button type="submit" class="btn-submit" onclick="submitMergeCar()" style="margin:0; padding:8px;">統合する</button>
     </div>
   </div>
 </div>
@@ -2108,7 +2108,7 @@ function renderMyAttendanceList(userName) {
     return;
   }
 
-  // 空白の差異（半角/全角/スペース有無）を無視して照合
+  // 照合時はスペースを無視して比較（山田太郎 ＝ 山田 太郎）
   var cleanTargetNorm = targetName.replace(/\s+/g, '');
 
   var myRecords = registeredRecords.filter(function(r) {
@@ -2222,6 +2222,32 @@ function renderMyAttendanceList(userName) {
   });
 }
 
+// サーバーから日程ステータスを取得して確実に全端末で共有する関数
+function fetchDateStatuses(callback) {
+  fetch(GAS_URL + "?type=date_statuses&t=" + Date.now())
+    .then(function(res) { return res.json(); })
+    .then(function(remoteStatuses) {
+      if (remoteStatuses && typeof remoteStatuses === 'object') {
+        dateStatusMap = remoteStatuses;
+        try { localStorage.setItem('uchimiya_date_status_map', JSON.stringify(dateStatusMap)); } catch(e){}
+        
+        var user = localStorage.getItem('uchimiya_auth_user');
+        if (user) renderMyAttendanceList(user);
+        
+        var adminView = document.getElementById('view-admin');
+        if (adminView && !adminView.classList.contains('hidden')) {
+          renderAdminAttendanceHTML(registeredRecords);
+        }
+        renderAdminCalendar();
+      }
+      if (callback) callback();
+    })
+    .catch(function(err) {
+      console.warn("Date statuses fetch error:", err);
+      if (callback) callback();
+    });
+}
+
 function refreshMyAttendanceView() {
   showProgressModal("最新の回答を取得中...");
   fetch(GAS_URL + "?type=attendance&t=" + Date.now())
@@ -2230,11 +2256,10 @@ function refreshMyAttendanceView() {
       if (Array.isArray(list)) {
         registeredRecords = list;
         try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(list)); } catch(e){}
-        var user = localStorage.getItem('uchimiya_auth_user');
-        if (user) renderMyAttendanceList(user);
-        renderAdminAttendanceHTML(registeredRecords);
       }
-      finishProgressModal("更新完了！");
+      fetchDateStatuses(function() {
+        finishProgressModal("更新完了！");
+      });
     })
     .catch(function() {
       finishProgressModal("更新に失敗しました");
@@ -2629,7 +2654,7 @@ function renderCalendar() {
   if (countEl) countEl.innerText = selectedDates.size + "日選択中";
 }
 
-/* 管理者専用カレンダーパネル（安全ガード付き） */
+/* 管理者専用カレンダーパネル */
 function toggleAdminCalPanel() {
   var body = document.getElementById('admin-cal-content');
   var arrow = document.getElementById('admin-cal-toggle-arrow');
@@ -3574,6 +3599,7 @@ function loadRemoteFeedbacks() {
     });
 }
 
+// 確実にサーバーに保存するGET方式でのステータス更新
 function toggleDateExecutionStatus(date, status) {
   dateStatusMap[date] = status;
   try { localStorage.setItem('uchimiya_date_status_map', JSON.stringify(dateStatusMap)); } catch(e) {}
@@ -3583,16 +3609,11 @@ function toggleDateExecutionStatus(date, status) {
 
   renderAdminCalendar();
 
-  fetch(GAS_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({
-      action: "update_date_status",
-      date: date,
-      status: status
-    })
-  }).catch(function() {});
+  // CORSエラーやPOST制限を完全に避けてGETパラメータで確実にサーバー保存
+  fetch(GAS_URL + "?type=update_date_status&date=" + encodeURIComponent(date) + "&status=" + encodeURIComponent(status) + "&t=" + Date.now())
+    .catch(function(e) {
+      console.warn("Status update fallback:", e);
+    });
 }
 
 function toggleMemberContactStatus(date, name, isChecked) {
@@ -3631,8 +3652,9 @@ function renderAdminAttendanceHTML(list) {
 
   var deduplicatedMap = new Map();
   list.forEach(function(item) {
-    var cleanName = String(item.name || '').trim();
-    var pKey = normalizeDateKey(item.date) + "___" + cleanName;
+    var rawName = String(item.name || '');
+    // 重複除去キー生成時のみスペースを揃えるが、表示・保持する名前は元のままにする
+    var pKey = normalizeDateKey(item.date) + "___" + rawName.replace(/\s+/g, '');
     if (!deduplicatedMap.has(pKey) || (item.rowIndex > deduplicatedMap.get(pKey).rowIndex)) {
       deduplicatedMap.set(pKey, item);
     }
@@ -3777,7 +3799,7 @@ function renderAdminAttendanceHTML(list) {
     html += '<div class="admin-date-group" data-date="' + date + '">';
     html += '<div class="admin-date-header">';
     
-    // 上段：日付（改行防止・1行維持）、ステータストグル、ゴミ箱ボタン
+    // 上段：日付、ステータストグル、ゴミ箱ボタン
     html += '<div class="admin-head-row-top">';
     html += '<span class="admin-head-date-label">📅 ' + formatDateLabel(date) + '</span>';
     html += '<div class="admin-head-actions-wrap">';
@@ -3795,7 +3817,7 @@ function renderAdminAttendanceHTML(list) {
     html += '<button type="button" class="btn-del-entire-date-icon" data-date="' + date + '" title="この日の回答データを全件削除">🗑️</button>';
     html += '</div></div>';
 
-    // 下段：人数内訳バッジ（各枠のすぐ右隣に詰めて配置）
+    // 下段：人数内訳バッジ
     html += '<div class="admin-head-row-bottom">';
     html += '<span class="admin-count-badge" style="background:var(--accent); color:#fff;">プレイヤー: ' + playerTotal + '名</span>';
     if (staffTotal > 0) {
@@ -4129,7 +4151,9 @@ function fetchAdminData(forceRefresh) {
         if (user) renderMyAttendanceList(user);
         renderAdminAttendanceHTML(registeredRecords);
       }
-      if (forceRefresh) finishProgressModal("更新完了！");
+      fetchDateStatuses(function() {
+        if (forceRefresh) finishProgressModal("更新完了！");
+      });
     })
     .catch(function() {
       if (forceRefresh) finishProgressModal("通信に失敗しました");
@@ -4279,6 +4303,7 @@ function submitEditEntry(e) {
   document.querySelectorAll('.edit-other-player-item').forEach(function(item) {
     var last = item.querySelector('.edit-op-last').value.trim();
     var first = item.querySelector('.edit-op-first').value.trim();
+    // 姓名の間に確実にスペースを入れる
     var opName = last + (first ? ' ' + first : '');
     var opTrans = item.querySelector('.edit-op-transport').value;
     var opCar = opTrans === '自車' ? item.querySelector('.edit-op-car-type').value : '';
@@ -4365,7 +4390,7 @@ function clearAllData() {
       .then(function() {
         finishProgressModal("全件削除完了！", function() {
           registeredRecords = [];
-          try { localStorage.removeItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
+          try { localStorage.setItem('uchimiya_cached_records', JSON.stringify(registeredRecords)); } catch(e){}
           fetchAdminData(true);
           var user = localStorage.getItem('uchimiya_auth_user');
           if (user) renderMyAttendanceList(user);
@@ -4546,6 +4571,8 @@ function submitAttendance(e) {
     openCalendarPopup();
     return;
   }
+  
+  // 入力されたスペース（全角・半角）を保持
   var primaryName = (document.getElementById('field-name').value || '').trim();
   if (!primaryName) {
     alert("参加者（プレイヤー）氏名を入力してください。");
@@ -4557,11 +4584,12 @@ function submitAttendance(e) {
   document.querySelectorAll('.other-player-card').forEach(function(c) {
     var last = c.querySelector('.field-other-player-last').value.trim();
     var first = c.querySelector('.field-other-player-first').value.trim();
+    // 姓と名の間に半角スペースを確実に挿入して保持
     var full = last + (first ? ' ' + first : '');
     var t = c.querySelector('.field-other-player-transport').value;
     var ct = t === '自車' ? c.querySelector('.field-other-player-car-type').value : '';
     if (last || first) {
-      if (full === primaryName || otherPlayers.some(function(p) { return p.name === full; })) {
+      if (full.replace(/\s+/g,'') === primaryName.replace(/\s+/g,'') || otherPlayers.some(function(p) { return p.name.replace(/\s+/g,'') === full.replace(/\s+/g,''); })) {
         nameDuplicateAlert = true;
       }
       otherPlayers.push({ name: full, transportMode: t, carType: ct });
@@ -4638,7 +4666,7 @@ function submitAttendance(e) {
     if (transportVal === "自車") {
       carType = card.querySelector('.field-car-type').value;
     } else if (transportVal.includes("乗り合い")) {
-      carLeader = card.querySelector('.field-car-leader').value.trim().replace(/\s+/g, ' ');
+      carLeader = card.querySelector('.field-car-leader').value.trim();
       if (!carLeader) {
         alert(formatDateLabel(d) + " の相乗り代表者（運転者）のお名前をご記入ください。");
         return;
@@ -4760,6 +4788,7 @@ function submitAttendance(e) {
       renderDaysConfigCards();
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
+      // 送信完了後に最新データを再取得
       fetch(GAS_URL + "?type=attendance&t=" + Date.now())
         .then(function(res) { return res.json(); })
         .then(function(list) {
@@ -4784,18 +4813,8 @@ window.addEventListener('DOMContentLoaded', function() {
   checkGateAccess();
 
   setTimeout(function() {
-    // サーバーから各日程の最新ステータスを取得（双方向同期）
-    fetch(GAS_URL + "?type=date_statuses&t=" + Date.now())
-      .then(function(res) { return res.json(); })
-      .then(function(remoteStatuses) {
-        if (remoteStatuses && typeof remoteStatuses === 'object') {
-          dateStatusMap = remoteStatuses;
-          try { localStorage.setItem('uchimiya_date_status_map', JSON.stringify(dateStatusMap)); } catch(e){}
-          var user = localStorage.getItem('uchimiya_auth_user');
-          if (user) renderMyAttendanceList(user);
-          renderAdminCalendar();
-        }
-      }).catch(function() {});
+    // 起動時にステータスをサーバーから一括取得
+    fetchDateStatuses();
 
     fetch(GAS_URL + "?type=obstacles&t=" + Date.now())
       .then(function(res) { return res.json(); })
