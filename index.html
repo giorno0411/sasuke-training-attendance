@@ -3867,7 +3867,8 @@ function renderAdminAttendanceHTML(list) {
       
       html += '<div class="member-top-row">';
       html += '<div class="member-left-side">';
-      html += '<span class="member-name ' + nameColorClass + '">' + escapeHtml(m.name) + '</span>';
+      var displayName = escapeHtml(m.name).replace(/ /g, '&nbsp;').replace(/ /g, '&emsp;');
+      html += '<span class="member-name ' + nameColorClass + '">' + displayName + '</span>';
       html += '</div>';
       
       html += '<div class="member-right-side">';
