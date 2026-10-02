@@ -4794,6 +4794,7 @@ window.addEventListener('DOMContentLoaded', function() {
   renderRulesDisplay();
   renderStageGroups();
   checkGateAccess();
+  fetch(GAS_URL + "?type=ping").catch(function(){});
 
   setTimeout(function() {
     fetchDateStatuses();
